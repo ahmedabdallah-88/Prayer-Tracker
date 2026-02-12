@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سجل قضاء الصلوات - الفرائض والسنن</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f4c3a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="متتبع الصلاة">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="متتبع الصلاة">
+    <meta name="msapplication-TileColor" content="#0f4c3a">
+    <meta name="msapplication-TileImage" content="icons/icon-144x144.png">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 50%, #0f4c3a 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px),
+                repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #fefdfb 0%, #f5f3ed 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            padding: 40px;
+            border: 3px solid #d4af37;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid #d4af37;
+        }
+
+        .container::before {
+            top: -3px;
+            left: -3px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .container::after {
+            bottom: -3px;
+            right: -3px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            position: relative;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 8px 25px rgba(15, 76, 58, 0.3);
+        }
+
+        .islamic-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            background-image: radial-gradient(circle at 20% 50%, transparent 0%, transparent 49%, #d4af37 50%, transparent 51%),
+                              radial-gradient(circle at 80% 50%, transparent 0%, transparent 49%, #d4af37 50%, transparent 51%);
+            background-size: 60px 60px;
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        .header h1 {
+            color: #d4af37;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quran-verse {
+            font-family: 'Amiri', serif;
+            color: #fefdfb;
+            font-size: 1.6em;
+            margin-bottom: 8px;
+            line-height: 1.8;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .verse-ref {
+            color: #d4af37;
+            font-size: 1em;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header::before,
+        .header::after {
+            content: '۩';
+            position: absolute;
+            font-size: 2em;
+            color: #d4af37;
+            opacity: 0.4;
+        }
+
+        .header::before {
+            top: 10px;
+            left: 20px;
+        }
+
+        .header::after {
+            top: 10px;
+            right: 20px;
+        }
+
+        .main-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .main-toggle-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            color: #d4af37;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-family: 'Cairo', sans-serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-width: 200px;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .main-toggle-btn:hover,
+        .main-toggle-btn.active {
+            background: #d4af37;
+            color: #0f4c3a;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .main-toggle-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .toggle-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, rgba(15, 76, 58, 0.1) 0%, rgba(26, 95, 74, 0.1) 100%);
+            color: #0f4c3a;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .toggle-btn:hover,
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(15, 76, 58, 0.4);
+        }
+
+        .toggle-btn:active {
+            transform: translateY(0);
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+
+        .stat-card .label {
+            color: #d4af37;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            color: white;
+            font-size: 3em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stat-card .sublabel {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            color: #0f4c3a;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .year-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(15, 76, 58, 0.05) 0%, rgba(26, 95, 74, 0.05) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .year-controls label {
+            font-weight: 700;
+            color: #0f4c3a;
+            font-size: 1.2em;
+        }
+
+        .year-controls input {
+            padding: 10px 20px;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            min-width: 120px;
+        }
+
+        .months-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .month-card {
+            background: white;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .month-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .month-card h3 {
+            color: #0f4c3a;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 2px solid #d4af37;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            transition: width 0.3s;
+        }
+
+        .month-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .month-stat {
+            background: linear-gradient(135deg, rgba(15, 76, 58, 0.1) 0%, rgba(26, 95, 74, 0.1) 100%);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .month-stat .label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .month-stat .value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #0f4c3a;
+        }
+
+        .month-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            border-radius: 12px;
+            border: 2px solid #d4af37;
+        }
+
+        .month-detail-header h2 {
+            color: #d4af37;
+            font-size: 2em;
+        }
+
+        .back-btn {
+            padding: 10px 25px;
+            background: #d4af37;
+            color: #0f4c3a;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(15, 76, 58, 0.05) 0%, rgba(26, 95, 74, 0.05) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-weight: 700;
+            color: #0f4c3a;
+            font-size: 1.1em;
+        }
+
+        .input-group select,
+        .input-group input {
+            padding: 10px 15px;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+            min-width: 120px;
+            background: white;
+        }
+
+        .input-group select:focus,
+        .input-group input:focus {
+            outline: none;
+            border-color: #0f4c3a;
+            box-shadow: 0 0 10px rgba(15, 76, 58, 0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .nav-btn:hover {
+            background: linear-gradient(135deg, #1a5f4a 0%, #0f4c3a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(15, 76, 58, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5f4a 100%);
+            border-radius: 12px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 8px 25px rgba(15, 76, 58, 0.3);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to bottom, #fefdfb, #f5f3ed);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border-color: #d4af37;
+        }
+
+        .stat-item .label {
+            font-size: 0.95em;
+            color: #0f4c3a;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-item .value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1a5f4a;
+            text-shadow: 1px 1px 2px rgba(212, 175, 55, 0.3);
+        }
+
+        .prayers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .prayer-section {
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            background: linear-gradient(to bottom, #fefdfb, #f5f3ed);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prayer-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, transparent 48%, currentColor 49%, currentColor 51%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, currentColor 49%, currentColor 51%, transparent 52%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        .prayer-section:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateY(-5px);
+        }
+
+        .prayer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid currentColor;
+            position: relative;
+            z-index: 1;
+        }
+
+        .prayer-name {
+            font-size: 1.6em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prayer-counter {
+            font-size: 1.1em;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: #0f4c3a;
+            border-radius: 25px;
+            font-weight: 700;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            border: 2px solid #0f4c3a;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            border: 3px solid currentColor;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.2s;
+            position: relative;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .day-box:hover {
+            transform: scale(1.1) rotate(2deg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            z-index: 10;
+        }
+
+        .day-box:active {
+            transform: scale(0.95);
+        }
+
+        .day-box.checked {
+            background: currentColor;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .day-box.checked::after {
+            content: '✓';
+            position: absolute;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .day-box.disabled {
+            opacity: 0.15;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .day-number {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            font-size: 0.7em;
+            opacity: 0.7;
+            font-weight: 700;
+        }
+
+        /* Fard Prayer Colors */
+        .fajr { color: #2c5aa0; }
+        .dhuhr { color: #d4af37; }
+        .asr { color: #2d7a4f; }
+        .maghrib { color: #c44536; }
+        .isha { color: #4a3674; }
+
+        /* Sunnah Prayer Colors */
+        .tahajjud { color: #1e3a8a; }
+        .sunnah-fajr { color: #4169e1; }
+        .duha { color: #f59e0b; }
+        .sunnah-dhuhr { color: #fbbf24; }
+        .sunnah-asr { color: #10b981; }
+        .sunnah-maghrib { color: #f97316; }
+        .sunnah-isha { color: #9333ea; }
+        .witr { color: #8b4789; }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            border: 2px solid currentColor;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .action-btn.reset {
+            background: linear-gradient(135deg, #c44536 0%, #a63828 100%);
+            border-color: #8b2e1f;
+        }
+
+        .action-btn.reset:hover {
+            background: linear-gradient(135deg, #a63828 0%, #8b2e1f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(196, 69, 54, 0.4);
+        }
+
+        .action-btn.print {
+            background: linear-gradient(135deg, #2d7a4f 0%, #1f5a39 100%);
+            border-color: #16452a;
+        }
+
+        .action-btn.print:hover {
+            background: linear-gradient(135deg, #1f5a39 0%, #16452a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(45, 122, 79, 0.4);
+        }
+
+        .action-btn.export {
+            background: linear-gradient(135deg, #4a3674 0%, #362657 100%);
+            border-color: #281d40;
+        }
+
+        .action-btn.export:hover {
+            background: linear-gradient(135deg, #362657 0%, #281d40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 54, 116, 0.4);
+        }
+
+        .action-btn.import {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%);
+            border-color: #152e54;
+        }
+
+        .action-btn.import:hover {
+            background: linear-gradient(135deg, #1e3f73 0%, #152e54 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 90, 160, 0.4);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            body::before {
+                display: none;
+            }
+            
+            .main-toggle,
+            .view-toggle,
+            .action-buttons,
+            .year-controls,
+            .controls {
+                display: none !important;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 20px;
+                border: 2px solid #0f4c3a;
+            }
+
+            .container::before,
+            .container::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .quran-verse {
+                font-size: 1.2em;
+            }
+
+            .main-toggle {
+                flex-direction: column;
+                gap: 12px;
+                padding: 0 15px;
+            }
+
+            .main-toggle-btn {
+                width: 100%;
+                min-width: unset;
+                padding: 15px 20px;
+                font-size: 1.1em;
+            }
+
+            .view-toggle {
+                flex-direction: column;
+                gap: 10px;
+                padding: 0 10px;
+            }
+
+            .toggle-btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .charts-container,
+            .months-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .days-grid {
+                grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+                gap: 6px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card .value {
+                font-size: 2.5em;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .input-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .input-group select,
+            .input-group input {
+                flex: 1;
+                min-width: unset;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                flex: 1;
+                padding: 10px 15px;
+                font-size: 0.95em;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+                padding: 0 10px;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+
+            .prayer-name {
+                font-size: 1.3em;
+            }
+
+            .prayer-counter {
+                font-size: 0.95em;
+                padding: 6px 12px;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.4em;
+            }
+
+            .quran-verse {
+                font-size: 1.05em;
+            }
+
+            .verse-ref {
+                font-size: 0.9em;
+            }
+
+            .container {
+                padding: 15px 10px;
+                border-width: 2px;
+            }
+
+            .container::before,
+            .container::after {
+                width: 50px;
+                height: 50px;
+            }
+
+            .main-toggle-btn {
+                padding: 12px 15px;
+                font-size: 1em;
+            }
+
+            .toggle-btn {
+                padding: 10px 15px;
+                font-size: 0.95em;
+            }
+
+            .days-grid {
+                grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+                gap: 5px;
+            }
+
+            .day-box {
+                border-width: 2px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card .value {
+                font-size: 2em;
+            }
+
+            .prayer-section {
+                padding: 15px;
+            }
+
+            .prayer-name {
+                font-size: 1.2em;
+                gap: 8px;
+            }
+
+            .prayer-counter {
+                font-size: 0.85em;
+                padding: 5px 10px;
+            }
+
+            .header::before,
+            .header::after {
+                font-size: 1.5em;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="islamic-pattern"></div>
+            <h1>🕌 سجل قضاء الصلوات - الفرائض والسنن</h1>
+            <p class="quran-verse">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا</p>
+            <p class="verse-ref">[سورة النساء: 103]</p>
+        </div>
+
+        <!-- Main Toggle between Fard and Sunnah -->
+        <div class="main-toggle">
+            <button class="main-toggle-btn active" onclick="switchSection('fard')">🕌 الفرائض</button>
+            <button class="main-toggle-btn" onclick="switchSection('sunnah')">✨ السنن والرواتب</button>
+        </div>
+
+        <!-- ==================== FARD SECTION ==================== -->
+        <div id="fardSection" class="section active">
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="switchView('fard', 'tracker')">📝 المتتبع الشهري</button>
+                <button class="toggle-btn" onclick="switchView('fard', 'yearly')">📅 نظرة السنة</button>
+                <button class="toggle-btn" onclick="switchView('fard', 'dashboard')">📊 لوحة التحكم</button>
+            </div>
+
+            <!-- Fard Tracker View (Active by default) -->
+            <div id="fardTrackerView" class="view active">
+                <div class="controls">
+                    <div class="nav-buttons">
+                        <button class="nav-btn" onclick="changeTrackerMonth('fard', -1)">◄ الشهر السابق</button>
+                        <button class="nav-btn" onclick="changeTrackerMonth('fard', 1)">الشهر التالي ►</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>الشهر:</label>
+                        <select id="fardTrackerMonthSelect" onchange="updateTrackerView('fard')">
+                            <option value="1">يناير</option>
+                            <option value="2">فبراير</option>
+                            <option value="3">مارس</option>
+                            <option value="4">أبريل</option>
+                            <option value="5">مايو</option>
+                            <option value="6">يونيو</option>
+                            <option value="7">يوليو</option>
+                            <option value="8">أغسطس</option>
+                            <option value="9">سبتمبر</option>
+                            <option value="10">أكتوبر</option>
+                            <option value="11">نوفمبر</option>
+                            <option value="12">ديسمبر</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>السنة:</label>
+                        <input type="number" id="fardTrackerYearInput" min="2000" max="2100" onchange="updateTrackerView('fard')">
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="label">إجمالي الصلوات المقضية</div>
+                        <div class="value" id="fardTrackerTotalCompleted">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">إجمالي الصلوات المتبقية</div>
+                        <div class="value" id="fardTrackerTotalRemaining">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">نسبة الإنجاز</div>
+                        <div class="value" id="fardTrackerCompletionRate">0%</div>
+                    </div>
+                </div>
+
+                <div class="prayers-container" id="fardTrackerPrayersContainer"></div>
+
+                <div class="action-buttons">
+                    <button class="action-btn reset" onclick="resetTrackerMonth('fard')">🔄 مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()">🖨️ طباعة</button>
+                </div>
+            </div>
+
+            <!-- Fard Yearly Overview -->
+            <div id="fardYearlyView" class="view">
+                <div class="year-controls">
+                    <label>السنة:</label>
+                    <input type="number" id="fardYearlyYear" min="2000" max="2100" onchange="updateYearlyView('fard')">
+                </div>
+                <div class="months-grid" id="fardMonthsGrid"></div>
+            </div>
+
+            <!-- Fard Dashboard View -->
+            <div id="fardDashboardView" class="view">
+                <div class="year-controls">
+                    <label>السنة:</label>
+                    <input type="number" id="fardDashboardYear" min="2000" max="2100" onchange="updateDashboard('fard')">
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="label">إجمالي الصلوات المقضية</div>
+                        <div class="value" id="fardYearTotalCompleted">0</div>
+                        <div class="sublabel">من أصل <span id="fardYearTotalPossible">0</span> صلاة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">نسبة الإنجاز السنوية</div>
+                        <div class="value" id="fardYearCompletionRate">0%</div>
+                        <div class="sublabel">معدل الالتزام</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">أفضل شهر</div>
+                        <div class="value" id="fardBestMonth">-</div>
+                        <div class="sublabel" id="fardBestMonthRate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">الصلاة الأكثر انتظاماً</div>
+                        <div class="value" id="fardBestPrayer">-</div>
+                        <div class="sublabel" id="fardBestPrayerRate">0%</div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>📈 التقدم الشهري</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="fardMonthlyProgressChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📊 الصلوات حسب النوع</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="fardPrayerTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>🎯 نسبة الإنجاز</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="fardCompletionPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📉 مقارنة الصلوات</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="fardPrayerComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fard Monthly Detail View (from yearly) -->
+            <div id="fardMonthlyView" class="view">
+                <div class="month-detail-header">
+                    <h2 id="fardCurrentMonthTitle"></h2>
+                    <button class="back-btn" onclick="backToYearly('fard')">← العودة للسنة</button>
+                </div>
+                <div class="prayers-container" id="fardPrayersContainer"></div>
+                <div class="action-buttons">
+                    <button class="action-btn reset" onclick="resetMonth('fard')">🔄 مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()">🖨️ طباعة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SUNNAH SECTION ==================== -->
+        <div id="sunnahSection" class="section">
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="switchView('sunnah', 'tracker')">📝 المتتبع الشهري</button>
+                <button class="toggle-btn" onclick="switchView('sunnah', 'yearly')">📅 نظرة السنة</button>
+                <button class="toggle-btn" onclick="switchView('sunnah', 'dashboard')">📊 لوحة التحكم</button>
+            </div>
+
+            <!-- Sunnah Tracker View (Active by default) -->
+            <div id="sunnahTrackerView" class="view active">
+                <div class="controls">
+                    <div class="nav-buttons">
+                        <button class="nav-btn" onclick="changeTrackerMonth('sunnah', -1)">◄ الشهر السابق</button>
+                        <button class="nav-btn" onclick="changeTrackerMonth('sunnah', 1)">الشهر التالي ►</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>الشهر:</label>
+                        <select id="sunnahTrackerMonthSelect" onchange="updateTrackerView('sunnah')">
+                            <option value="1">يناير</option>
+                            <option value="2">فبراير</option>
+                            <option value="3">مارس</option>
+                            <option value="4">أبريل</option>
+                            <option value="5">مايو</option>
+                            <option value="6">يونيو</option>
+                            <option value="7">يوليو</option>
+                            <option value="8">أغسطس</option>
+                            <option value="9">سبتمبر</option>
+                            <option value="10">أكتوبر</option>
+                            <option value="11">نوفمبر</option>
+                            <option value="12">ديسمبر</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>السنة:</label>
+                        <input type="number" id="sunnahTrackerYearInput" min="2000" max="2100" onchange="updateTrackerView('sunnah')">
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="label">إجمالي السنن المؤداة</div>
+                        <div class="value" id="sunnahTrackerTotalCompleted">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">إجمالي السنن المتبقية</div>
+                        <div class="value" id="sunnahTrackerTotalRemaining">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">نسبة الإنجاز</div>
+                        <div class="value" id="sunnahTrackerCompletionRate">0%</div>
+                    </div>
+                </div>
+
+                <div class="prayers-container" id="sunnahTrackerPrayersContainer"></div>
+
+                <div class="action-buttons">
+                    <button class="action-btn reset" onclick="resetTrackerMonth('sunnah')">🔄 مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()">🖨️ طباعة</button>
+                </div>
+            </div>
+
+            <!-- Sunnah Yearly Overview -->
+            <div id="sunnahYearlyView" class="view">
+                <div class="year-controls">
+                    <label>السنة:</label>
+                    <input type="number" id="sunnahYearlyYear" min="2000" max="2100" onchange="updateYearlyView('sunnah')">
+                </div>
+                <div class="months-grid" id="sunnahMonthsGrid"></div>
+            </div>
+
+            <!-- Sunnah Dashboard View -->
+            <div id="sunnahDashboardView" class="view">
+                <div class="year-controls">
+                    <label>السنة:</label>
+                    <input type="number" id="sunnahDashboardYear" min="2000" max="2100" onchange="updateDashboard('sunnah')">
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="label">إجمالي السنن المؤداة</div>
+                        <div class="value" id="sunnahYearTotalCompleted">0</div>
+                        <div class="sublabel">من أصل <span id="sunnahYearTotalPossible">0</span> سنة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">نسبة الإنجاز السنوية</div>
+                        <div class="value" id="sunnahYearCompletionRate">0%</div>
+                        <div class="sublabel">معدل الالتزام</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">أفضل شهر</div>
+                        <div class="value" id="sunnahBestMonth">-</div>
+                        <div class="sublabel" id="sunnahBestMonthRate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">السنة الأكثر انتظاماً</div>
+                        <div class="value" id="sunnahBestPrayer">-</div>
+                        <div class="sublabel" id="sunnahBestPrayerRate">0%</div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>📈 التقدم الشهري</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sunnahMonthlyProgressChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📊 السنن حسب النوع</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sunnahPrayerTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>🎯 نسبة الإنجاز</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sunnahCompletionPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📉 مقارنة السنن</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sunnahPrayerComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sunnah Monthly Detail View (from yearly) -->
+            <div id="sunnahMonthlyView" class="view">
+                <div class="month-detail-header">
+                    <h2 id="sunnahCurrentMonthTitle"></h2>
+                    <button class="back-btn" onclick="backToYearly('sunnah')">← العودة للسنة</button>
+                </div>
+                <div class="prayers-container" id="sunnahPrayersContainer"></div>
+                <div class="action-buttons">
+                    <button class="action-btn reset" onclick="resetMonth('sunnah')">🔄 مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()">🖨️ طباعة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn export" onclick="exportData()">💾 تصدير البيانات</button>
+            <button class="action-btn import" onclick="importData()">📥 استيراد البيانات</button>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" class="hidden" accept=".json" onchange="handleImport(event)">
+
+    <script>
+        const fardPrayers = [
+            { id: 'fajr', name: 'الفجر', icon: '🌙', class: 'fajr', color: '#2c5aa0' },
+            { id: 'dhuhr', name: 'الظهر', icon: '☀️', class: 'dhuhr', color: '#d4af37' },
+            { id: 'asr', name: 'العصر', icon: '🕌', class: 'asr', color: '#2d7a4f' },
+            { id: 'maghrib', name: 'المغرب', icon: '🌅', class: 'maghrib', color: '#c44536' },
+            { id: 'isha', name: 'العشاء', icon: '⭐', class: 'isha', color: '#4a3674' }
+        ];
+
+        const sunnahPrayers = [
+            { id: 'tahajjud', name: 'التهجد', icon: '🌃', class: 'tahajjud', color: '#1e3a8a' },
+            { id: 'sunnah-fajr', name: 'سنة الفجر', icon: '🌙', class: 'sunnah-fajr', color: '#4169e1' },
+            { id: 'duha', name: 'الضحى', icon: '🌤️', class: 'duha', color: '#f59e0b' },
+            { id: 'sunnah-dhuhr', name: 'سنة الظهر', icon: '☀️', class: 'sunnah-dhuhr', color: '#fbbf24' },
+            { id: 'sunnah-asr', name: 'سنة العصر', icon: '🕌', class: 'sunnah-asr', color: '#10b981' },
+            { id: 'sunnah-maghrib', name: 'سنة المغرب', icon: '🌅', class: 'sunnah-maghrib', color: '#f97316' },
+            { id: 'sunnah-isha', name: 'سنة العشاء', icon: '⭐', class: 'sunnah-isha', color: '#9333ea' },
+            { id: 'witr', name: 'الوتر', icon: '🌟', class: 'witr', color: '#8b4789' }
+        ];
+
+        const monthNames = [
+            'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+        ];
+
+        let currentYear, currentMonth;
+        let fardData = {};
+        let sunnahData = {};
+        let charts = { fard: {}, sunnah: {} };
+        let currentSection = 'fard';
+
+        function init() {
+            const today = new Date();
+            currentMonth = today.getMonth() + 1;
+            currentYear = today.getFullYear();
+            
+            // Initialize all year inputs
+            document.getElementById('fardDashboardYear').value = currentYear;
+            document.getElementById('fardYearlyYear').value = currentYear;
+            document.getElementById('fardTrackerMonthSelect').value = currentMonth;
+            document.getElementById('fardTrackerYearInput').value = currentYear;
+            
+            document.getElementById('sunnahDashboardYear').value = currentYear;
+            document.getElementById('sunnahYearlyYear').value = currentYear;
+            document.getElementById('sunnahTrackerMonthSelect').value = currentMonth;
+            document.getElementById('sunnahTrackerYearInput').value = currentYear;
+            
+            loadAllData('fard');
+            loadAllData('sunnah');
+            updateTrackerView('fard');
+        }
+
+        function getDaysInMonth(month, year) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        function isFutureDate(day, month, year) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+            
+            const checkDate = new Date(year, month - 1, day);
+            checkDate.setHours(0, 0, 0, 0);
+            
+            return checkDate > today;
+        }
+
+        function getStorageKey(type, month, year) {
+            return `salah_tracker_${type}_${year}_${month}`;
+        }
+
+        function getPrayersArray(type) {
+            return type === 'fard' ? fardPrayers : sunnahPrayers;
+        }
+
+        function getDataObject(type) {
+            return type === 'fard' ? fardData : sunnahData;
+        }
+
+        function loadAllData(type) {
+            const dataObj = type === 'fard' ? fardData : sunnahData;
+            const prayers = getPrayersArray(type);
+            
+            for (let month = 1; month <= 12; month++) {
+                const key = getStorageKey(type, month, currentYear);
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    dataObj[month] = JSON.parse(stored);
+                } else {
+                    dataObj[month] = {};
+                    prayers.forEach(prayer => {
+                        dataObj[month][prayer.id] = {};
+                    });
+                }
+            }
+        }
+
+        function saveMonthData(type, month) {
+            const dataObj = getDataObject(type);
+            const key = getStorageKey(type, month, currentYear);
+            localStorage.setItem(key, JSON.stringify(dataObj[month]));
+        }
+
+        function getMonthStats(type, month, year) {
+            const dataObj = getDataObject(type);
+            const prayers = getPrayersArray(type);
+            const daysInMonth = getDaysInMonth(month, year);
+            let completed = 0;
+            let total = daysInMonth * prayers.length;
+            
+            if (dataObj[month]) {
+                prayers.forEach(prayer => {
+                    if (dataObj[month][prayer.id]) {
+                        completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
+                    }
+                });
+            }
+            
+            return {
+                completed,
+                total,
+                percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+            };
+        }
+
+        function getYearStats(type, year) {
+            let totalCompleted = 0;
+            let totalPossible = 0;
+            
+            for (let month = 1; month <= 12; month++) {
+                const stats = getMonthStats(type, month, year);
+                totalCompleted += stats.completed;
+                totalPossible += stats.total;
+            }
+            
+            return {
+                completed: totalCompleted,
+                total: totalPossible,
+                percentage: totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0
+            };
+        }
+
+        function switchSection(section) {
+            currentSection = section;
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.main-toggle-btn').forEach(b => b.classList.remove('active'));
+            
+            if (section === 'fard') {
+                document.getElementById('fardSection').classList.add('active');
+                document.querySelector('.main-toggle-btn:nth-child(1)').classList.add('active');
+                const today = new Date();
+                currentMonth = parseInt(document.getElementById('fardTrackerMonthSelect').value) || (today.getMonth() + 1);
+                currentYear = parseInt(document.getElementById('fardTrackerYearInput').value) || today.getFullYear();
+                loadAllData('fard');
+                updateTrackerView('fard');
+            } else {
+                document.getElementById('sunnahSection').classList.add('active');
+                document.querySelector('.main-toggle-btn:nth-child(2)').classList.add('active');
+                const today = new Date();
+                currentMonth = parseInt(document.getElementById('sunnahTrackerMonthSelect').value) || (today.getMonth() + 1);
+                currentYear = parseInt(document.getElementById('sunnahTrackerYearInput').value) || today.getFullYear();
+                loadAllData('sunnah');
+                updateTrackerView('sunnah');
+            }
+        }
+
+        function switchView(type, view) {
+            const prefix = type;
+            document.querySelectorAll(`#${prefix}Section .view`).forEach(v => v.classList.remove('active'));
+            document.querySelectorAll(`#${prefix}Section .toggle-btn`).forEach(b => b.classList.remove('active'));
+            
+            if (view === 'tracker') {
+                document.getElementById(`${prefix}TrackerView`).classList.add('active');
+                document.querySelector(`#${prefix}Section .toggle-btn:nth-child(1)`).classList.add('active');
+                const today = new Date();
+                currentMonth = parseInt(document.getElementById(`${prefix}TrackerMonthSelect`).value) || (today.getMonth() + 1);
+                currentYear = parseInt(document.getElementById(`${prefix}TrackerYearInput`).value) || today.getFullYear();
+                document.getElementById(`${prefix}TrackerMonthSelect`).value = currentMonth;
+                document.getElementById(`${prefix}TrackerYearInput`).value = currentYear;
+                loadAllData(type);
+                updateTrackerView(type);
+            } else if (view === 'yearly') {
+                document.getElementById(`${prefix}YearlyView`).classList.add('active');
+                document.querySelector(`#${prefix}Section .toggle-btn:nth-child(2)`).classList.add('active');
+                currentYear = parseInt(document.getElementById(`${prefix}YearlyYear`).value);
+                loadAllData(type);
+                updateYearlyView(type);
+            } else if (view === 'dashboard') {
+                document.getElementById(`${prefix}DashboardView`).classList.add('active');
+                document.querySelector(`#${prefix}Section .toggle-btn:nth-child(3)`).classList.add('active');
+                currentYear = parseInt(document.getElementById(`${prefix}DashboardYear`).value);
+                loadAllData(type);
+                updateDashboard(type);
+            }
+        }
+
+        function updateDashboard(type) {
+            currentYear = parseInt(document.getElementById(`${type}DashboardYear`).value);
+            loadAllData(type);
+            
+            const yearStats = getYearStats(type, currentYear);
+            document.getElementById(`${type}YearTotalCompleted`).textContent = yearStats.completed;
+            document.getElementById(`${type}YearTotalPossible`).textContent = yearStats.total;
+            document.getElementById(`${type}YearCompletionRate`).textContent = yearStats.percentage + '%';
+            
+            // Find best month
+            let bestMonth = { month: 0, percentage: 0 };
+            for (let month = 1; month <= 12; month++) {
+                const stats = getMonthStats(type, month, currentYear);
+                if (stats.percentage > bestMonth.percentage) {
+                    bestMonth = { month, percentage: stats.percentage };
+                }
+            }
+            document.getElementById(`${type}BestMonth`).textContent = bestMonth.month > 0 ? monthNames[bestMonth.month - 1] : '-';
+            document.getElementById(`${type}BestMonthRate`).textContent = bestMonth.percentage + '%';
+            
+            // Find best prayer
+            const prayers = getPrayersArray(type);
+            const dataObj = getDataObject(type);
+            let prayerStats = {};
+            prayers.forEach(prayer => {
+                let completed = 0;
+                let total = 0;
+                for (let month = 1; month <= 12; month++) {
+                    const days = getDaysInMonth(month, currentYear);
+                    total += days;
+                    if (dataObj[month] && dataObj[month][prayer.id]) {
+                        completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
+                    }
+                }
+                prayerStats[prayer.id] = {
+                    name: prayer.name,
+                    percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+                };
+            });
+            
+            let bestPrayer = Object.entries(prayerStats).reduce((best, [id, stats]) => 
+                stats.percentage > best.percentage ? stats : best, { name: '-', percentage: 0 }
+            );
+            
+            document.getElementById(`${type}BestPrayer`).textContent = bestPrayer.name;
+            document.getElementById(`${type}BestPrayerRate`).textContent = bestPrayer.percentage + '%';
+            
+            updateCharts(type);
+        }
+
+        function updateCharts(type) {
+            const prayers = getPrayersArray(type);
+            const dataObj = getDataObject(type);
+            
+            // Monthly Progress Chart
+            const monthlyData = [];
+            for (let month = 1; month <= 12; month++) {
+                monthlyData.push(getMonthStats(type, month, currentYear).percentage);
+            }
+            
+            if (charts[type].monthlyProgress) charts[type].monthlyProgress.destroy();
+            charts[type].monthlyProgress = new Chart(document.getElementById(`${type}MonthlyProgressChart`), {
+                type: 'line',
+                data: {
+                    labels: monthNames,
+                    datasets: [{
+                        label: 'نسبة الإنجاز %',
+                        data: monthlyData,
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Prayer Type Chart
+            const prayerTypeData = prayers.map(prayer => {
+                let completed = 0;
+                for (let month = 1; month <= 12; month++) {
+                    if (dataObj[month] && dataObj[month][prayer.id]) {
+                        completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
+                    }
+                }
+                return completed;
+            });
+            
+            if (charts[type].prayerType) charts[type].prayerType.destroy();
+            charts[type].prayerType = new Chart(document.getElementById(`${type}PrayerTypeChart`), {
+                type: 'bar',
+                data: {
+                    labels: prayers.map(p => p.name),
+                    datasets: [{
+                        label: type === 'fard' ? 'عدد الصلوات' : 'عدد السنن',
+                        data: prayerTypeData,
+                        backgroundColor: prayers.map(p => p.color),
+                        borderColor: prayers.map(p => p.color),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            
+            // Completion Pie Chart
+            const yearStats = getYearStats(type, currentYear);
+            if (charts[type].completionPie) charts[type].completionPie.destroy();
+            charts[type].completionPie = new Chart(document.getElementById(`${type}CompletionPieChart`), {
+                type: 'doughnut',
+                data: {
+                    labels: type === 'fard' ? ['مقضية', 'متبقية'] : ['مؤداة', 'متبقية'],
+                    datasets: [{
+                        data: [yearStats.completed, yearStats.total - yearStats.completed],
+                        backgroundColor: ['#2d7a4f', '#e0e0e0'],
+                        borderWidth: 3,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Prayer Comparison Chart
+            const comparisonData = prayers.map(prayer => {
+                let completed = 0;
+                let total = 0;
+                for (let month = 1; month <= 12; month++) {
+                    const days = getDaysInMonth(month, currentYear);
+                    total += days;
+                    if (dataObj[month] && dataObj[month][prayer.id]) {
+                        completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
+                    }
+                }
+                return total > 0 ? Math.round((completed / total) * 100) : 0;
+            });
+            
+            if (charts[type].prayerComparison) charts[type].prayerComparison.destroy();
+            charts[type].prayerComparison = new Chart(document.getElementById(`${type}PrayerComparisonChart`), {
+                type: 'radar',
+                data: {
+                    labels: prayers.map(p => p.name),
+                    datasets: [{
+                        label: 'نسبة الإنجاز %',
+                        data: comparisonData,
+                        backgroundColor: 'rgba(15, 76, 58, 0.2)',
+                        borderColor: '#0f4c3a',
+                        borderWidth: 2,
+                        pointBackgroundColor: prayers.map(p => p.color),
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateYearlyView(type) {
+            currentYear = parseInt(document.getElementById(`${type}YearlyYear`).value);
+            loadAllData(type);
+            
+            const grid = document.getElementById(`${type}MonthsGrid`);
+            grid.innerHTML = '';
+            
+            for (let month = 1; month <= 12; month++) {
+                const stats = getMonthStats(type, month, currentYear);
+                const card = document.createElement('div');
+                card.className = 'month-card';
+                card.onclick = () => openMonth(type, month);
+                
+                card.innerHTML = `
+                    <h3>${monthNames[month - 1]} ${currentYear}</h3>
+                    <div class="month-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${stats.percentage}%">
+                                ${stats.percentage}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="month-stats">
+                        <div class="month-stat">
+                            <div class="label">${type === 'fard' ? 'مقضية' : 'مؤداة'}</div>
+                            <div class="value">${stats.completed}</div>
+                        </div>
+                        <div class="month-stat">
+                            <div class="label">متبقية</div>
+                            <div class="value">${stats.total - stats.completed}</div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            }
+        }
+
+        function openMonth(type, month) {
+            currentMonth = month;
+            document.getElementById(`${type}CurrentMonthTitle`).textContent = `${monthNames[month - 1]} ${currentYear}`;
+            
+            document.getElementById(`${type}YearlyView`).classList.remove('active');
+            document.getElementById(`${type}MonthlyView`).classList.add('active');
+            
+            renderMonthDetail(type);
+        }
+
+        function backToYearly(type) {
+            document.getElementById(`${type}MonthlyView`).classList.remove('active');
+            document.getElementById(`${type}YearlyView`).classList.add('active');
+            updateYearlyView(type);
+        }
+
+        function renderMonthDetail(type) {
+            const container = document.getElementById(`${type}PrayersContainer`);
+            container.innerHTML = '';
+            
+            const prayers = getPrayersArray(type);
+            const dataObj = getDataObject(type);
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            
+            prayers.forEach(prayer => {
+                const section = document.createElement('div');
+                section.className = `prayer-section ${prayer.class}`;
+                
+                let completed = 0;
+                if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
+                    completed = Object.values(dataObj[currentMonth][prayer.id]).filter(v => v).length;
+                }
+                
+                section.innerHTML = `
+                    <div class="prayer-header">
+                        <div class="prayer-name">
+                            <span>${prayer.icon}</span>
+                            <span>${prayer.name}</span>
+                        </div>
+                        <div class="prayer-counter">${completed} / ${daysInMonth}</div>
+                    </div>
+                    <div class="days-grid" id="${type}-grid-${prayer.id}"></div>
+                `;
+                
+                container.appendChild(section);
+                
+                const grid = document.getElementById(`${type}-grid-${prayer.id}`);
+                for (let day = 1; day <= 31; day++) {
+                    const dayBox = document.createElement('div');
+                    dayBox.className = 'day-box';
+                    
+                    if (day > daysInMonth) {
+                        dayBox.classList.add('disabled');
+                    } else if (isFutureDate(day, currentMonth, currentYear)) {
+                        // Future date - disable it
+                        const dayNum = document.createElement('span');
+                        dayNum.className = 'day-number';
+                        dayNum.textContent = day;
+                        dayBox.appendChild(dayNum);
+                        dayBox.classList.add('disabled');
+                        dayBox.style.opacity = '0.3';
+                        dayBox.title = 'لا يمكن تعليم صلاة في المستقبل';
+                    } else {
+                        const dayNum = document.createElement('span');
+                        dayNum.className = 'day-number';
+                        dayNum.textContent = day;
+                        dayBox.appendChild(dayNum);
+                        
+                        if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
+                            dayBox.classList.add('checked');
+                        }
+                        
+                        dayBox.onclick = () => toggleDay(type, prayer.id, day);
+                    }
+                    
+                    grid.appendChild(dayBox);
+                }
+            });
+        }
+
+        function toggleDay(type, prayerId, day) {
+            // Validate that the date is not in the future
+            if (isFutureDate(day, currentMonth, currentYear)) {
+                alert('⚠️ لا يمكن تعليم صلاة في تاريخ مستقبلي!\nيمكنك فقط تعليم الصلوات حتى تاريخ اليوم.');
+                return;
+            }
+            
+            const dataObj = getDataObject(type);
+            
+            if (!dataObj[currentMonth][prayerId]) {
+                dataObj[currentMonth][prayerId] = {};
+            }
+            
+            dataObj[currentMonth][prayerId][day] = !dataObj[currentMonth][prayerId][day];
+            saveMonthData(type, currentMonth);
+            renderMonthDetail(type);
+        }
+
+        function resetMonth(type) {
+            if (confirm('هل أنت متأكد من مسح جميع البيانات لهذا الشهر؟')) {
+                const dataObj = getDataObject(type);
+                const prayers = getPrayersArray(type);
+                
+                dataObj[currentMonth] = {};
+                prayers.forEach(prayer => {
+                    dataObj[currentMonth][prayer.id] = {};
+                });
+                saveMonthData(type, currentMonth);
+                renderMonthDetail(type);
+            }
+        }
+
+        function updateTrackerView(type) {
+            currentMonth = parseInt(document.getElementById(`${type}TrackerMonthSelect`).value);
+            currentYear = parseInt(document.getElementById(`${type}TrackerYearInput`).value);
+            
+            loadAllData(type);
+            renderTrackerMonth(type);
+            updateTrackerStats(type);
+        }
+
+        function renderTrackerMonth(type) {
+            const container = document.getElementById(`${type}TrackerPrayersContainer`);
+            container.innerHTML = '';
+            
+            const prayers = getPrayersArray(type);
+            const dataObj = getDataObject(type);
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            
+            prayers.forEach(prayer => {
+                const section = document.createElement('div');
+                section.className = `prayer-section ${prayer.class}`;
+                
+                let completed = 0;
+                if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
+                    completed = Object.values(dataObj[currentMonth][prayer.id]).filter(v => v).length;
+                }
+                
+                const header = document.createElement('div');
+                header.className = 'prayer-header';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'prayer-name';
+                nameDiv.innerHTML = `<span>${prayer.icon}</span><span>${prayer.name}</span>`;
+                
+                const counter = document.createElement('div');
+                counter.className = 'prayer-counter';
+                counter.textContent = `${completed} / ${daysInMonth}`;
+                
+                header.appendChild(nameDiv);
+                header.appendChild(counter);
+                
+                const grid = document.createElement('div');
+                grid.className = 'days-grid';
+                
+                for (let day = 1; day <= 31; day++) {
+                    const dayBox = document.createElement('div');
+                    dayBox.className = 'day-box';
+                    
+                    if (day > daysInMonth) {
+                        dayBox.classList.add('disabled');
+                    } else if (isFutureDate(day, currentMonth, currentYear)) {
+                        // Future date - disable it
+                        const dayNum = document.createElement('span');
+                        dayNum.className = 'day-number';
+                        dayNum.textContent = day;
+                        dayBox.appendChild(dayNum);
+                        dayBox.classList.add('disabled');
+                        dayBox.style.opacity = '0.3';
+                        dayBox.title = 'لا يمكن تعليم صلاة في المستقبل';
+                    } else {
+                        const dayNum = document.createElement('span');
+                        dayNum.className = 'day-number';
+                        dayNum.textContent = day;
+                        dayBox.appendChild(dayNum);
+                        
+                        if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
+                            dayBox.classList.add('checked');
+                        }
+                        
+                        dayBox.onclick = () => toggleTrackerDay(type, prayer.id, day);
+                    }
+                    
+                    grid.appendChild(dayBox);
+                }
+                
+                section.appendChild(header);
+                section.appendChild(grid);
+                container.appendChild(section);
+            });
+        }
+
+        function toggleTrackerDay(type, prayerId, day) {
+            // Validate that the date is not in the future
+            if (isFutureDate(day, currentMonth, currentYear)) {
+                alert('⚠️ لا يمكن تعليم صلاة في تاريخ مستقبلي!\nيمكنك فقط تعليم الصلوات حتى تاريخ اليوم.');
+                return;
+            }
+            
+            const dataObj = getDataObject(type);
+            
+            if (!dataObj[currentMonth][prayerId]) {
+                dataObj[currentMonth][prayerId] = {};
+            }
+            
+            dataObj[currentMonth][prayerId][day] = !dataObj[currentMonth][prayerId][day];
+            saveMonthData(type, currentMonth);
+            renderTrackerMonth(type);
+            updateTrackerStats(type);
+        }
+
+        function updateTrackerStats(type) {
+            const prayers = getPrayersArray(type);
+            const dataObj = getDataObject(type);
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            let totalCompleted = 0;
+            let totalPossible = daysInMonth * prayers.length;
+            
+            prayers.forEach(prayer => {
+                let completed = 0;
+                if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
+                    completed = Object.values(dataObj[currentMonth][prayer.id]).filter(v => v).length;
+                }
+                totalCompleted += completed;
+            });
+            
+            document.getElementById(`${type}TrackerTotalCompleted`).textContent = totalCompleted;
+            document.getElementById(`${type}TrackerTotalRemaining`).textContent = totalPossible - totalCompleted;
+            
+            const rate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+            document.getElementById(`${type}TrackerCompletionRate`).textContent = rate + '%';
+        }
+
+        function changeTrackerMonth(type, delta) {
+            currentMonth += delta;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            } else if (currentMonth < 1) {
+                currentMonth = 12;
+                currentYear--;
+            }
+            
+            document.getElementById(`${type}TrackerMonthSelect`).value = currentMonth;
+            document.getElementById(`${type}TrackerYearInput`).value = currentYear;
+            loadAllData(type);
+            updateTrackerView(type);
+        }
+
+        function resetTrackerMonth(type) {
+            if (confirm('هل أنت متأكد من مسح جميع البيانات لهذا الشهر؟')) {
+                const dataObj = getDataObject(type);
+                const prayers = getPrayersArray(type);
+                
+                dataObj[currentMonth] = {};
+                prayers.forEach(prayer => {
+                    dataObj[currentMonth][prayer.id] = {};
+                });
+                saveMonthData(type, currentMonth);
+                renderTrackerMonth(type);
+                updateTrackerStats(type);
+            }
+        }
+
+        function exportData() {
+            const allData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('salah_tracker_')) {
+                    allData[key] = JSON.parse(localStorage.getItem(key));
+                }
+            }
+            
+            const dataStr = JSON.stringify(allData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `salah_tracker_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    
+                    if (confirm('سيتم استبدال جميع البيانات الحالية. هل تريد المتابعة؟')) {
+                        Object.keys(imported).forEach(key => {
+                            localStorage.setItem(key, JSON.stringify(imported[key]));
+                        });
+                        
+                        loadAllData('fard');
+                        loadAllData('sunnah');
+                        updateDashboard(currentSection);
+                        alert('تم استيراد البيانات بنجاح!');
+                    }
+                } catch (error) {
+                    alert('خطأ في قراءة الملف!');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        init();
+
+        // ==================== PWA Service Worker & Install ====================
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service Worker registered:', reg.scope))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+
+        // Install Prompt
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallBanner();
+        });
+
+        function showInstallBanner() {
+            // Check if already dismissed
+            if (localStorage.getItem('pwa_install_dismissed')) return;
+            
+            const banner = document.createElement('div');
+            banner.id = 'installBanner';
+            banner.innerHTML = `
+                <div style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#0f4c3a,#1a5f4a);
+                    padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+                    z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid #d4af37;direction:rtl;">
+                    <div style="color:white;font-family:'Cairo',sans-serif;flex:1;">
+                        <div style="font-size:1.1em;font-weight:700;color:#d4af37;">🕌 تثبيت التطبيق</div>
+                        <div style="font-size:0.85em;opacity:0.9;margin-top:4px;">أضف متتبع الصلاة إلى شاشتك الرئيسية</div>
+                    </div>
+                    <button onclick="installApp()" style="background:#d4af37;color:#0f4c3a;border:none;
+                        padding:10px 24px;border-radius:8px;font-weight:700;font-size:1em;cursor:pointer;
+                        font-family:'Cairo',sans-serif;white-space:nowrap;">تثبيت</button>
+                    <button onclick="dismissInstall()" style="background:none;border:none;color:rgba(255,255,255,0.7);
+                        font-size:1.5em;cursor:pointer;padding:5px 8px;">✕</button>
+                </div>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choice => {
+                    if (choice.outcome === 'accepted') {
+                        console.log('User accepted install');
+                    }
+                    deferredPrompt = null;
+                    const banner = document.getElementById('installBanner');
+                    if (banner) banner.remove();
+                });
+            }
+        }
+
+        function dismissInstall() {
+            const banner = document.getElementById('installBanner');
+            if (banner) banner.remove();
+            localStorage.setItem('pwa_install_dismissed', 'true');
+        }
+
+        // Detect if running as installed app
+        window.addEventListener('appinstalled', () => {
+            console.log('App installed successfully!');
+            const banner = document.getElementById('installBanner');
+            if (banner) banner.remove();
+        });
+    </script>
+</body>
+</html>
