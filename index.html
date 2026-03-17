@@ -3549,8 +3549,35 @@
                 card.className = 'month-card';
                 card.onclick = () => openMonth(type, month);
                 
+                // Calculate congregation stats for fard
+                let congHtml = '';
+                if (type === 'fard') {
+                    const congData = getCongregationData(currentYear, month);
+                    const prayers = getPrayersArray('fard');
+                    const dataObj = getDataObject('fard');
+                    let monthCong = 0, monthCompleted = 0;
+                    
+                    prayers.forEach(prayer => {
+                        if (dataObj[month] && dataObj[month][prayer.id]) {
+                            const completedDays = Object.keys(dataObj[month][prayer.id]).filter(d => dataObj[month][prayer.id][d]);
+                            monthCompleted += completedDays.length;
+                            completedDays.forEach(d => {
+                                if (isCongregation(congData, prayer.id, parseInt(d))) monthCong++;
+                            });
+                        }
+                    });
+                    
+                    const congRate = monthCompleted > 0 ? Math.round((monthCong / monthCompleted) * 100) : 0;
+                    congHtml = `
+                        <div class="month-stat" style="grid-column: 1 / -1;">
+                            <div class="label">🕌 ${t('congregation')}</div>
+                            <div class="value">${congRate}%</div>
+                        </div>
+                    `;
+                }
+                
                 card.innerHTML = `
-                    <h3>${monthNames[month - 1]} ${currentYear}</h3>
+                    <h3>${getMonthName(month - 1)} ${currentYear}</h3>
                     <div class="month-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${stats.percentage}%">
@@ -3560,13 +3587,14 @@
                     </div>
                     <div class="month-stats">
                         <div class="month-stat">
-                            <div class="label">${type === 'fard' ? 'مقضية' : 'مؤداة'}</div>
+                            <div class="label">${type === 'fard' ? t('completed_word') : t('performed')}</div>
                             <div class="value">${stats.completed}</div>
                         </div>
                         <div class="month-stat">
-                            <div class="label">متبقية</div>
+                            <div class="label">${t('remaining_word')}</div>
                             <div class="value">${stats.total - stats.completed}</div>
                         </div>
+                        ${congHtml}
                     </div>
                 `;
                 
@@ -3576,7 +3604,7 @@
 
         function openMonth(type, month) {
             currentMonth = month;
-            document.getElementById(`${type}CurrentMonthTitle`).textContent = `${monthNames[month - 1]} ${currentYear}`;
+            document.getElementById(`${type}CurrentMonthTitle`).textContent = `${getMonthName(month - 1)} ${currentYear}`;
             
             document.getElementById(`${type}YearlyView`).classList.remove('active');
             document.getElementById(`${type}MonthlyView`).classList.add('active');
