@@ -2611,7 +2611,7 @@
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="by_type">📊 الصلوات حسب النوع</h3>
+                        <h3 data-t="fard_by_type">🕌 صلاة الجماعة حسب النوع</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardPrayerTypeChart" role="img" aria-label="Prayer type chart"></canvas>
                         </div>
@@ -2635,13 +2635,13 @@
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="weekly_pattern">📊 نمط الصلاة الأسبوعي</h3>
+                        <h3 data-t="weekly_pattern">🕌 نمط صلاة الجماعة الأسبوعي</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardWeeklyPatternChart" role="img" aria-label="Weekly pattern chart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="prayer_heatmap">🗓️ خريطة الالتزام السنوية</h3>
+                        <h3 data-t="prayer_heatmap">🕌 خريطة الالتزام بصلاة الجماعة</h3>
                         <div class="chart-wrapper" style="height:200px;">
                             <canvas id="fardHeatmapChart" role="img" aria-label="Yearly heatmap"></canvas>
                         </div>
@@ -3426,15 +3426,35 @@
             });
             
             // Prayer Type Chart
-            const prayerTypeData = prayers.map(prayer => {
-                let completed = 0;
-                for (let month = 1; month <= 12; month++) {
-                    if (dataObj[month] && dataObj[month][prayer.id]) {
-                        completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
+            let prayerTypeData;
+            let prayerTypeLabel;
+            
+            if (type === 'fard') {
+                // For fard: show congregation count per prayer
+                prayerTypeData = prayers.map(prayer => {
+                    let congCount = 0;
+                    for (let month = 1; month <= 12; month++) {
+                        const congData = getCongregationData(currentYear, month);
+                        if (congData[prayer.id]) {
+                            congCount += Object.values(congData[prayer.id]).filter(v => v).length;
+                        }
                     }
-                }
-                return completed;
-            });
+                    return congCount;
+                });
+                prayerTypeLabel = t('congregation');
+            } else {
+                // For sunnah: show completion count
+                prayerTypeData = prayers.map(prayer => {
+                    let completed = 0;
+                    for (let month = 1; month <= 12; month++) {
+                        if (dataObj[month] && dataObj[month][prayer.id]) {
+                            completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
+                        }
+                    }
+                    return completed;
+                });
+                prayerTypeLabel = t('chart_sunnah_count');
+            }
             
             if (charts[type].prayerType) charts[type].prayerType.destroy();
             charts[type].prayerType = new Chart(document.getElementById(`${type}PrayerTypeChart`), {
@@ -3442,7 +3462,7 @@
                 data: {
                     labels: prayers.map(p => getPrayerName(p.id)),
                     datasets: [{
-                        label: type === 'fard' ? 'عدد الصلوات' : 'عدد السنن',
+                        label: prayerTypeLabel,
                         data: prayerTypeData,
                         backgroundColor: prayers.map(p => p.color),
                         borderColor: prayers.map(p => p.color),
@@ -5782,7 +5802,8 @@
             'of_total': { ar: 'من أصل', en: 'out of' },
             'prayers_word': { ar: 'صلاة', en: 'prayers' },
             'monthly_progress': { ar: '📈 التقدم الشهري', en: '📈 Monthly Progress' },
-            'by_type': { ar: '📊 الصلوات حسب النوع', en: '📊 Prayers by Type' },
+            'by_type': { ar: '📊 السنن حسب النوع', en: '📊 Sunnah by Type' },
+            'fard_by_type': { ar: '🕌 صلاة الجماعة حسب النوع', en: '🕌 Congregation by Prayer Type' },
             'completion_pie': { ar: '🎯 نسبة الإنجاز', en: '🎯 Completion Rate' },
             'comparison': { ar: '📉 مقارنة الصلوات', en: '📉 Prayer Comparison' },
             
@@ -5881,8 +5902,8 @@
             'congregation': { ar: 'جماعة', en: 'Congregation' },
             'individual': { ar: 'منفرد', en: 'Individual' },
             'cong_rate': { ar: 'نسبة صلاة الجماعة', en: 'Congregation Rate' },
-            'weekly_pattern': { ar: '📊 نمط الصلاة الأسبوعي', en: '📊 Weekly Prayer Pattern' },
-            'prayer_heatmap': { ar: '🗓️ خريطة الالتزام السنوية', en: '🗓️ Yearly Commitment Heatmap' },
+            'weekly_pattern': { ar: '🕌 نمط صلاة الجماعة الأسبوعي', en: '🕌 Weekly Congregation Pattern' },
+            'prayer_heatmap': { ar: '🕌 خريطة الالتزام بصلاة الجماعة', en: '🕌 Congregation Commitment Heatmap' },
             'cong_chart_title': { ar: '🕌 صلاة الجماعة الشهرية', en: '🕌 Monthly Congregation Rate' },
 
             'select_profile_first': { ar: 'الرجاء اختيار ملف شخصي أولاً', en: 'Please select a profile first' },
@@ -6033,27 +6054,26 @@
             const dataObj = getDataObject('fard');
             const dayNames = T['day_names'][currentLang];
             
-            // Count completions by day of week for each prayer
+            // Count CONGREGATION by day of week for each prayer
             const weekData = {};
             prayers.forEach(p => { weekData[p.id] = [0,0,0,0,0,0,0]; });
             const weekTotals = [0,0,0,0,0,0,0];
             
             for (let month = 1; month <= 12; month++) {
-                if (!dataObj[month]) continue;
+                const congData = getCongregationData(currentYear, month);
                 const daysInMonth = getDaysInMonth(month, currentYear);
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(currentYear, month - 1, day);
-                    const dow = date.getDay(); // 0=Sun
+                    const dow = date.getDay();
                     weekTotals[dow]++;
                     prayers.forEach(p => {
-                        if (dataObj[month][p.id] && dataObj[month][p.id][day]) {
+                        if (congData[p.id] && congData[p.id][day]) {
                             weekData[p.id][dow]++;
                         }
                     });
                 }
             }
             
-            // Calculate rates per day of week
             const datasets = prayers.map(p => ({
                 label: getPrayerName(p.id),
                 data: weekData[p.id].map((count, i) => weekTotals[i] > 0 ? Math.round((count / weekTotals[i]) * 100) : 0),
@@ -6086,34 +6106,36 @@
             
             const prayers = getPrayersArray('fard');
             const dataObj = getDataObject('fard');
-            const monthNames = getMonthNames();
+            const mNames = getMonthNames();
             
-            // Build monthly completion rates
+            // Build monthly CONGREGATION rates
             const heatData = [];
             const labels = [];
             
             for (let month = 1; month <= 12; month++) {
-                const daysInMonth = getDaysInMonth(month, currentYear);
-                let total = 0, completed = 0;
+                const congData = getCongregationData(currentYear, month);
+                let totalCompleted = 0, totalCong = 0;
                 
                 prayers.forEach(p => {
-                    total += daysInMonth;
                     if (dataObj[month] && dataObj[month][p.id]) {
-                        completed += Object.values(dataObj[month][p.id]).filter(v => v).length;
+                        const completedDays = Object.keys(dataObj[month][p.id]).filter(d => dataObj[month][p.id][d]);
+                        totalCompleted += completedDays.length;
+                        completedDays.forEach(d => {
+                            if (congData[p.id] && congData[p.id][parseInt(d)]) totalCong++;
+                        });
                     }
                 });
                 
-                heatData.push(total > 0 ? Math.round((completed / total) * 100) : 0);
-                labels.push(monthNames[month - 1]);
+                heatData.push(totalCompleted > 0 ? Math.round((totalCong / totalCompleted) * 100) : 0);
+                labels.push(mNames[month - 1]);
             }
             
-            // Color scale based on percentage
             const colors = heatData.map(v => {
-                if (v >= 80) return '#059669';
-                if (v >= 60) return '#10b981';
-                if (v >= 40) return '#fbbf24';
-                if (v >= 20) return '#f97316';
-                if (v > 0) return '#ef4444';
+                if (v >= 80) return '#1d4ed8';
+                if (v >= 60) return '#3b82f6';
+                if (v >= 40) return '#60a5fa';
+                if (v >= 20) return '#93c5fd';
+                if (v > 0) return '#bfdbfe';
                 return '#e5e7eb';
             });
             
@@ -6123,7 +6145,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: t('completion_rate'),
+                        label: t('cong_rate'),
                         data: heatData,
                         backgroundColor: colors,
                         borderColor: colors.map(c => c === '#e5e7eb' ? '#d1d5db' : c),
