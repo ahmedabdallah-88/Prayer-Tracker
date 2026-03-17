@@ -273,9 +273,12 @@
         /* Language Switcher */
         .lang-switcher {
             position: fixed;
-            top: max(20px, calc(env(safe-area-inset-top) + 10px));
-            right: max(20px, env(safe-area-inset-right));
+            top: max(12px, calc(env(safe-area-inset-top) + 4px));
+            right: max(12px, env(safe-area-inset-right));
             z-index: 9999;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
         }
 
         .lang-toggle-btn {
@@ -309,12 +312,12 @@
         }
 
         [dir="ltr"] .theme-switcher {
-            left: auto;
-            right: 80px;
+            /* Already inside lang-switcher, no position change needed */
         }
 
         [dir="ltr"] .lang-switcher {
-            right: 20px;
+            right: max(12px, env(safe-area-inset-right));
+            left: auto;
         }
 
         [dir="ltr"] .day-number {
@@ -350,15 +353,13 @@
                 font-size: 1.1em;
             }
             [dir="ltr"] .theme-switcher {
-                right: 58px;
+                /* Already inside lang-switcher */
             }
         }
 
         /* Theme Switcher Styles */
         .theme-switcher {
-            position: fixed;
-            top: max(20px, calc(env(safe-area-inset-top) + 10px));
-            left: max(20px, env(safe-area-inset-left));
+            position: relative;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -400,6 +401,10 @@
             max-height: 70vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            min-width: 200px;
         }
 
         .theme-options.show {
@@ -519,14 +524,10 @@
         }
 
         @media (max-width: 768px) {
-            .theme-switcher {
-                top: 10px;
-                left: 10px;
-            }
             .theme-toggle-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1.1em;
+                width: 36px;
+                height: 36px;
+                font-size: 1em;
             }
             .streak-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -2443,49 +2444,47 @@
     </div>
 
 
-    <!-- Language Switcher -->
+    <!-- Controls Bar (Language + Theme) -->
     <div class="lang-switcher">
         <button class="lang-toggle-btn" onclick="toggleLang()" id="langBtn" role="button" aria-label="Switch language" title="Switch Language">عر</button>
+        <div class="theme-switcher">
+            <button class="theme-toggle-btn" onclick="toggleThemeMenu()" title="تغيير السمة" role="button" aria-label="Change theme" aria-haspopup="true">🎨</button>
+            <div class="theme-options" id="themeOptions">
+                <button class="theme-option active" data-theme="green" onclick="setTheme('green')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #0f4c3a, #d4af37);"></span>
+                    <span data-t="green_gold">أخضر وذهبي</span>
+                </button>
+                <button class="theme-option" data-theme="navy" onclick="setTheme('navy')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #0d1b2a, #c0c0c0);"></span>
+                    <span data-t="navy_silver">كحلي وفضي</span>
+                </button>
+                <button class="theme-option" data-theme="purple" onclick="setTheme('purple')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #2d1b4e, #d4af37);"></span>
+                    <span data-t="purple_gold">بنفسجي وذهبي</span>
+                </button>
+                <button class="theme-option" data-theme="feminine" onclick="setTheme('feminine')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #8e3564, #e8a4b8);"></span>
+                    <span data-t="pink">وردي 🌸</span>
+                </button>
+                <button class="theme-option" data-theme="sky" onclick="setTheme('sky')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #0369a1, #bae6fd);"></span>
+                    <span data-t="sky_blue">أزرق سماوي</span>
+                </button>
+                <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #0a0a0a, #d4af37);"></span>
+                    <span data-t="dark_mode">دارك مود</span>
+                </button>
+                <button class="theme-option" data-theme="olive" onclick="setTheme('olive')">
+                    <span class="theme-dot" style="background: linear-gradient(135deg, #4a5529, #d4c5a0);"></span>
+                    <span data-t="olive_cream">زيتوني</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <a href="#mainContent" class="skip-link" data-t="skip_to_content">تخطي إلى المحتوى</a>
     <div class="offline-bar" id="offlineBar" role="alert" data-t="offline_msg">⚡ أنت غير متصل بالإنترنت — التطبيق يعمل بدون اتصال</div>
     <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Theme Switcher -->
-    <div class="theme-switcher">
-        <button class="theme-toggle-btn" onclick="toggleThemeMenu()" title="تغيير السمة" role="button" aria-label="Change theme" aria-haspopup="true">🎨</button>
-        <div class="theme-options" id="themeOptions">
-            <button class="theme-option active" data-theme="green" onclick="setTheme('green')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #0f4c3a, #d4af37);"></span>
-                <span data-t="green_gold">أخضر وذهبي</span>
-            </button>
-            <button class="theme-option" data-theme="navy" onclick="setTheme('navy')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #0d1b2a, #c0c0c0);"></span>
-                <span data-t="navy_silver">كحلي وفضي</span>
-            </button>
-            <button class="theme-option" data-theme="purple" onclick="setTheme('purple')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #2d1b4e, #d4af37);"></span>
-                <span data-t="purple_gold">بنفسجي وذهبي</span>
-            </button>
-            <button class="theme-option" data-theme="feminine" onclick="setTheme('feminine')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #8e3564, #e8a4b8);"></span>
-                <span data-t="pink">وردي 🌸</span>
-            </button>
-            <button class="theme-option" data-theme="sky" onclick="setTheme('sky')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #0369a1, #bae6fd);"></span>
-                <span data-t="sky_blue">أزرق سماوي</span>
-            </button>
-            <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #0a0a0a, #d4af37);"></span>
-                <span data-t="dark_mode">دارك مود</span>
-            </button>
-            <button class="theme-option" data-theme="olive" onclick="setTheme('olive')">
-                <span class="theme-dot" style="background: linear-gradient(135deg, #4a5529, #d4c5a0);"></span>
-                <span data-t="olive_cream">زيتوني</span>
-            </button>
-        </div>
-    </div>
 
     <div class="container" id="mainContent">
         <div class="header">
