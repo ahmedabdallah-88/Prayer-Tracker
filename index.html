@@ -1531,6 +1531,7 @@
             padding-bottom: max(20px, env(safe-area-inset-bottom));
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
         .profile-overlay.hidden { display: none; }
 
@@ -2080,6 +2081,8 @@
             padding: 20px;
             opacity: 0;
             transition: opacity 0.25s;
+            overscroll-behavior: contain;
+            touch-action: none;
         }
 
         .confirm-overlay.show { opacity: 1; }
@@ -4288,10 +4291,14 @@
 
         function showProfileScreen() {
             document.getElementById('profileOverlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.top = `-${window.scrollY}px`;
             renderProfilesList();
             hideProfileForm();
             
-            // Hide old data actions if profiles already exist (user is just switching)
+            // Hide old data actions if profiles already exist
             const profiles = getProfiles();
             const oldDataSection = document.getElementById('oldDataActions');
             if (oldDataSection && profiles.length > 0) {
@@ -4303,6 +4310,12 @@
 
         function hideProfileScreen() {
             document.getElementById('profileOverlay').classList.add('hidden');
+            const scrollY = document.body.style.top;
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
         }
 
         function renderProfilesList() {
@@ -4391,14 +4404,14 @@
             if (!age || age < 5) { showToast(t('enter_valid_age'), 'warning'); return; }
             if (!gender) { showToast(t('select_gender'), 'warning'); return; }
             
+            let profiles = getProfiles();
+            
             // Check duplicate name (except when editing same profile)
             const existing = profiles.find(p => p.name === name && p.id !== editId);
             if (existing) { showToast(t('duplicate_name'), 'warning'); return; }
             
             // Profile limit
             if (!editId && profiles.length >= 10) { showToast(t('profile_limit'), 'warning'); return; }
-
-            let profiles = getProfiles();
 
             if (editId) {
                 const idx = profiles.findIndex(p => p.id === editId);
@@ -4643,9 +4656,13 @@
                 
                 const cleanup = (result) => {
                     overlay.classList.remove('show');
+                    document.body.style.overflow = '';
                     setTimeout(() => overlay.remove(), 250);
                     resolve(result);
                 };
+                
+                // Lock body scroll
+                document.body.style.overflow = 'hidden';
                 
                 overlay.querySelector('#_cfYes').onclick = () => cleanup(true);
                 overlay.querySelector('#_cfNo').onclick = () => cleanup(false);
