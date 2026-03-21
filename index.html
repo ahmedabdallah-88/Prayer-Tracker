@@ -3119,18 +3119,18 @@
 
         .day-box .day-number {
             position: static !important;
-            font-size: 0.9em !important;
+            font-size: 0.95em !important;
             color: var(--text-body) !important;
             font-weight: 700 !important;
             line-height: 1.1 !important;
         }
 
         .day-box .day-greg {
-            font-size: 0.6em !important;
-            color: var(--text-muted) !important;
-            opacity: 0.7;
+            font-size: 0.75em !important;
+            color: var(--accent-dark, #a8871f) !important;
+            opacity: 0.85;
             line-height: 1 !important;
-            font-weight: 400 !important;
+            font-weight: 600 !important;
         }
 
         .day-box.checked {
@@ -3355,7 +3355,7 @@
         <div class="header">
             <div class="islamic-pattern"></div>
             <h1 data-t="app_title">🕌 سجل قضاء الصلوات - الفرائض والسنن</h1>
-            <p class="quran-verse" style="direction:rtl;">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا</p>
+            <p class="quran-verse" style="direction:rtl;">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًۭا مَّوْقُوتًۭا</p>
             <p class="verse-ref" style="direction:rtl;">[سورة النساء: 103]</p>
 
             <div class="current-profile-badge" onclick="showProfileScreen()" id="profileBadge" style="display:none;">
@@ -4051,8 +4051,7 @@
         function gregorianToHijri(gDate) {
             try {
                 var fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
-                    year: 'numeric', month: 'numeric', day: 'numeric',
-                    timeZone: 'Asia/Riyadh'
+                    year: 'numeric', month: 'numeric', day: 'numeric'
                 });
                 var parts = fmt.formatToParts(gDate);
                 var hYear = 0, hMonth = 0, hDay = 0;
@@ -4860,13 +4859,11 @@
                 container.appendChild(section);
                 
                 const grid = document.getElementById(`${type}-grid-${prayer.id}`);
-                for (let day = 1; day <= 31; day++) {
+                for (let day = 1; day <= daysInMonth; day++) {
                     const dayBox = document.createElement('div');
                     dayBox.className = 'day-box';
                     
-                    if (day > daysInMonth) {
-                        dayBox.classList.add('disabled');
-                    } else if (isPrayerExempt(exemptData, prayer.id, day)) {
+                    if (isPrayerExempt(exemptData, prayer.id, day)) {
                         dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('exempt');
                     } else if (isFutureDate(day, currentMonth, currentYear)) {
@@ -4995,13 +4992,11 @@
                 const grid = document.createElement('div');
                 grid.className = 'days-grid';
                 
-                for (let day = 1; day <= 31; day++) {
+                for (let day = 1; day <= daysInMonth; day++) {
                     const dayBox = document.createElement('div');
                     dayBox.className = 'day-box';
                     
-                    if (day > daysInMonth) {
-                        dayBox.classList.add('disabled');
-                    } else if (isFutureDate(day, currentMonth, currentYear)) {
+                    if (isFutureDate(day, currentMonth, currentYear)) {
                         // Future date - disable it
                         dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('disabled');
@@ -5456,68 +5451,52 @@
             // For sunnah: streak is based on prayer completion
             const isCongStreak = (type === 'fard');
             
-            let checkDate = new Date(today);
-            checkDate.setHours(0, 0, 0, 0);
+            // Use noon to avoid DST boundary issues
+            let checkDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
             
-            var todayH = gregorianToHijri(today);
+            var todayH = gregorianToHijri(checkDate);
             var todayHMonth = todayH.month;
             var todayHDay = todayH.day;
             var todayHYear = todayH.year;
             
-            // Check if today is already marked (using Hijri keys)
-            let startFromToday = false;
-            if (isCongStreak) {
-                const congKey = getCongregationKey(todayHYear, todayHMonth);
-                const congData = localStorage.getItem(congKey);
-                if (congData) {
-                    const parsed = JSON.parse(congData);
-                    if (parsed[prayerId] && parsed[prayerId][todayHDay]) {
-                        startFromToday = true;
+            // Helper: check if a Hijri date has data
+            function isDayChecked(hYear, hMonth, hDay) {
+                if (isCongStreak) {
+                    var congKey = getCongregationKey(hYear, hMonth);
+                    var stored = localStorage.getItem(congKey);
+                    if (stored) {
+                        var parsed = JSON.parse(stored);
+                        if (parsed[prayerId] && parsed[prayerId][String(hDay)]) return true;
+                        if (parsed[prayerId] && parsed[prayerId][hDay]) return true;
                     }
-                }
-            } else {
-                const todayKey = getStorageKey(type, todayHMonth, todayHYear);
-                const todayData = localStorage.getItem(todayKey);
-                if (todayData) {
-                    const parsed = JSON.parse(todayData);
-                    if (parsed[prayerId] && parsed[prayerId][todayHDay]) {
-                        startFromToday = true;
+                    return false;
+                } else {
+                    var key = getStorageKey(type, hMonth, hYear);
+                    var stored = localStorage.getItem(key);
+                    if (stored) {
+                        var parsed = JSON.parse(stored);
+                        if (parsed[prayerId] && parsed[prayerId][String(hDay)]) return true;
+                        if (parsed[prayerId] && parsed[prayerId][hDay]) return true;
                     }
+                    return false;
                 }
             }
+            
+            // Check if today is already marked
+            let startFromToday = isDayChecked(todayHYear, todayHMonth, todayHDay);
             
             if (!startFromToday) {
-                checkDate.setDate(checkDate.getDate() - 1);
+                // Go back one day
+                checkDate = new Date(checkDate.getTime() - 86400000);
             }
             
-            // Calculate current streak (going backwards, convert each day to Hijri)
+            // Calculate current streak (going backwards)
             for (let i = 0; i < 730; i++) {
                 var hDate = gregorianToHijri(checkDate);
-                var cHMonth = hDate.month;
-                var cHDay = hDate.day;
-                var cHYear = hDate.year;
                 
-                let isChecked = false;
-                
-                if (isCongStreak) {
-                    const congKey = getCongregationKey(cHYear, cHMonth);
-                    const stored = localStorage.getItem(congKey);
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][cHDay]) isChecked = true;
-                    }
-                } else {
-                    const key = getStorageKey(type, cHMonth, cHYear);
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][cHDay]) isChecked = true;
-                    }
-                }
-                
-                if (isChecked) {
+                if (isDayChecked(hDate.year, hDate.month, hDate.day)) {
                     currentStreak++;
-                    checkDate.setDate(checkDate.getDate() - 1);
+                    checkDate = new Date(checkDate.getTime() - 86400000);
                 } else {
                     break;
                 }
@@ -5525,41 +5504,20 @@
             
             // Calculate best streak (scan from Muharram 1 of current Hijri year)
             var scanStartG = hijriToGregorianDay1(currentHijriYear, 1);
-            let scanDate = new Date(scanStartG);
-            scanDate.setHours(0, 0, 0, 0);
+            var todayNoon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+            let scanDate = new Date(scanStartG.getFullYear(), scanStartG.getMonth(), scanStartG.getDate(), 12, 0, 0);
             
-            while (scanDate <= today) {
+            while (scanDate <= todayNoon) {
                 var hScan = gregorianToHijri(scanDate);
-                var sHMonth = hScan.month;
-                var sHDay = hScan.day;
-                var sHYear = hScan.year;
                 
-                let isChecked = false;
-                
-                if (isCongStreak) {
-                    const congKey = getCongregationKey(sHYear, sHMonth);
-                    const stored = localStorage.getItem(congKey);
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][sHDay]) isChecked = true;
-                    }
-                } else {
-                    const key = getStorageKey(type, sHMonth, sHYear);
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][sHDay]) isChecked = true;
-                    }
-                }
-                
-                if (isChecked) {
+                if (isDayChecked(hScan.year, hScan.month, hScan.day)) {
                     tempStreak++;
                     bestStreak = Math.max(bestStreak, tempStreak);
                 } else {
                     tempStreak = 0;
                 }
                 
-                scanDate.setDate(scanDate.getDate() + 1);
+                scanDate = new Date(scanDate.getTime() + 86400000);
             }
             
             return { current: currentStreak, best: bestStreak };
@@ -6634,13 +6592,11 @@
             
             let fasted = 0, exemptCount = 0;
             
-            for (let day = 1; day <= 31; day++) {
+            for (let day = 1; day <= daysInMonth; day++) {
                 const dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
                 
-                if (day > daysInMonth) {
-                    dayBox.classList.add('disabled');
-                } else if (isFutureDate(day, fastingMonth, fastingYear)) {
+                if (isFutureDate(day, fastingMonth, fastingYear)) {
                     dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
                     dayBox.classList.add('disabled');
                     dayBox.style.opacity = '0.3';
@@ -6934,21 +6890,17 @@
                 const grid = document.createElement('div');
                 grid.className = 'days-grid';
                 
-                for (let day = 1; day <= 31; day++) {
+                for (let day = 1; day <= daysInMonth; day++) {
                     const dayBox = document.createElement('div');
                     dayBox.className = 'day-box';
                     
-                    // Add Gregorian date reference as tooltip for valid days
-                    if (day <= daysInMonth) {
-                        try {
-                            var gDate = hijriToGregorian(currentHijriYear, currentHijriMonth, day);
-                            dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
-                        } catch(e) {}
-                    }
+                    // Add Gregorian date reference as tooltip
+                    try {
+                        var gDate = hijriToGregorian(currentHijriYear, currentHijriMonth, day);
+                        dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
+                    } catch(e) {}
                     
-                    if (day > daysInMonth) {
-                        dayBox.classList.add('disabled');
-                    } else if (isPrayerExempt(exemptData, prayer.id, day)) {
+                    if (isPrayerExempt(exemptData, prayer.id, day)) {
                         dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('exempt');
                         
@@ -7250,7 +7202,7 @@
         const T = {
             // Header
             'app_title': { ar: '🕌 سجل قضاء الصلوات - الفرائض والسنن', en: '🕌 Prayer Tracker - Obligatory & Sunnah' },
-            'quran_verse': { ar: 'إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا', en: 'Indeed, prayer has been decreed upon the believers at specified times' },
+            'quran_verse': { ar: 'إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًۭا مَّوْقُوتًۭا', en: 'Indeed, prayer has been decreed upon the believers at specified times' },
             'verse_ref': { ar: '[سورة النساء: 103]', en: '[An-Nisa: 103]' },
             
             // Profile
@@ -8184,15 +8136,28 @@
                 localStorage.setItem('salah_notif_enabled', 'false');
                 showToast(currentLang === 'ar' ? '🔕 تم إيقاف التنبيهات' : '🔕 Notifications disabled', 'info');
             } else {
+                // Check iOS standalone mode
+                var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+                
+                if (isIOS && !isStandalone) {
+                    showToast(currentLang === 'ar' 
+                        ? '📱 للتنبيهات على iOS: أضف التطبيق للشاشة الرئيسية أولاً (مشاركة ← إضافة للشاشة الرئيسية)' 
+                        : '📱 For iOS notifications: Add to Home Screen first (Share → Add to Home Screen)', 'warning', 6000);
+                    return;
+                }
+                
                 // Request permission
                 if (!('Notification' in window)) {
-                    showToast(currentLang === 'ar' ? 'المتصفح لا يدعم التنبيهات' : 'Browser does not support notifications', 'error');
+                    showToast(currentLang === 'ar' 
+                        ? 'المتصفح لا يدعم التنبيهات — جرّب Chrome أو فعّل التطبيق من الشاشة الرئيسية' 
+                        : 'Notifications not supported — try Chrome or install as PWA', 'error', 5000);
                     return;
                 }
 
                 var permission = Notification.permission;
                 if (permission === 'denied') {
-                    showToast(currentLang === 'ar' ? 'تم حظر التنبيهات في إعدادات المتصفح' : 'Notifications blocked in browser settings', 'error');
+                    showToast(currentLang === 'ar' ? 'تم حظر التنبيهات — فعّلها من إعدادات المتصفح' : 'Notifications blocked — enable in browser settings', 'error');
                     return;
                 }
 
@@ -8205,12 +8170,11 @@
                     localStorage.setItem('salah_notif_enabled', 'true');
                     showToast(currentLang === 'ar' ? '🔔 تم تفعيل التنبيهات' : '🔔 Notifications enabled', 'success');
                     
-                    // Show a test notification
-                    new Notification(currentLang === 'ar' ? '🕌 متتبع الصلاة' : '🕌 Prayer Tracker', {
-                        body: currentLang === 'ar' ? 'سيتم تذكيرك قبل كل صلاة بـ ٢٠ دقيقة' : 'You will be reminded 20 minutes before each prayer',
-                        icon: 'icons/icon-192x192.png',
-                        tag: 'prayer-test'
-                    });
+                    // Show test notification via SW
+                    sendPrayerNotification(
+                        currentLang === 'ar' ? 'متتبع الصلاة' : 'Prayer Tracker',
+                        'test'
+                    );
                 } else {
                     showToast(currentLang === 'ar' ? 'لم يتم السماح بالتنبيهات' : 'Notification permission not granted', 'warning');
                 }
@@ -8218,23 +8182,44 @@
             updateNotifButton();
         }
 
-        function sendPrayerNotification(prayerName, type) {
+        async function sendPrayerNotification(prayerName, type) {
             if (!notificationsEnabled) return;
             if (Notification.permission !== 'granted') return;
 
             var title, body, tag;
             
-            if (type === 'before') {
+            if (type === 'test') {
+                title = '🕌 ' + prayerName;
+                body = currentLang === 'ar' ? 'سيتم تذكيرك قبل كل صلاة بـ ٢٠ دقيقة' : 'You will be reminded 20 min before each prayer';
+                tag = 'prayer-test';
+            } else if (type === 'before') {
                 title = '🕌 ' + (currentLang === 'ar' ? 'قرب وقت الصلاة' : 'Prayer time approaching');
-                body = (currentLang === 'ar' ? 'يقترب وقت صلاة ' : '') + prayerName + (currentLang === 'ar' ? ' - استعد!' : ' is coming in ~20 minutes');
+                body = (currentLang === 'ar' ? 'يقترب وقت صلاة ' + prayerName + ' — استعد!' : prayerName + ' is coming in ~20 minutes');
                 tag = 'prayer-before-' + prayerName;
             } else {
                 title = '⏰ ' + (currentLang === 'ar' ? 'هل صليت؟' : 'Did you pray?');
-                body = (currentLang === 'ar' ? 'مرّ وقت صلاة ' : '') + prayerName + (currentLang === 'ar' ? ' — سجّل صلاتك' : ' time has passed — log your prayer');
+                body = (currentLang === 'ar' ? 'مرّ وقت صلاة ' + prayerName + ' — سجّل صلاتك' : prayerName + ' time has passed — log your prayer');
                 tag = 'prayer-after-' + prayerName;
             }
 
             try {
+                // Try Service Worker notification first (works on mobile PWA)
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    var reg = await navigator.serviceWorker.ready;
+                    await reg.showNotification(title, {
+                        body: body,
+                        icon: 'icons/icon-192x192.png',
+                        badge: 'icons/icon-72x72.png',
+                        tag: tag,
+                        renotify: true,
+                        vibrate: [200, 100, 200],
+                        requireInteraction: type !== 'test',
+                        data: { url: './' }
+                    });
+                    return;
+                }
+                
+                // Fallback to regular Notification API (desktop)
                 new Notification(title, {
                     body: body,
                     icon: 'icons/icon-192x192.png',
@@ -8243,6 +8228,8 @@
                 });
             } catch(e) {
                 console.log('Notification error:', e);
+                // Last resort: in-app toast
+                showToast(title + ': ' + body, 'info', 5000);
             }
         }
 
@@ -8307,11 +8294,11 @@
                 
                 // At midnight, reset and refetch
                 var now = new Date();
-                if (now.getHours() === 0 && now.getMinutes() === 0) {
+                if (now.getHours() === 0 && now.getMinutes() < 1) {
                     notifSentToday = {};
                     fetchPrayerTimes(true);
                 }
-            }, 60000);
+            }, 30000); // Check every 30 seconds
         }
 
         // ==================== QADA (MISSED PRAYERS) REPORT ====================
@@ -8437,6 +8424,21 @@
 
         window.togglePrayerNotifications = togglePrayerNotifications;
         window.refreshPrayerTimes = refreshPrayerTimes;
+        
+        // Apply SW update by telling new worker to skip waiting, then reload
+        window.applyUpdate = function() {
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(function(reg) {
+                    if (reg.waiting) {
+                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                });
+                // Reload after a small delay for the SW to activate
+                setTimeout(function() { window.location.reload(); }, 500);
+            } else {
+                window.location.reload();
+            }
+        };
 
         // ==================== MONTH DAYS TOGGLE (29/30) ====================
         function toggleMonthDays() {
@@ -8607,8 +8609,121 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('SW registered:', reg.scope))
+                    .then(async function(reg) {
+                        console.log('SW registered:', reg.scope);
+                        
+                        // Listen for notification clicks from SW
+                        navigator.serviceWorker.addEventListener('message', function(event) {
+                            if (event.data && event.data.type === 'notification-click') {
+                                window.focus();
+                                // Scroll to the prayer that was notified
+                                if (event.data.tag && event.data.tag.includes('prayer-after-')) {
+                                    try { scrollToUnmarkedPrayer(); } catch(e) {}
+                                }
+                            }
+                        });
+                        
+                        // Check for SW update
+                        reg.addEventListener('updatefound', function() {
+                            var newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available — show update bar
+                                    var updateBar = document.createElement('div');
+                                    updateBar.id = 'updateBar';
+                                    updateBar.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#059669,#047857);color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:10001;font-family:Cairo,sans-serif;font-size:0.9em;direction:rtl;box-shadow:0 4px 15px rgba(0,0,0,0.2);';
+                                    updateBar.innerHTML = '<span>🔄 ' + (currentLang === 'ar' ? 'تحديث جديد متاح' : 'Update available') + '</span>' +
+                                        '<button type="button" onclick="applyUpdate()" style="background:white;color:#047857;border:none;padding:6px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">' + 
+                                        (currentLang === 'ar' ? 'تحديث الآن' : 'Update now') + '</button>';
+                                    document.body.appendChild(updateBar);
+                                }
+                            });
+                        });
+                        
+                        // Register periodic background sync (Chrome Android 80+)
+                        if ('periodicSync' in reg) {
+                            try {
+                                var status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+                                if (status.state === 'granted') {
+                                    await reg.periodicSync.register('prayer-check', {
+                                        minInterval: 15 * 60 * 1000 // 15 minutes
+                                    });
+                                    console.log('Periodic sync registered');
+                                }
+                            } catch(e) {
+                                console.log('Periodic sync not available:', e);
+                            }
+                        }
+                    })
                     .catch(err => console.log('SW failed:', err));
+            });
+        }
+        
+        // Re-check prayer times when app becomes visible again
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && activeProfile) {
+                renderPrayerTimes();
+                checkPrayerTimeNotifications();
+            }
+        });
+        
+        // Schedule next prayer notifications via SW when app goes to background
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden' && notificationsEnabled && prayerTimesData && prayerTimesData.timings) {
+                scheduleSWNotifications();
+            }
+        });
+        
+        function scheduleSWNotifications() {
+            if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+            if (!prayerTimesData || !prayerTimesData.timings) return;
+            
+            var now = new Date();
+            var nowMin = now.getHours() * 60 + now.getMinutes();
+            var timings = prayerTimesData.timings;
+            
+            var todayH = gregorianToHijri(now);
+            var dataObj = getDataObject('fard');
+            
+            var prayers = [
+                { id: 'fajr', time: parseTimeToMinutes(timings.fajr) },
+                { id: 'dhuhr', time: parseTimeToMinutes(timings.dhuhr) },
+                { id: 'asr', time: parseTimeToMinutes(timings.asr) },
+                { id: 'maghrib', time: parseTimeToMinutes(timings.maghrib) },
+                { id: 'isha', time: parseTimeToMinutes(timings.isha) }
+            ];
+            
+            prayers.forEach(function(p) {
+                var prayerName = getPrayerName(p.id);
+                
+                // Schedule "before" notification (20 min before)
+                var beforeMin = p.time - 20;
+                if (beforeMin > nowMin) {
+                    var delayMs = (beforeMin - nowMin) * 60000;
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SCHEDULE_NOTIFICATION',
+                        title: '🕌 ' + (currentLang === 'ar' ? 'قرب وقت الصلاة' : 'Prayer approaching'),
+                        body: (currentLang === 'ar' ? 'يقترب وقت صلاة ' + prayerName + ' — استعد!' : prayerName + ' in ~20 minutes'),
+                        tag: 'prayer-before-' + p.id,
+                        delay: delayMs
+                    });
+                }
+                
+                // Schedule "after" notification (30 min after) — only if not marked
+                var afterMin = p.time + 30;
+                if (afterMin > nowMin) {
+                    var isMarked = dataObj[todayH.month] && dataObj[todayH.month][p.id] && dataObj[todayH.month][p.id][todayH.day];
+                    if (!isMarked) {
+                        var delayMs2 = (afterMin - nowMin) * 60000;
+                        navigator.serviceWorker.controller.postMessage({
+                            type: 'SCHEDULE_NOTIFICATION',
+                            title: '⏰ ' + (currentLang === 'ar' ? 'هل صليت؟' : 'Did you pray?'),
+                            body: (currentLang === 'ar' ? 'مرّ وقت صلاة ' + prayerName + ' — سجّل صلاتك' : prayerName + ' time passed — log it'),
+                            tag: 'prayer-after-' + p.id,
+                            delay: delayMs2
+                        });
+                    }
+                }
             });
         }
 
