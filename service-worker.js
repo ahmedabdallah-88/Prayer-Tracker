@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salah-tracker-v28';
+const CACHE_NAME = 'salah-tracker-v29';
 const urlsToCache = [
   './',
   './index.html',
