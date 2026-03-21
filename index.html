@@ -5098,6 +5098,47 @@
             document.getElementById('importFile').click();
         }
 
+        // Convert a Gregorian-keyed localStorage key to Hijri-keyed
+        // e.g. salah_tracker_p_abc_fard_2025_3 → salah_tracker_p_abc_fard_h1446_9
+        function convertKeyToHijri(key) {
+            // Already Hijri? (contains '_h' followed by a 4-digit year)
+            if (/_h\d{4}/.test(key)) return key;
+            
+            // Pattern: ..._TYPE_YEAR_MONTH (tracker, qada, cong, exempt, volfasting)
+            var matchYM = key.match(/^(.+?)(\d{4})_(\d{1,2})$/);
+            if (matchYM) {
+                var prefix = matchYM[1];
+                var gYear = parseInt(matchYM[2]);
+                var gMonth = parseInt(matchYM[3]);
+                
+                if (gYear >= 2000 && gYear <= 2100 && gMonth >= 1 && gMonth <= 12) {
+                    try {
+                        var midDate = new Date(gYear, gMonth - 1, 15);
+                        var h = gregorianToHijri(midDate);
+                        return prefix + 'h' + h.year + '_' + h.month;
+                    } catch(e) {}
+                }
+            }
+            
+            // Pattern: ..._YEAR (fasting, periods — year only)
+            var matchY = key.match(/^(.+?)(\d{4})$/);
+            if (matchY && !matchYM) {
+                var prefix2 = matchY[1];
+                var gYear2 = parseInt(matchY[2]);
+                
+                if (gYear2 >= 2000 && gYear2 <= 2100) {
+                    try {
+                        // Use mid-year to get approximate Hijri year
+                        var midYear = new Date(gYear2, 5, 15);
+                        var h2 = gregorianToHijri(midYear);
+                        return prefix2 + 'h' + h2.year;
+                    } catch(e) {}
+                }
+            }
+            
+            return key;
+        }
+
         function handleImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -5140,7 +5181,6 @@
                                 newKey = key.replace(oldProfileId, currentId);
                             } else if (!key.includes('p_')) {
                                 // Old format without any profile prefix — add current prefix
-                                // e.g. salah_tracker_fard_2025_3 → salah_tracker_p_xxx_fard_2025_3
                                 newKey = key.replace('salah_tracker_', `salah_tracker_${currentId}_`);
                                 if (key.startsWith('salah_exempt_')) {
                                     newKey = key.replace('salah_exempt_', `salah_exempt_${currentId}_`);
@@ -5155,6 +5195,9 @@
                                     newKey = key.replace('salah_periods_', `salah_periods_${currentId}_`);
                                 }
                             }
+                            
+                            // Convert Gregorian keys to Hijri if needed
+                            newKey = convertKeyToHijri(newKey);
                             
                             localStorage.setItem(newKey, JSON.stringify(imported[key]));
                             importCount++;
@@ -5625,6 +5668,8 @@
                                 if (k.startsWith('salah_volfasting_')) newKey = k.replace('salah_volfasting_', `salah_volfasting_${newId}_`);
                                 if (k.startsWith('salah_periods_')) newKey = k.replace('salah_periods_', `salah_periods_${newId}_`);
                             }
+                            // Convert Gregorian keys to Hijri
+                            newKey = convertKeyToHijri(newKey);
                             localStorage.setItem(newKey, JSON.stringify(imported[k]));
                         });
                         
@@ -7735,6 +7780,41 @@
             });
         }
 
+        // Reverse geocode coordinates to city name
+        async function reverseGeocode(lat, lng) {
+            try {
+                // Check cache
+                var cached = localStorage.getItem('salah_city_name');
+                if (cached) {
+                    var data = JSON.parse(cached);
+                    // Same location within ~5km? reuse
+                    if (Math.abs(data.lat - lat) < 0.05 && Math.abs(data.lng - lng) < 0.05) {
+                        return data.city;
+                    }
+                }
+                
+                var url = 'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&accept-language=' + currentLang;
+                var response = await fetch(url, { headers: { 'User-Agent': 'PrayerTrackerPWA/1.0' } });
+                var json = await response.json();
+                
+                var city = '';
+                if (json && json.address) {
+                    city = json.address.city || json.address.town || json.address.village || json.address.state || '';
+                    if (json.address.country) {
+                        city = city ? (city + '، ' + json.address.country) : json.address.country;
+                    }
+                }
+                
+                if (city) {
+                    localStorage.setItem('salah_city_name', JSON.stringify({ lat: lat, lng: lng, city: city }));
+                }
+                return city;
+            } catch(e) {
+                console.log('Reverse geocode error:', e);
+                return '';
+            }
+        }
+
         async function fetchPrayerTimes(forceRefresh) {
             // Check cache first
             if (!forceRefresh) {
@@ -7761,6 +7841,10 @@
                 
                 if (json.code === 200 && json.data && json.data.timings) {
                     var timings = json.data.timings;
+                    
+                    // Get real city name via reverse geocoding
+                    var cityName = await reverseGeocode(loc.lat, loc.lng);
+                    
                     prayerTimesData = {
                         date: today.toISOString().split('T')[0],
                         timings: {
@@ -7771,7 +7855,7 @@
                             maghrib: timings.Maghrib,
                             isha: timings.Isha
                         },
-                        location: json.data.meta ? json.data.meta.timezone : '',
+                        location: cityName || (json.data.meta ? json.data.meta.timezone : ''),
                         lat: loc.lat,
                         lng: loc.lng
                     };
@@ -7920,8 +8004,10 @@
         }
 
         function refreshPrayerTimes() {
+            localStorage.removeItem('salah_city_name');
+            localStorage.removeItem('salah_user_location');
             fetchPrayerTimes(true);
-            showToast(currentLang === 'ar' ? 'جاري تحديث مواقيت الصلاة...' : 'Refreshing prayer times...', 'info');
+            showToast(currentLang === 'ar' ? 'جاري تحديث المواقيت والموقع...' : 'Refreshing times & location...', 'info');
         }
 
         // ==================== PUSH NOTIFICATIONS ====================
