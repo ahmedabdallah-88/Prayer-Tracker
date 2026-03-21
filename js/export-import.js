@@ -171,7 +171,7 @@ export function importAndConvertToHijri(imported, profileId) {
 
         // ---- TRACKER DATA (prayer -> day -> value) ----
         // Pattern: salah_tracker_PROFILEID_TYPE_YEAR_MONTH
-        var trackerMatch = key.match(/^(salah_tracker_(?:p_[a-z0-9]+_|))(\w+)_(\d{4})_(\d{1,2})$/);
+        var trackerMatch = key.match(/^(salah_tracker_(?:p_[a-z0-9_]+_|))(\w+)_(\d{4})_(\d{1,2})$/);
         if (trackerMatch && !/_h\d{4}/.test(key)) {
             var tPrefix = 'salah_tracker_' + profileId + '_';
             var tType = trackerMatch[2];
@@ -205,9 +205,9 @@ export function importAndConvertToHijri(imported, profileId) {
 
         // ---- QADA / CONG / EXEMPT DATA (prayerId -> day -> value) ----
         var auxPatterns = [
-            { regex: /^(salah_qada_(?:p_[a-z0-9]+_|))(\d{4})_(\d{1,2})$/, store: hijriQada, prefix: 'salah_qada_' },
-            { regex: /^(salah_cong_(?:p_[a-z0-9]+_|))(\d{4})_(\d{1,2})$/, store: hijriCong, prefix: 'salah_cong_' },
-            { regex: /^(salah_exempt_(?:p_[a-z0-9]+_|))(\d{4})_(\d{1,2})$/, store: hijriExempt, prefix: 'salah_exempt_' }
+            { regex: /^(salah_qada_(?:p_[a-z0-9_]+_|))(\d{4})_(\d{1,2})$/, store: hijriQada, prefix: 'salah_qada_' },
+            { regex: /^(salah_cong_(?:p_[a-z0-9_]+_|))(\d{4})_(\d{1,2})$/, store: hijriCong, prefix: 'salah_cong_' },
+            { regex: /^(salah_exempt_(?:p_[a-z0-9_]+_|))(\d{4})_(\d{1,2})$/, store: hijriExempt, prefix: 'salah_exempt_' }
         ];
 
         var handled = false;
@@ -260,7 +260,7 @@ export function importAndConvertToHijri(imported, profileId) {
         if (handled) return;
 
         // ---- VOL FASTING (day -> true/false) ----
-        var volMatch = key.match(/^(salah_volfasting_(?:p_[a-z0-9]+_|))(\d{4})_(\d{1,2})$/);
+        var volMatch = key.match(/^(salah_volfasting_(?:p_[a-z0-9_]+_|))(\d{4})_(\d{1,2})$/);
         if (volMatch && !/_h\d{4}/.test(key)) {
             var vY = parseInt(volMatch[2]);
             var vM = parseInt(volMatch[3]);
@@ -283,14 +283,14 @@ export function importAndConvertToHijri(imported, profileId) {
         }
 
         // ---- FASTING / PERIODS (year-only, day numbers are Ramadan-relative, keep as-is) ----
-        var yearOnlyMatch = key.match(/^(salah_(?:fasting|periods)_(?:p_[a-z0-9]+_|))(\d{4})$/);
+        var yearOnlyMatch = key.match(/^(salah_(?:fasting|periods)_(?:p_[a-z0-9_]+_|))(\d{4})$/);
         if (yearOnlyMatch && !/_h\d{4}/.test(key)) {
             var fY = parseInt(yearOnlyMatch[2]);
             if (fY >= 2000 && fY <= 2100) {
                 try {
                     var midDate = new Date(fY, 5, 15);
                     var hh = gregorianToHijri(midDate);
-                    var newKey = yearOnlyMatch[1].replace(/p_[a-z0-9]+_/, profileId + '_');
+                    var newKey = yearOnlyMatch[1].replace(/p_[a-z0-9_]+_/, profileId + '_');
                     if (!newKey.includes(profileId)) newKey = yearOnlyMatch[1] + profileId + '_';
                     // Rebuild prefix properly
                     var basePrefix = key.match(/^(salah_(?:fasting|periods)_)/)[1];
@@ -304,8 +304,8 @@ export function importAndConvertToHijri(imported, profileId) {
 
         // ---- ALREADY HIJRI or OTHER KEYS — store directly with profile remap ----
         var remappedKey = key;
-        // Remap profile ID if needed
-        var oldPMatch = key.match(/_(p_[a-z0-9]+)_/);
+        // Remap profile ID if needed (profile IDs look like p_1234567890_abc12)
+        var oldPMatch = key.match(/_(p_\d+_[a-z0-9]+)_/);
         if (oldPMatch && oldPMatch[1] !== profileId) {
             remappedKey = key.replace(oldPMatch[1], profileId);
         } else if (!key.includes('p_') && key.startsWith('salah_')) {
