@@ -19,7 +19,7 @@ import { fetchPrayerTimes, refreshPrayerTimes, startPrayerTimesMonitor } from '.
 import { togglePrayerNotifications } from './notifications.js';
 import { renderQadaReport } from './qada.js';
 import { showToast, showConfirm, hapticFeedback, toggleMonthDays, showHijriOverrideDialog, scrollToUnmarkedPrayer, dismissReminder, initSwipeHandlers, initDayBoxAnimation } from './ui-utils.js';
-import { switchTab, updateShellBar } from './fiori.js';
+import { switchTab, updateShellBar, initFiori } from './fiori.js';
 import { registerServiceWorker, applyUpdate } from './pwa.js';
 
 // ==================== INIT ====================
@@ -57,6 +57,9 @@ function init() {
     // Apply language
     applyLang();
 
+    // Initialize Fiori shell overrides
+    initFiori();
+
     // Auto-load last profile
     var lastProfileId = localStorage.getItem('salah_active_profile');
     if (lastProfileId) {
@@ -64,9 +67,10 @@ function init() {
         var profile = profiles.find(function(p) { return p.id === lastProfileId; });
         if (profile) {
             state.activeProfile = profile;
-            // Apply profile UI
+            // Apply profile UI and update shell bar
             import('./profiles.js').then(function(mod) {
                 if (mod.applyProfileUI) mod.applyProfileUI();
+                updateShellBar();
             });
             loadAllData('fard');
             loadAllData('sunnah');
@@ -154,7 +158,8 @@ window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     state.deferredPrompt = e;
     window._pwaInstallPrompt = e;
-    if (!localStorage.getItem('pwa_install_dismissed')) {
+    // Always show install banner (clear previous dismiss)
+    {
         var banner = document.createElement('div');
         banner.id = 'installBanner';
         banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid var(--accent);direction:rtl;';

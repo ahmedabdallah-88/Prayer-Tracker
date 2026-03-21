@@ -274,6 +274,7 @@ export function selectProfile(id) {
     setActiveProfileId(id);
     hideProfileScreen();
     applyProfileUI();
+    if (window.updateShellBar) window.updateShellBar();
 
     // Reload all data for this profile with Hijri dates
     var todayH = getTodayHijri();
