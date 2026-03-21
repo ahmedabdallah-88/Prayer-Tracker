@@ -13,6 +13,7 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
+            touch-action: manipulation;
         }
         .profile-overlay.hidden { display: none; }
 

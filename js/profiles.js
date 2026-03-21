@@ -37,10 +37,10 @@ export function getStorageKey(type, month, year) {
 
 export function showProfileScreen() {
     document.getElementById('profileOverlay').classList.remove('hidden');
+    // Save scroll position before locking
+    state._savedScrollY = window.scrollY;
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.top = `-${window.scrollY}px`;
     // Hide shell bar and tab bar behind overlay
     const shellBar = document.getElementById('shellBar');
     const tabBar = document.getElementById('tabBar');
@@ -61,12 +61,12 @@ export function showProfileScreen() {
 
 export function hideProfileScreen() {
     document.getElementById('profileOverlay').classList.add('hidden');
-    const scrollY = document.body.style.top;
+    document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.top = '';
-    window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    // Restore scroll position
+    if (state._savedScrollY) {
+        window.scrollTo(0, state._savedScrollY);
+    }
     // Restore shell bar and tab bar
     const shellBar = document.getElementById('shellBar');
     const tabBar = document.getElementById('tabBar');
