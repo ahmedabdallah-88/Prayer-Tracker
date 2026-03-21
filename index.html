@@ -3420,6 +3420,7 @@
 
                 <div id="fardTrackerHijriHeader" style="text-align:center;font-family:'Amiri',serif;font-size:1.2em;color:var(--primary-dark);margin:8px 0 4px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <span id="fardTrackerHijriHeaderText"></span>
+                    <button type="button" id="monthDaysToggleBtn" onclick="toggleMonthDays()" style="background:var(--primary-light);border:1.5px solid var(--accent-border);border-radius:8px;padding:2px 10px;font-size:0.6em;cursor:pointer;color:var(--primary-dark);font-family:'Cairo',sans-serif;font-weight:700;" title="تعديل عدد أيام الشهر">30</button>
                     <button type="button" onclick="showHijriOverrideDialog()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:2px 8px;font-size:0.7em;cursor:pointer;color:var(--text-muted);" title="تعديل بداية الشهر الهجري">⚙️</button>
                 </div>
 
@@ -4088,6 +4089,13 @@
         // Get the number of days in a Hijri month
         // Strategy: find Gregorian dates for day 1 of this month and day 1 of next month, count difference
         function getHijriDaysInMonth(hYear, hMonth) {
+            // Check direct days-count override first (user said 29 or 30)
+            var daysOverrideKey = 'salah_hijri_days_' + hYear + '_' + hMonth;
+            var daysOverride = localStorage.getItem(daysOverrideKey);
+            if (daysOverride) {
+                return parseInt(daysOverride);
+            }
+
             var overrides = getHijriOverrides();
             var key = hYear + '_' + hMonth;
             var nextMonth = hMonth === 12 ? 1 : hMonth + 1;
@@ -4101,11 +4109,28 @@
                 return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
             }
 
-            // Otherwise compute using Intl
-            var startG = hijriToGregorianDay1(hYear, hMonth);
-            var endG = hijriToGregorianDay1(nextYear, nextMonth);
-            var diff = Math.round((endG - startG) / (1000 * 60 * 60 * 24));
-            return diff > 0 ? diff : 30; // fallback
+            // Direct check: does day 30 exist in this Hijri month?
+            // Get Gregorian date for day 1, then check day 30
+            try {
+                var day1G = hijriToGregorianDay1(hYear, hMonth);
+                // Day 30 would be 29 days after day 1
+                var day30G = new Date(day1G.getTime() + 29 * 86400000);
+                var h30 = gregorianToHijri(day30G);
+                
+                // If day 30's Hijri month is still the same → 30 days
+                // If day 30's Hijri month changed → 29 days
+                if (h30.year === hYear && h30.month === hMonth) {
+                    return 30;
+                } else {
+                    return 29;
+                }
+            } catch(e) {
+                // Fallback to difference method
+                var startG = hijriToGregorianDay1(hYear, hMonth);
+                var endG = hijriToGregorianDay1(nextYear, nextMonth);
+                var diff = Math.round((endG - startG) / (1000 * 60 * 60 * 24));
+                return diff > 0 ? diff : 30;
+            }
         }
 
         // Cache for hijriToGregorianDay1 results
@@ -4926,6 +4951,9 @@
                     headerEl.textContent = formatHijriMonthHeader(currentHijriYear, currentHijriMonth);
                 }
             }
+            
+            // Update month days button
+            updateMonthDaysButton();
             
             loadAllData(type);
             renderTrackerMonth(type);
@@ -7841,7 +7869,7 @@
             });
         }
 
-        // Reverse geocode coordinates to city name
+        // Reverse geocode coordinates to city name + country code
         async function reverseGeocode(lat, lng) {
             try {
                 // Check cache
@@ -7850,7 +7878,7 @@
                     var data = JSON.parse(cached);
                     // Same location within ~5km? reuse
                     if (Math.abs(data.lat - lat) < 0.05 && Math.abs(data.lng - lng) < 0.05) {
-                        return data.city;
+                        return { city: data.city, countryCode: data.countryCode || '' };
                     }
                 }
                 
@@ -7859,21 +7887,69 @@
                 var json = await response.json();
                 
                 var city = '';
+                var countryCode = '';
                 if (json && json.address) {
                     city = json.address.city || json.address.town || json.address.village || json.address.state || '';
+                    countryCode = (json.address.country_code || '').toUpperCase();
                     if (json.address.country) {
                         city = city ? (city + '، ' + json.address.country) : json.address.country;
                     }
                 }
                 
                 if (city) {
-                    localStorage.setItem('salah_city_name', JSON.stringify({ lat: lat, lng: lng, city: city }));
+                    localStorage.setItem('salah_city_name', JSON.stringify({ lat: lat, lng: lng, city: city, countryCode: countryCode }));
                 }
-                return city;
+                return { city: city, countryCode: countryCode };
             } catch(e) {
                 console.log('Reverse geocode error:', e);
-                return '';
+                return { city: '', countryCode: '' };
             }
+        }
+
+        // Auto-detect prayer calculation method based on country
+        // https://aladhan.com/calculation-methods
+        function getPrayerMethod(countryCode) {
+            var cc = (countryCode || '').toUpperCase();
+            
+            // Egypt → Egyptian General Authority of Survey (Fajr 19.5°, Isha 17.5°)
+            if (cc === 'EG') return 5;
+            
+            // Saudi Arabia, Bahrain → Umm al-Qura (Fajr 18.5°, Isha 90min)
+            if (cc === 'SA' || cc === 'BH') return 4;
+            
+            // Kuwait → Kuwait method
+            if (cc === 'KW') return 9;
+            
+            // Qatar → Qatar method
+            if (cc === 'QA') return 10;
+            
+            // UAE, Oman, Yemen → Gulf Region
+            if (cc === 'AE' || cc === 'OM' || cc === 'YE') return 8;
+            
+            // Turkey → Diyanet
+            if (cc === 'TR') return 13;
+            
+            // Jordan, Palestine, Syria, Iraq, Libya, Sudan, Algeria, Morocco, Tunisia, Lebanon
+            // → Muslim World League (Fajr 18°, Isha 17°)
+            if (['JO','PS','SY','IQ','LY','SD','DZ','MA','TN','LB'].indexOf(cc) >= 0) return 3;
+            
+            // Pakistan, Afghanistan, Bangladesh → Karachi
+            if (cc === 'PK' || cc === 'AF' || cc === 'BD') return 1;
+            
+            // Singapore, Malaysia, Indonesia → Singapore
+            if (cc === 'SG' || cc === 'MY' || cc === 'ID') return 11;
+            
+            // France → UOIF
+            if (cc === 'FR') return 12;
+            
+            // Russia → Spiritual Admin of Muslims of Russia
+            if (cc === 'RU') return 14;
+            
+            // North America → ISNA
+            if (cc === 'US' || cc === 'CA') return 2;
+            
+            // Default → Muslim World League
+            return 3;
         }
 
         async function fetchPrayerTimes(forceRefresh) {
@@ -7891,11 +7967,19 @@
                 var loc = await getUserLocation();
                 userLocation = loc;
                 
+                // Get city name and country code first
+                var geoResult = await reverseGeocode(loc.lat, loc.lng);
+                var countryCode = geoResult.countryCode || '';
+                var cityName = geoResult.city || '';
+                
+                // Auto-detect calculation method based on country
+                var method = getPrayerMethod(countryCode);
+                
                 var today = new Date();
                 var dateStr = String(today.getDate()).padStart(2,'0') + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + today.getFullYear();
                 
-                // Aladhan API - Method 4 = Umm al-Qura
-                var url = 'https://api.aladhan.com/v1/timings/' + dateStr + '?latitude=' + loc.lat + '&longitude=' + loc.lng + '&method=4';
+                // Aladhan API with auto-detected method
+                var url = 'https://api.aladhan.com/v1/timings/' + dateStr + '?latitude=' + loc.lat + '&longitude=' + loc.lng + '&method=' + method;
                 
                 var response = await fetch(url);
                 var json = await response.json();
@@ -7903,8 +7987,7 @@
                 if (json.code === 200 && json.data && json.data.timings) {
                     var timings = json.data.timings;
                     
-                    // Get real city name via reverse geocoding
-                    var cityName = await reverseGeocode(loc.lat, loc.lng);
+                    var methodName = json.data.meta && json.data.meta.method ? json.data.meta.method.name : '';
                     
                     prayerTimesData = {
                         date: today.toISOString().split('T')[0],
@@ -7917,6 +8000,9 @@
                             isha: timings.Isha
                         },
                         location: cityName || (json.data.meta ? json.data.meta.timezone : ''),
+                        method: method,
+                        methodName: methodName,
+                        countryCode: countryCode,
                         lat: loc.lat,
                         lng: loc.lng
                     };
@@ -8067,6 +8153,8 @@
         function refreshPrayerTimes() {
             localStorage.removeItem('salah_city_name');
             localStorage.removeItem('salah_user_location');
+            localStorage.removeItem('salah_prayer_times');
+            prayerTimesData = null;
             fetchPrayerTimes(true);
             showToast(currentLang === 'ar' ? 'جاري تحديث المواقيت والموقع...' : 'Refreshing times & location...', 'info');
         }
@@ -8349,6 +8437,56 @@
 
         window.togglePrayerNotifications = togglePrayerNotifications;
         window.refreshPrayerTimes = refreshPrayerTimes;
+
+        // ==================== MONTH DAYS TOGGLE (29/30) ====================
+        function toggleMonthDays() {
+            var hYear = currentHijriYear;
+            var hMonth = currentHijriMonth;
+            var daysKey = 'salah_hijri_days_' + hYear + '_' + hMonth;
+            
+            var currentDays = getHijriDaysInMonth(hYear, hMonth);
+            var newDays = currentDays === 30 ? 29 : 30;
+            
+            localStorage.setItem(daysKey, String(newDays));
+            
+            // Clear day 30 data if switching to 29
+            if (newDays === 29) {
+                // Remove any prayer data marked on day 30
+                ['fard', 'sunnah'].forEach(function(type) {
+                    var key = getStorageKey(type, hMonth, hYear);
+                    var stored = localStorage.getItem(key);
+                    if (stored) {
+                        var data = JSON.parse(stored);
+                        var changed = false;
+                        Object.keys(data).forEach(function(prayerId) {
+                            if (data[prayerId] && data[prayerId]['30']) {
+                                delete data[prayerId]['30'];
+                                changed = true;
+                            }
+                        });
+                        if (changed) localStorage.setItem(key, JSON.stringify(data));
+                    }
+                });
+            }
+            
+            // Refresh views
+            _hijriDay1Cache = {};
+            updateTrackerView(currentSection === 'sunnah' ? 'sunnah' : 'fard');
+            
+            var monthName = getHijriMonthName(hMonth - 1);
+            showToast(monthName + ' ' + hYear + ': ' + newDays + ' ' + (currentLang === 'ar' ? 'يوم' : 'days'), 'success');
+        }
+
+        function updateMonthDaysButton() {
+            var btn = document.getElementById('monthDaysToggleBtn');
+            if (!btn) return;
+            var days = getHijriDaysInMonth(currentHijriYear, currentHijriMonth);
+            btn.textContent = days;
+            btn.style.background = localStorage.getItem('salah_hijri_days_' + currentHijriYear + '_' + currentHijriMonth) 
+                ? 'rgba(201,162,39,0.25)' : 'var(--primary-light)';
+        }
+
+        window.toggleMonthDays = toggleMonthDays;
 
         // ==================== HIJRI OVERRIDE DIALOG ====================
         function showHijriOverrideDialog() {
