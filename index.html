@@ -5562,34 +5562,46 @@
             let bestStreak = 0;
             let tempStreak = 0;
             
+            // For FARD: streak is based on CONGREGATION (🕌) only
+            // For SUNNAH: streak is based on prayer completion (✅)
+            const useCongregation = (type === 'fard');
+            
             // Use noon to avoid DST boundary issues
             let checkDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
             
             var todayH = gregorianToHijri(checkDate);
-            var todayHMonth = todayH.month;
-            var todayHDay = todayH.day;
-            var todayHYear = todayH.year;
             
-            // Helper: check if a Hijri date has prayer data (checked/congregation/qada all count)
+            // Helper: check if a Hijri date has the relevant data
             function isDayChecked(hYear, hMonth, hDay) {
-                // Validate day is within month bounds — reject ghost days
+                // Validate day is within month bounds
                 var maxDays = getHijriDaysInMonth(hYear, hMonth);
                 if (hDay > maxDays || hDay < 1) return false;
                 
-                var key = getStorageKey(type, hMonth, hYear);
-                var stored = localStorage.getItem(key);
-                if (stored) {
-                    var parsed = JSON.parse(stored);
-                    if (parsed[prayerId] && (parsed[prayerId][String(hDay)] || parsed[prayerId][hDay])) return true;
+                if (useCongregation) {
+                    // Check congregation data
+                    var congKey = getCongregationKey(hYear, hMonth);
+                    var stored = localStorage.getItem(congKey);
+                    if (stored) {
+                        var parsed = JSON.parse(stored);
+                        if (parsed[prayerId] && (parsed[prayerId][String(hDay)] || parsed[prayerId][hDay])) return true;
+                    }
+                    return false;
+                } else {
+                    // Check tracker data
+                    var key = getStorageKey(type, hMonth, hYear);
+                    var stored = localStorage.getItem(key);
+                    if (stored) {
+                        var parsed = JSON.parse(stored);
+                        if (parsed[prayerId] && (parsed[prayerId][String(hDay)] || parsed[prayerId][hDay])) return true;
+                    }
+                    return false;
                 }
-                return false;
             }
             
             // Check if today is already marked
-            let startFromToday = isDayChecked(todayHYear, todayHMonth, todayHDay);
+            let startFromToday = isDayChecked(todayH.year, todayH.month, todayH.day);
             
             if (!startFromToday) {
-                // Go back one day
                 checkDate = new Date(checkDate.getTime() - 86400000);
             }
             
@@ -5632,6 +5644,7 @@
             grid.innerHTML = '';
             
             const prayers = getPrayersArray(type);
+            const isFard = (type === 'fard');
             
             prayers.forEach(prayer => {
                 const streak = calculateStreak(type, prayer.id);
@@ -5645,14 +5658,22 @@
                 
                 const isOnFire = streak.current >= 3;
                 
+                // Fard: show congregation streak, Sunnah: show completion streak
+                var streakLabel = isFard 
+                    ? (currentLang === 'ar' ? 'أيام جماعة متتابعة 🕌' : 'Consecutive congregation days 🕌')
+                    : t("consecutive_days");
+                var bestLabel = isFard
+                    ? (currentLang === 'ar' ? '🏆 أفضل سلسلة جماعة:' : '🏆 Best congregation streak:')
+                    : t("best_streak");
+                
                 card.innerHTML = `
                     <div class="streak-prayer-name">
                         <span>${prayer.icon}</span>
                         <span>${getPrayerName(prayer.id)}</span>
                     </div>
                     <div class="streak-value ${isOnFire ? 'fire' : ''}">${fireEmoji} ${streak.current}</div>
-                    <div class="streak-label">${t("consecutive_days")}</div>
-                    <div class="streak-best">${t("best_streak")} ${streak.best} ${t("days_word")}</div>
+                    <div class="streak-label">${streakLabel}</div>
+                    <div class="streak-best">${bestLabel} ${streak.best} ${t("days_word")}</div>
                 `;
                 
                 grid.appendChild(card);
