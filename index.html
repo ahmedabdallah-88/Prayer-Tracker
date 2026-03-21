@@ -5391,6 +5391,38 @@
                     const imported = JSON.parse(e.target.result);
                     
                     if (!activeProfile) {
+                        // Check if imported data contains a profile — offer to adopt it
+                        if (imported['_profile']) {
+                            var ip = imported['_profile'];
+                            if (await showConfirm(
+                                (currentLang === 'ar' 
+                                    ? 'تم العثور على ملف شخصي في البيانات:\n\n' + ip.name + ' (' + (ip.gender === 'female' ? 'أنثى' : 'ذكر') + ', ' + ip.age + ' سنة)\n\nهل تريد استخدام هذا الملف الشخصي؟'
+                                    : 'Profile found in data:\n\n' + ip.name + ' (' + ip.gender + ', ' + ip.age + ' yrs)\n\nAdopt this profile?')
+                            )) {
+                                // Create and adopt the profile
+                                var newId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                                var newProfile = { id: newId, name: ip.name, age: ip.age, gender: ip.gender };
+                                var profiles = getProfiles();
+                                profiles.push(newProfile);
+                                saveProfiles(profiles);
+                                
+                                // Import data under new profile ID
+                                importAndConvertToHijri(imported, newId);
+                                
+                                if (imported['_theme']) {
+                                    localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                                    loadTheme();
+                                }
+                                
+                                // Select this profile and fully reload
+                                selectProfile(newId);
+                                showToast(t('import_success'), 'success');
+                                return;
+                            }
+                        }
+                        
+                        // No profile to adopt — store as pending
+                        localStorage.setItem('_pending_import', e.target.result);
                         showToast(t('select_profile_first'), 'warning');
                         return;
                     }
@@ -5407,18 +5439,41 @@
                             loadTheme();
                         }
                         
-                        // Reload everything
+                        // Full reload: reset state to today's Hijri date
                         var todayH = getTodayHijri();
                         currentHijriMonth = todayH.month;
                         currentHijriYear = todayH.year;
                         currentMonth = currentHijriMonth;
                         currentYear = currentHijriYear;
+                        
+                        // Update ALL month/year selects
+                        document.getElementById('fardTrackerMonthSelect').value = currentHijriMonth;
+                        document.getElementById('fardTrackerYearInput').value = currentHijriYear;
+                        document.getElementById('sunnahTrackerMonthSelect').value = currentHijriMonth;
+                        document.getElementById('sunnahTrackerYearInput').value = currentHijriYear;
+                        document.getElementById('fardDashboardYear').value = currentHijriYear;
+                        document.getElementById('fardYearlyYear').value = currentHijriYear;
+                        document.getElementById('sunnahDashboardYear').value = currentHijriYear;
+                        document.getElementById('sunnahYearlyYear').value = currentHijriYear;
+                        
+                        // Reload data
                         loadAllData('fard');
                         loadAllData('sunnah');
                         
-                        // Update visible view
-                        if (currentSection === 'fard' || currentSection === 'sunnah') {
-                            updateTrackerView(currentSection);
+                        // Force re-render of ALL views
+                        updateTrackerView('fard');
+                        updateTrackerView('sunnah');
+                        renderStreaks('fard');
+                        renderStreaks('sunnah');
+                        
+                        // If dashboard is visible, update it
+                        var fardDash = document.getElementById('fardDashboardView');
+                        if (fardDash && fardDash.classList.contains('active')) {
+                            updateDashboard('fard');
+                        }
+                        var sunnahDash = document.getElementById('sunnahDashboardView');
+                        if (sunnahDash && sunnahDash.classList.contains('active')) {
+                            updateDashboard('sunnah');
                         }
                         
                         showToast(`${t('import_success')} (${importCount})`, 'success');
@@ -5487,10 +5542,6 @@
             let bestStreak = 0;
             let tempStreak = 0;
             
-            // For fard: streak is based on CONGREGATION only
-            // For sunnah: streak is based on prayer completion
-            const isCongStreak = (type === 'fard');
-            
             // Use noon to avoid DST boundary issues
             let checkDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
             
@@ -5499,27 +5550,15 @@
             var todayHDay = todayH.day;
             var todayHYear = todayH.year;
             
-            // Helper: check if a Hijri date has data
+            // Helper: check if a Hijri date has prayer data (checked/congregation/qada all count)
             function isDayChecked(hYear, hMonth, hDay) {
-                if (isCongStreak) {
-                    var congKey = getCongregationKey(hYear, hMonth);
-                    var stored = localStorage.getItem(congKey);
-                    if (stored) {
-                        var parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][String(hDay)]) return true;
-                        if (parsed[prayerId] && parsed[prayerId][hDay]) return true;
-                    }
-                    return false;
-                } else {
-                    var key = getStorageKey(type, hMonth, hYear);
-                    var stored = localStorage.getItem(key);
-                    if (stored) {
-                        var parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][String(hDay)]) return true;
-                        if (parsed[prayerId] && parsed[prayerId][hDay]) return true;
-                    }
-                    return false;
+                var key = getStorageKey(type, hMonth, hYear);
+                var stored = localStorage.getItem(key);
+                if (stored) {
+                    var parsed = JSON.parse(stored);
+                    if (parsed[prayerId] && (parsed[prayerId][String(hDay)] || parsed[prayerId][hDay])) return true;
                 }
+                return false;
             }
             
             // Check if today is already marked
@@ -7287,18 +7326,50 @@
             if (!file) return;
             
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
                     
-                    // Store pending import data
-                        {
-                        // Store temporarily — will be remapped when profile is created
-                        localStorage.setItem('_pending_import', e.target.result);
-                        showToast(t('pending_import_saved'), 'success');
+                    // Check if imported data contains a profile
+                    if (imported['_profile']) {
+                        var ip = imported['_profile'];
+                        if (await showConfirm(
+                            (currentLang === 'ar'
+                                ? 'تم العثور على ملف شخصي:\n\n👤 ' + ip.name + '\n' + (ip.gender === 'female' ? '👩 أنثى' : '👨 ذكر') + ' · ' + ip.age + ' سنة\n\nهل تريد استخدامه مباشرة؟'
+                                : 'Profile found:\n\n👤 ' + ip.name + '\n' + ip.gender + ' · ' + ip.age + ' yrs\n\nAdopt this profile?')
+                        )) {
+                            // Create the profile
+                            var newId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                            var newProfile = { id: newId, name: ip.name, age: ip.age, gender: ip.gender };
+                            var profiles = getProfiles();
+                            profiles.push(newProfile);
+                            saveProfiles(profiles);
+                            
+                            // Import all data under new profile ID
+                            importAndConvertToHijri(imported, newId);
+                            
+                            if (imported['_theme']) {
+                                localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                                loadTheme();
+                            }
+                            
+                            // Select and activate profile
+                            selectProfile(newId);
+                            showToast(currentLang === 'ar' 
+                                ? '✅ تم استيراد البيانات وتفعيل الملف الشخصي: ' + ip.name 
+                                : '✅ Data imported & profile activated: ' + ip.name, 'success', 4000);
+                            return;
+                        }
                     }
+                    
+                    // No profile or user declined — store as pending import
+                    localStorage.setItem('_pending_import', e.target.result);
+                    showToast(t('pending_import_saved'), 'success');
+                    // Refresh profile list to show create button
+                    renderProfilesList();
                 } catch (error) {
                     showToast(t('file_error'), 'error');
+                    console.error('Import on profile error:', error);
                 }
             };
             reader.readAsText(file);
