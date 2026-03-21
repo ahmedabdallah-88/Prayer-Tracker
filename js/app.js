@@ -153,15 +153,43 @@ document.addEventListener('visibilitychange', function() {
 window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     state.deferredPrompt = e;
+    window._pwaInstallPrompt = e;
     if (!localStorage.getItem('pwa_install_dismissed')) {
         var banner = document.createElement('div');
         banner.id = 'installBanner';
-        banner.innerHTML = '<div style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid var(--accent);direction:rtl;">' +
-            '<div style="color:white;font-family:\'Cairo\',sans-serif;flex:1;">' +
-            '<div style="font-size:1.1em;font-weight:700;color:var(--accent);">\ud83d\udd4c \u062a\u062b\u0628\u064a\u062a \u0627\u0644\u062a\u0637\u0628\u064a\u0642</div>' +
-            '<div style="font-size:0.85em;opacity:0.9;margin-top:4px;">\u0623\u0636\u0641 \u0645\u062a\u062a\u0628\u0639 \u0627\u0644\u0635\u0644\u0627\u0629 \u0625\u0644\u0649 \u0634\u0627\u0634\u062a\u0643 \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629</div></div>' +
-            '<button onclick="state.deferredPrompt.prompt();state.deferredPrompt.userChoice.then(function(){state.deferredPrompt=null;document.getElementById(\'installBanner\').remove();})" style="background:var(--accent);color:var(--primary-dark);border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:1em;cursor:pointer;font-family:\'Cairo\',sans-serif;">\u062a\u062b\u0628\u064a\u062a</button>' +
-            '<button onclick="document.getElementById(\'installBanner\').remove();localStorage.setItem(\'pwa_install_dismissed\',\'true\');" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.5em;cursor:pointer;padding:5px 8px;">\u2715</button></div>';
+        banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid var(--accent);direction:rtl;';
+
+        var textDiv = document.createElement('div');
+        textDiv.style.cssText = 'color:white;font-family:Cairo,sans-serif;flex:1;';
+        textDiv.innerHTML = '<div style="font-size:1.1em;font-weight:700;color:var(--accent);">🕌 تثبيت التطبيق</div>' +
+            '<div style="font-size:0.85em;opacity:0.9;margin-top:4px;">أضف متتبع الصلاة إلى شاشتك الرئيسية</div>';
+
+        var installBtn = document.createElement('button');
+        installBtn.textContent = 'تثبيت';
+        installBtn.style.cssText = 'background:var(--accent);color:var(--primary-dark);border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:1em;cursor:pointer;font-family:Cairo,sans-serif;';
+        installBtn.addEventListener('click', function() {
+            if (state.deferredPrompt) {
+                state.deferredPrompt.prompt();
+                state.deferredPrompt.userChoice.then(function() {
+                    state.deferredPrompt = null;
+                    var b = document.getElementById('installBanner');
+                    if (b) b.remove();
+                });
+            }
+        });
+
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = '\u2715';
+        closeBtn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.5em;cursor:pointer;padding:5px 8px;';
+        closeBtn.addEventListener('click', function() {
+            var b = document.getElementById('installBanner');
+            if (b) b.remove();
+            localStorage.setItem('pwa_install_dismissed', 'true');
+        });
+
+        banner.appendChild(textDiv);
+        banner.appendChild(installBtn);
+        banner.appendChild(closeBtn);
         document.body.appendChild(banner);
     }
 });
