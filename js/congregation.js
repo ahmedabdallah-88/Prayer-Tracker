@@ -2,6 +2,9 @@
 // Congregation tracking, stats, and advanced charts
 import { state, fardPrayers } from './state.js';
 import { getHijriMonthNames, getHijriDaysInMonth, gregorianToHijri, hijriToGregorian } from './hijri-calendar.js';
+import { getProfilePrefix, getPrayersArray, getDataObject, getPrayerName } from './prayer-data.js';
+import { showToast } from './ui-utils.js';
+import { t } from './i18n.js';
 
 // ==================== CONGREGATION DATA ====================
 
@@ -26,16 +29,16 @@ export function isCongregation(congData, prayerId, day) {
 // ==================== CONGREGATION TOGGLE ====================
 
 export function toggleCongregation(prayerId, day) {
-    const data = getCongregationData(currentYear, currentMonth);
+    const data = getCongregationData(state.currentYear, state.currentMonth);
     if (!data[prayerId]) data[prayerId] = {};
     data[prayerId][day] = !data[prayerId][day];
     if (!data[prayerId][day]) delete data[prayerId][day];
     // Clean up empty prayer entries
     if (Object.keys(data[prayerId]).length === 0) delete data[prayerId];
-    saveCongregationData(currentYear, currentMonth, data);
-    renderTrackerMonth('fard');
+    saveCongregationData(state.currentYear, state.currentMonth, data);
+    if (window.renderTrackerMonth) window.renderTrackerMonth('fard');
     updateCongregationStats();
-    renderStreaks('fard');
+    if (window.renderStreaks) window.renderStreaks('fard');
 }
 
 // ==================== CONGREGATION STATS ====================
@@ -44,14 +47,14 @@ export function updateCongregationStats() {
     const container = document.getElementById('fardCongStats');
     if (!container) return;
 
-    const congData = getCongregationData(currentYear, currentMonth);
+    const congData = getCongregationData(state.currentYear, state.currentMonth);
     const dataObj = getDataObject('fard');
     const prayers = getPrayersArray('fard');
 
     let totalCompleted = 0, totalCong = 0;
     prayers.forEach(prayer => {
-        if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
-            const completedDays = Object.keys(dataObj[currentMonth][prayer.id]).filter(d => dataObj[currentMonth][prayer.id][d]);
+        if (dataObj[state.currentMonth] && dataObj[state.currentMonth][prayer.id]) {
+            const completedDays = Object.keys(dataObj[state.currentMonth][prayer.id]).filter(d => dataObj[state.currentMonth][prayer.id][d]);
             totalCompleted += completedDays.length;
             completedDays.forEach(d => {
                 if (isCongregation(congData, prayer.id, parseInt(d))) totalCong++;
@@ -81,7 +84,8 @@ export function renderWeeklyPattern() {
 
     const prayers = getPrayersArray('fard');
     const dataObj = getDataObject('fard');
-    const dayNames = T['day_names'][currentLang];
+    var T = window.T || {};
+    const dayNames = T['day_names'] ? T['day_names'][state.currentLang] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
     // Count CONGREGATION by day of week for each prayer
     const weekData = {};
@@ -89,11 +93,11 @@ export function renderWeeklyPattern() {
     const weekTotals = [0,0,0,0,0,0,0];
 
     for (let month = 1; month <= 12; month++) {
-        const congData = getCongregationData(currentHijriYear, month);
-        const daysInMonth = getHijriDaysInMonth(currentHijriYear, month);
+        const congData = getCongregationData(state.currentHijriYear, month);
+        const daysInMonth = getHijriDaysInMonth(state.currentHijriYear, month);
         for (let day = 1; day <= daysInMonth; day++) {
             // Convert Hijri date to Gregorian to get day of week
-            const date = hijriToGregorian(currentHijriYear, month, day);
+            const date = hijriToGregorian(state.currentHijriYear, month, day);
             const dow = date.getDay();
             weekTotals[dow]++;
             prayers.forEach(p => {
@@ -112,8 +116,8 @@ export function renderWeeklyPattern() {
         borderWidth: 2
     }));
 
-    if (charts.fardWeekly) charts.fardWeekly.destroy();
-    charts.fardWeekly = new Chart(ctx, {
+    if (state.charts.fardWeekly) state.charts.fardWeekly.destroy();
+    state.charts.fardWeekly = new Chart(ctx, {
         type: 'bar',
         data: { labels: dayNames, datasets },
         options: {
@@ -143,7 +147,7 @@ export function renderYearlyHeatmap() {
     const labels = [];
 
     for (let month = 1; month <= 12; month++) {
-        const congData = getCongregationData(currentHijriYear, month);
+        const congData = getCongregationData(state.currentHijriYear, month);
         let totalCompleted = 0, totalCong = 0;
 
         prayers.forEach(p => {
@@ -169,8 +173,8 @@ export function renderYearlyHeatmap() {
         return '#e5e7eb';
     });
 
-    if (charts.fardHeatmap) charts.fardHeatmap.destroy();
-    charts.fardHeatmap = new Chart(ctx, {
+    if (state.charts.fardHeatmap) state.charts.fardHeatmap.destroy();
+    state.charts.fardHeatmap = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,

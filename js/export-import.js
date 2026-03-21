@@ -2,6 +2,11 @@
 import { state } from './state.js';
 import { gregorianToHijri, getTodayHijri } from './hijri-calendar.js';
 import { getProfilePrefix } from './profiles.js';
+import { showToast, showConfirm } from './ui-utils.js';
+import { t } from './i18n.js';
+import { loadAllData } from './prayer-data.js';
+import { updateTrackerView } from './tracker.js';
+import { loadTheme } from './theme.js';
 
 // ==================== EXPORT ====================
 

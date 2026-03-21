@@ -2,6 +2,10 @@
 // Ramadan fasting, voluntary fasting, and fasting dashboard
 import { state, fardPrayers, sunnahPrayers } from './state.js';
 import { getHijriMonthNames, getHijriMonthName, getHijriDaysInMonth, gregorianToHijri, getTodayHijri, hijriToGregorian, getGregorianSpanForHijriMonth } from './hijri-calendar.js';
+import { getProfilePrefix, getDaysInMonth, isFutureDate } from './prayer-data.js';
+import { showToast, showConfirm, hapticFeedback } from './ui-utils.js';
+import { t } from './i18n.js';
+import { getExemptDays } from './exempt-days.js';
 
 // ==================== RAMADAN FASTING ====================
 
@@ -34,7 +38,7 @@ export function switchFastingView(view) {
     } else if (view === 'dashboard') {
         document.getElementById('fastingDashboardView').classList.add('active');
         try { document.querySelector('#fastingSection .toggle-btn:nth-child(3)').classList.add('active'); } catch(e) {}
-        document.getElementById('fastingDashboardYear').value = currentYear;
+        document.getElementById('fastingDashboardYear').value = state.currentYear;
         updateFastingDashboard();
     }
 }
@@ -56,28 +60,29 @@ export function saveVolFastingData(year, month, data) {
 }
 
 export function updateVoluntaryFasting() {
-    fastingMonth = parseInt(document.getElementById('fastingMonthSelect').value);
-    fastingYear = parseInt(document.getElementById('fastingYearVoluntary').value);
-    const daysInMonth = getDaysInMonth(fastingMonth, fastingYear);
-    const data = getVolFastingData(fastingYear, fastingMonth);
-    const isFemale = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
-    const exemptData = isFemale ? getExemptDays(fastingYear, fastingMonth) : {};
+    state.fastingMonth = parseInt(document.getElementById('fastingMonthSelect').value);
+    state.fastingYear = parseInt(document.getElementById('fastingYearVoluntary').value);
+    const daysInMonth = getHijriDaysInMonth(state.fastingYear, state.fastingMonth);
+    const data = getVolFastingData(state.fastingYear, state.fastingMonth);
+    const isFemale = state.activeProfile && state.activeProfile.gender === 'female' && state.activeProfile.age >= 12;
+    const exemptData = isFemale ? getExemptDays(state.fastingYear, state.fastingMonth) : {};
 
     const grid = document.getElementById('voluntaryFastingGrid');
     grid.innerHTML = '';
 
     let fasted = 0, exemptCount = 0;
+    var createDualDayNum = window.createDualDayNum;
 
     for (let day = 1; day <= daysInMonth; day++) {
         const dayBox = document.createElement('div');
         dayBox.className = 'day-box';
 
-        if (isFutureDate(day, fastingMonth, fastingYear)) {
-            dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
+        if (isFutureDate(day, state.fastingMonth, state.fastingYear)) {
+            if (createDualDayNum) dayBox.appendChild(createDualDayNum(day, state.fastingYear, state.fastingMonth));
             dayBox.classList.add('disabled');
             dayBox.style.opacity = '0.3';
-        } else if (isFemale && fastingExemptModeOn) {
-            dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
+        } else if (isFemale && state.fastingExemptModeOn) {
+            if (createDualDayNum) dayBox.appendChild(createDualDayNum(day, state.fastingYear, state.fastingMonth));
 
             // Check if any prayer is exempt on this day (reuse prayer exempt data)
             const dayExempt = exemptData[day] && Object.values(exemptData[day]).some(v => v);
@@ -88,7 +93,7 @@ export function updateVoluntaryFasting() {
             dayBox.style.cursor = 'default';
             dayBox.title = t('exempt_linked_prayer');
         } else {
-            dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
+            if (createDualDayNum) dayBox.appendChild(createDualDayNum(day, state.fastingYear, state.fastingMonth));
 
             // Check if exempt day for female
             const dayExempt = isFemale && exemptData[day] && Object.values(exemptData[day]).some(v => v);
@@ -102,11 +107,11 @@ export function updateVoluntaryFasting() {
 
             if (!dayExempt) {
                 dayBox.onclick = () => {
-                    const d = getVolFastingData(fastingYear, fastingMonth);
+                    const d = getVolFastingData(state.fastingYear, state.fastingMonth);
                     d[day] = !d[day];
                     hapticFeedback(d[day] ? 'success' : 'light');
                     if (!d[day]) delete d[day];
-                    saveVolFastingData(fastingYear, fastingMonth, d);
+                    saveVolFastingData(state.fastingYear, state.fastingMonth, d);
                     updateVoluntaryFasting();
                 };
             }
@@ -124,28 +129,28 @@ export function updateVoluntaryFasting() {
 }
 
 export function changeFastingMonth(delta) {
-    fastingMonth = parseInt(document.getElementById('fastingMonthSelect').value);
-    fastingYear = parseInt(document.getElementById('fastingYearVoluntary').value);
-    fastingMonth += delta;
-    if (fastingMonth > 12) { fastingMonth = 1; fastingYear++; }
-    else if (fastingMonth < 1) { fastingMonth = 12; fastingYear--; }
-    document.getElementById('fastingMonthSelect').value = fastingMonth;
-    document.getElementById('fastingYearVoluntary').value = fastingYear;
+    state.fastingMonth = parseInt(document.getElementById('fastingMonthSelect').value);
+    state.fastingYear = parseInt(document.getElementById('fastingYearVoluntary').value);
+    state.fastingMonth += delta;
+    if (state.fastingMonth > 12) { state.fastingMonth = 1; state.fastingYear++; }
+    else if (state.fastingMonth < 1) { state.fastingMonth = 12; state.fastingYear--; }
+    document.getElementById('fastingMonthSelect').value = state.fastingMonth;
+    document.getElementById('fastingYearVoluntary').value = state.fastingYear;
     updateVoluntaryFasting();
 }
 
 export async function resetVoluntaryFasting() {
     if (!await showConfirm(t('confirm_clear'))) return;
-    fastingMonth = parseInt(document.getElementById('fastingMonthSelect').value);
-    fastingYear = parseInt(document.getElementById('fastingYearVoluntary').value);
-    localStorage.removeItem(getVolFastingKey(fastingYear, fastingMonth));
+    state.fastingMonth = parseInt(document.getElementById('fastingMonthSelect').value);
+    state.fastingYear = parseInt(document.getElementById('fastingYearVoluntary').value);
+    localStorage.removeItem(getVolFastingKey(state.fastingYear, state.fastingMonth));
     updateVoluntaryFasting();
 }
 
 // ==================== FASTING DASHBOARD ====================
 
 export function updateFastingDashboard() {
-    const year = parseInt(document.getElementById('fastingDashboardYear').value) || currentHijriYear;
+    const year = parseInt(document.getElementById('fastingDashboardYear').value) || state.currentHijriYear;
 
     let totalVol = 0;
     let bestMonth = { month: 0, days: 0 };
@@ -175,10 +180,10 @@ export function updateFastingDashboard() {
     document.getElementById('fastDashRamadanRate').textContent = Math.round((ramadanFasted / ramadanDays) * 100) + '%';
 
     // Monthly chart
-    if (charts.fasting) charts.fasting.destroy();
+    if (state.charts.fasting) state.charts.fasting.destroy();
     const ctx = document.getElementById('fastingMonthlyChart');
     if (ctx) {
-        charts.fasting = new Chart(ctx, {
+        state.charts.fasting = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: getHijriMonthNames(),
@@ -204,7 +209,7 @@ export function updateFastingDashboard() {
 // ==================== RAMADAN VIEW ====================
 
 export function updateFastingView() {
-    const year = parseInt(document.getElementById('fastingYearInput').value) || currentHijriYear;
+    const year = parseInt(document.getElementById('fastingYearInput').value) || state.currentHijriYear;
     const data = getFastingData(year);
     const grid = document.getElementById('fastingGrid');
     grid.innerHTML = '';
@@ -219,12 +224,13 @@ export function updateFastingView() {
     }
 
     let fasted = 0, exempt = 0, missed = 0;
+    var createDualDayNum = window.createDualDayNum;
 
     for (let day = 1; day <= ramadanDays; day++) {
         const box = document.createElement('div');
         box.className = 'fasting-day-box';
 
-        box.appendChild(createDualDayNum(day, year, 9));
+        if (createDualDayNum) box.appendChild(createDualDayNum(day, year, 9));
 
         const status = data[day] || '';
 
@@ -239,7 +245,7 @@ export function updateFastingView() {
     document.getElementById('fastingDaysFasted').textContent = fasted;
     document.getElementById('fastingDaysExempt').textContent = exempt;
     document.getElementById('fastingDaysMissed').textContent = missed;
-    const isFemaleRamadan = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
+    const isFemaleRamadan = state.activeProfile && state.activeProfile.gender === 'female' && state.activeProfile.age >= 12;
     document.getElementById('fastingDaysOwed').textContent = isFemaleRamadan ? (exempt + missed) : missed;
     document.getElementById('fastingCounter').textContent = `${fasted} / ${ramadanDays}`;
 }
@@ -247,7 +253,7 @@ export function updateFastingView() {
 export function cycleFastingDay(year, day) {
     const data = getFastingData(year);
     const current = data[day] || '';
-    const isFemale = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
+    const isFemale = state.activeProfile && state.activeProfile.gender === 'female' && state.activeProfile.age >= 12;
 
     const cycle = isFemale
         ? { '': 'fasted', 'fasted': 'exempt', 'exempt': 'missed', 'missed': '' }
@@ -264,7 +270,7 @@ export function cycleFastingDay(year, day) {
 
 export async function resetFasting() {
     if (!await showConfirm(t('confirm_clear_fasting'))) return;
-    const year = parseInt(document.getElementById('fastingYearInput').value) || currentYear;
+    const year = parseInt(document.getElementById('fastingYearInput').value) || state.currentYear;
     localStorage.removeItem(getFastingKey(year));
     updateFastingView();
 }
