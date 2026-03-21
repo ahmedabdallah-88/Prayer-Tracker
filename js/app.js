@@ -5,7 +5,7 @@ import { state, fardPrayers, sunnahPrayers, monthNames } from './state.js';
 import { gregorianToHijri, getTodayHijri, getHijriDaysInMonth, getHijriMonthName } from './hijri-calendar.js';
 import { getPrayersArray, getDataObject, loadAllData, saveMonthData, getStorageKey, getPrayerName, getDaysInMonth, isFutureDate } from './prayer-data.js';
 import { switchSection, switchView } from './navigation.js';
-import { updateTrackerView, renderTrackerMonth, toggleDay, handleDayClick, updateTrackerStats, changeTrackerMonth, resetTrackerMonth, resetMonth, batchMarkPrayer, initSwipeHandlers, initDayBoxAnimation } from './tracker.js';
+import { updateTrackerView, renderTrackerMonth, toggleDay, handleDayClick, updateTrackerStats, changeTrackerMonth, resetTrackerMonth, resetMonth, batchMarkPrayer } from './tracker.js';
 import { updateDashboard, updateCharts, updateYearlyView, backToYearly } from './dashboard.js';
 import { calculateStreak, renderStreaks } from './streaks.js';
 import { switchFastingView, updateFastingView, updateVoluntaryFasting, changeFastingMonth, resetFasting, resetVoluntaryFasting, updateFastingDashboard } from './fasting.js';
@@ -18,7 +18,7 @@ import { setTheme, toggleThemeMenu, loadTheme } from './theme.js';
 import { fetchPrayerTimes, refreshPrayerTimes, startPrayerTimesMonitor } from './prayer-times.js';
 import { togglePrayerNotifications } from './notifications.js';
 import { renderQadaReport } from './qada.js';
-import { showToast, showConfirm, hapticFeedback, toggleMonthDays, showHijriOverrideDialog, setTrackerViewMode, changeWeek, scrollToUnmarkedPrayer, dismissReminder } from './ui-utils.js';
+import { showToast, showConfirm, hapticFeedback, toggleMonthDays, showHijriOverrideDialog, scrollToUnmarkedPrayer, dismissReminder, initSwipeHandlers, initDayBoxAnimation } from './ui-utils.js';
 import { switchTab, updateShellBar } from './fiori.js';
 import { registerServiceWorker, applyUpdate } from './pwa.js';
 
