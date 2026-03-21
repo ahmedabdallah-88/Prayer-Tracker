@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v41
-const CACHE_NAME = 'prayer-tracker-v41';
+// Prayer Tracker PWA — Service Worker v34
+const CACHE_NAME = 'prayer-tracker-v34';
 const ASSETS = [
     './',
     './index.html',
@@ -11,43 +11,12 @@ const ASSETS = [
     './icons/icon-152x152.png',
     './icons/icon-192x192.png',
     './icons/icon-384x384.png',
-    './icons/icon-512x512.png',
-    // CSS modules
-    './css/themes.css',
-    './css/base.css',
-    './css/components.css',
-    './css/profile.css',
-    './css/fiori.css',
-    './css/responsive.css',
-    './css/rtl.css',
-    // JS modules
-    './js/app.js',
-    './js/state.js',
-    './js/hijri-calendar.js',
-    './js/prayer-data.js',
-    './js/navigation.js',
-    './js/tracker.js',
-    './js/dashboard.js',
-    './js/streaks.js',
-    './js/fasting.js',
-    './js/congregation.js',
-    './js/exempt-days.js',
-    './js/profiles.js',
-    './js/export-import.js',
-    './js/i18n.js',
-    './js/theme.js',
-    './js/prayer-times.js',
-    './js/notifications.js',
-    './js/qada.js',
-    './js/advanced-charts.js',
-    './js/ui-utils.js',
-    './js/fiori.js',
-    './js/pwa.js'
+    './icons/icon-512x512.png'
 ];
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v41...');
+    console.log('[SW] Installing v34...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -57,7 +26,7 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v41...');
+    console.log('[SW] Activating v34...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
