@@ -67,7 +67,7 @@ export function calculateStreak(type, prayerId) {
     }
 
     // Calculate best streak (scan from Muharram 1 of current Hijri year)
-    var scanStartG = hijriToGregorianDay1(currentHijriYear, 1);
+    var scanStartG = hijriToGregorianDay1(state.currentHijriYear, 1);
     var todayNoon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
     let scanDate = new Date(scanStartG.getFullYear(), scanStartG.getMonth(), scanStartG.getDate(), 12, 0, 0);
 

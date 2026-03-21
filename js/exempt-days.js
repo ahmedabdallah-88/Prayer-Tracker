@@ -1,7 +1,9 @@
 // ==================== EXEMPT DAY MANAGEMENT MODULE ====================
 import { state, fardPrayers, sunnahPrayers } from './state.js';
 import { getHijriMonthName } from './hijri-calendar.js';
-import { getProfilePrefix } from './profiles.js';
+import { getProfilePrefix } from './prayer-data.js';
+import { showToast } from './ui-utils.js';
+import { t } from './i18n.js';
 
 // ==================== EXEMPT STORAGE ====================
 
@@ -39,7 +41,7 @@ export function saveExemptDays(year, month, data) {
 
 export function toggleExemptMode(type) {
     state.exemptMode[type] = document.getElementById(`${type}ExemptMode`).checked;
-    renderTrackerMonth(type);
+    if (window.renderTrackerMonth) window.renderTrackerMonth(type);
 }
 
 // ==================== EXEMPT PRAYER TOGGLING ====================
@@ -56,12 +58,9 @@ export function toggleExemptPrayer(prayerId, day) {
     }
 
     saveExemptDays(state.currentYear, state.currentMonth, exemptData);
-    renderTrackerMonth('fard');
-    renderTrackerMonth('sunnah');
-    updateTrackerStats('fard');
-    updateTrackerStats('sunnah');
-    renderStreaks('fard');
-    renderStreaks('sunnah');
+    if (window.renderTrackerMonth) { window.renderTrackerMonth('fard'); window.renderTrackerMonth('sunnah'); }
+    if (window.updateTrackerStats) { window.updateTrackerStats('fard'); window.updateTrackerStats('sunnah'); }
+    if (window.renderStreaks) { window.renderStreaks('fard'); window.renderStreaks('sunnah'); }
     updateExemptInfo('fard');
     updateExemptInfo('sunnah');
     savePeriodHistory();
