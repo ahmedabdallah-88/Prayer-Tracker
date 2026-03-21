@@ -14,9 +14,15 @@ export function exportData() {
     const allData = {};
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('salah_tracker_')) {
-            allData[key] = JSON.parse(localStorage.getItem(key));
+        if (key && key.startsWith('salah_')) {
+            try { allData[key] = JSON.parse(localStorage.getItem(key)); }
+            catch(e) { allData[key] = localStorage.getItem(key); }
         }
+    }
+
+    if (Object.keys(allData).length === 0) {
+        showToast(t('no_data'), 'warning');
+        return;
     }
 
     const dataStr = JSON.stringify(allData, null, 2);
@@ -24,9 +30,13 @@ export function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `salah_tracker_backup_${new Date().toISOString().split('T')[0]}.json`;
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+    a.download = `salah_backup_${dateStr}_${timeStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    showToast(t('export_success'), 'success');
 }
 
 export function exportOldData() {
@@ -99,10 +109,8 @@ export function handleImport(event) {
                 loadAllData('fard');
                 loadAllData('sunnah');
 
-                // Update visible view
-                if (state.currentSection === 'fard' || state.currentSection === 'sunnah') {
-                    updateTrackerView(state.currentSection);
-                }
+                // Always update the tracker view
+                updateTrackerView(state.currentSection || 'fard');
 
                 showToast(`${t('import_success')} (${importCount})`, 'success');
             }
@@ -302,14 +310,20 @@ export function importAndConvertToHijri(imported, profileId) {
             }
         }
 
+        // ---- NON-DATA KEYS (theme, settings, profiles) — store as-is ----
+        if (key === 'salah_tracker_theme' || key === 'salah_profiles' || key === 'salah_active_profile' || !key.match(/_\d{1,2}$/)) {
+            directKeys[key] = value;
+            return;
+        }
+
         // ---- ALREADY HIJRI or OTHER KEYS — store directly with profile remap ----
         var remappedKey = key;
         // Remap profile ID if needed (profile IDs look like p_1234567890_abc12)
         var oldPMatch = key.match(/_(p_\d+_[a-z0-9]+)_/);
         if (oldPMatch && oldPMatch[1] !== profileId) {
             remappedKey = key.replace(oldPMatch[1], profileId);
-        } else if (!key.includes('p_') && key.startsWith('salah_')) {
-            // Old format without profile prefix
+        } else if (!key.includes('p_') && key.startsWith('salah_') && typeof value === 'object') {
+            // Old format without profile prefix — only remap actual data objects
             remappedKey = key.replace(/^(salah_\w+_)/, '$1' + profileId + '_');
         }
         directKeys[remappedKey] = value;

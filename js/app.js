@@ -158,46 +158,80 @@ window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     state.deferredPrompt = e;
     window._pwaInstallPrompt = e;
-    // Always show install banner (clear previous dismiss)
-    {
-        var banner = document.createElement('div');
-        banner.id = 'installBanner';
-        banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid var(--accent);direction:rtl;';
 
-        var textDiv = document.createElement('div');
-        textDiv.style.cssText = 'color:white;font-family:Cairo,sans-serif;flex:1;';
-        textDiv.innerHTML = '<div style="font-size:1.1em;font-weight:700;color:var(--accent);">🕌 تثبيت التطبيق</div>' +
-            '<div style="font-size:0.85em;opacity:0.9;margin-top:4px;">أضف متتبع الصلاة إلى شاشتك الرئيسية</div>';
+    // Show the persistent install button in settings
+    var installAppBtn = document.getElementById('installAppBtn');
+    if (installAppBtn) installAppBtn.style.display = '';
 
-        var installBtn = document.createElement('button');
-        installBtn.textContent = 'تثبيت';
-        installBtn.style.cssText = 'background:var(--accent);color:var(--primary-dark);border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:1em;cursor:pointer;font-family:Cairo,sans-serif;';
-        installBtn.addEventListener('click', function() {
-            if (state.deferredPrompt) {
-                state.deferredPrompt.prompt();
-                state.deferredPrompt.userChoice.then(function() {
-                    state.deferredPrompt = null;
-                    var b = document.getElementById('installBanner');
-                    if (b) b.remove();
-                });
-            }
-        });
+    // Show bottom banner
+    var existingBanner = document.getElementById('installBanner');
+    if (existingBanner) existingBanner.remove();
 
-        var closeBtn = document.createElement('button');
-        closeBtn.textContent = '\u2715';
-        closeBtn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.5em;cursor:pointer;padding:5px 8px;';
-        closeBtn.addEventListener('click', function() {
+    var banner = document.createElement('div');
+    banner.id = 'installBanner';
+    banner.style.cssText = 'position:fixed;bottom:70px;left:0;right:0;background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid var(--accent);direction:rtl;';
+
+    var textDiv = document.createElement('div');
+    textDiv.style.cssText = 'color:white;font-family:Cairo,sans-serif;flex:1;';
+    textDiv.innerHTML = '<div style="font-size:1.1em;font-weight:700;color:var(--accent);">🕌 تثبيت التطبيق</div>' +
+        '<div style="font-size:0.85em;opacity:0.9;margin-top:4px;">أضف متتبع الصلاة إلى شاشتك الرئيسية</div>';
+
+    var installBtn = document.createElement('button');
+    installBtn.textContent = 'تثبيت';
+    installBtn.style.cssText = 'background:var(--accent);color:var(--primary-dark);border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:1em;cursor:pointer;font-family:Cairo,sans-serif;';
+    installBtn.addEventListener('click', function() {
+        triggerInstall();
+    });
+
+    var closeBtn = document.createElement('button');
+    closeBtn.textContent = '\u2715';
+    closeBtn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.5em;cursor:pointer;padding:5px 8px;';
+    closeBtn.addEventListener('click', function() {
+        var b = document.getElementById('installBanner');
+        if (b) b.remove();
+    });
+
+    banner.appendChild(textDiv);
+    banner.appendChild(installBtn);
+    banner.appendChild(closeBtn);
+    document.body.appendChild(banner);
+});
+
+// Trigger PWA install
+function triggerInstall() {
+    if (state.deferredPrompt) {
+        state.deferredPrompt.prompt();
+        state.deferredPrompt.userChoice.then(function(choice) {
+            state.deferredPrompt = null;
+            window._pwaInstallPrompt = null;
             var b = document.getElementById('installBanner');
             if (b) b.remove();
-            localStorage.setItem('pwa_install_dismissed', 'true');
+            var installAppBtn = document.getElementById('installAppBtn');
+            if (installAppBtn) installAppBtn.style.display = 'none';
+            if (choice.outcome === 'accepted') {
+                showToast('تم تثبيت التطبيق بنجاح! ✅', 'success');
+            }
         });
-
-        banner.appendChild(textDiv);
-        banner.appendChild(installBtn);
-        banner.appendChild(closeBtn);
-        document.body.appendChild(banner);
+    } else {
+        // No deferred prompt available — show manual instructions
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        if (isStandalone) {
+            showToast('التطبيق مثبت بالفعل! ✅', 'success');
+        } else if (isIOS) {
+            showToast('اضغط على زر المشاركة ⬆️ ثم "إضافة إلى الشاشة الرئيسية"', 'info');
+        } else {
+            showToast('افتح قائمة المتصفح ⋮ ثم اختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية"', 'info');
+        }
     }
-});
+}
+window.triggerInstall = triggerInstall;
+
+// Hide install button if already in standalone mode
+if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+    var installAppBtn = document.getElementById('installAppBtn');
+    if (installAppBtn) installAppBtn.style.display = 'none';
+}
 
 // Expose remaining globals for inline onclick handlers
 window.selectGender = selectGender;
