@@ -812,42 +812,46 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid var(--accent);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: var(--card-radius, 16px);
+            border: none;
+            box-shadow: var(--card-shadow, 0 2px 12px rgba(0,0,0,0.04));
             text-align: center;
             transition: all 0.3s;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         .stat-card .label {
-            color: var(--accent);
-            font-size: 1.1em;
-            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 0.8em;
+            margin-bottom: 8px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .stat-card .value {
-            color: white;
-            font-size: 3em;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: var(--text-primary);
+            font-size: 2.2em;
+            font-weight: 800;
         }
 
         .stat-card .sublabel {
-            color: rgba(255,255,255,0.8);
+            color: var(--text-muted);
+            font-size: 0.75em;
+            margin-top: 4px;
+        }
             font-size: 0.9em;
             margin-top: 5px;
         }
@@ -1103,11 +1107,11 @@
 
         .stat-item {
             text-align: center;
-            padding: 20px;
-            background: linear-gradient(to bottom, var(--bg-container-start), var(--bg-container-end));
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border: 2px solid var(--accent-border-light);
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            box-shadow: var(--card-shadow, 0 2px 12px rgba(0,0,0,0.04));
+            border: none;
             transition: all 0.3s;
         }
 
@@ -2003,7 +2007,7 @@
 
 
         /* Congregation Prayer Tracking */
-        .congregation-toggle-bar {
+        .congregation-toggle-bar { display: none !important; } .congregation-toggle-bar-old {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2058,7 +2062,7 @@
         .cong-stat.alone { background: rgba(107,114,128,0.1); color: #4b5563; }
 
         @media (max-width: 768px) {
-            .congregation-toggle-bar { flex-wrap: wrap; }
+            .congregation-toggle-bar { display: none !important; } .congregation-toggle-bar-old { flex-wrap: wrap; }
         }
 
 
@@ -2241,6 +2245,83 @@
             from { transform: translateX(-100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* Prayer Times Bar */
+        .prayer-times-bar {
+            background: linear-gradient(135deg, rgba(26,60,52,0.06), rgba(201,162,39,0.08));
+            border: 1.5px solid var(--accent-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            animation: fadeSlideIn 0.5s ease;
+        }
+        .prayer-times-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 0.95em;
+        }
+        .prayer-times-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+        .pt-item {
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-border-light);
+            transition: all 0.3s;
+        }
+        .pt-item.active-prayer {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-medium));
+            color: var(--text-on-dark);
+            border-color: var(--accent);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+        .pt-item.passed-prayer {
+            opacity: 0.5;
+        }
+        .pt-item .pt-name {
+            font-size: 0.7em;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .pt-item .pt-time {
+            font-size: 0.85em;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            direction: ltr;
+        }
+        .pt-item.active-prayer .pt-name { color: var(--accent); }
+
+        @media (max-width: 400px) {
+            .prayer-times-grid { grid-template-columns: repeat(5, 1fr); gap: 3px; }
+            .pt-item { padding: 6px 2px; }
+            .pt-item .pt-name { font-size: 0.6em; }
+            .pt-item .pt-time { font-size: 0.75em; }
+        }
+
+        /* Qada Report */
+        .qada-month-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(248,113,113,0.06);
+            margin-bottom: 6px;
+            font-size: 0.85em;
+        }
+        .qada-month-row .qm-month { font-weight: 700; min-width: 90px; }
+        .qada-month-row .qm-bar { flex:1; height:8px; background:#fee2e2; border-radius:4px; overflow:hidden; }
+        .qada-month-row .qm-bar-fill { height:100%; background:linear-gradient(90deg,#f87171,#dc2626); border-radius:4px; transition:width 0.5s; }
+        .qada-month-row .qm-count { font-weight:700; color:#dc2626; min-width:30px; text-align:center; }
 
         /* Reminder badge */
         .reminder-bar {
@@ -2859,6 +2940,128 @@
         }
 
 
+
+        /* Sacred stats: light background + dark text */
+        .stat-card {
+            background: var(--bg-card) !important;
+            border-radius: 16px !important;
+            border: none !important;
+            box-shadow: var(--card-shadow) !important;
+            padding: 20px 16px !important;
+        }
+
+        .stat-card .label {
+            color: var(--text-muted) !important;
+            font-size: 0.8em !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .stat-card .value {
+            color: var(--text-primary) !important;
+            font-size: 1.8em !important;
+            font-weight: 800 !important;
+        }
+
+        .stat-card .sublabel {
+            color: var(--text-muted) !important;
+            font-size: 0.75em !important;
+        }
+
+        .dashboard-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+            margin-bottom: 20px !important;
+        }
+
+        /* Monthly stats in controls */
+        .month-stats-bar .stat-item {
+            background: var(--bg-card) !important;
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: var(--card-shadow) !important;
+            padding: 12px !important;
+        }
+
+        .month-stats-bar .stat-item .label {
+            color: var(--text-muted) !important;
+        }
+
+        .month-stats-bar .stat-item .value {
+            color: var(--text-primary) !important;
+        }
+
+        /* Hero stat card (big green) */
+        .hero-stat {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-medium)) !important;
+            border-radius: var(--card-radius) !important;
+            padding: 28px 24px !important;
+            margin-bottom: 16px !important;
+            color: var(--text-on-dark) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-stat::after {
+            content: '★';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5em;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .hero-stat .hero-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .hero-stat .hero-value {
+            font-size: 3em;
+            font-weight: 800;
+            line-height: 1;
+            margin-top: 4px;
+        }
+
+        .hero-stat .hero-sub {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .hero-stat .hero-sub-item .sub-label {
+            font-size: 0.65em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .hero-stat .hero-sub-item .sub-value {
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        /* Qada (makeup prayer) day box style */
+        .day-box.qada {
+            background: #dc2626 !important;
+            border-color: #b91c1c !important;
+        }
+
+        .day-box.qada .day-number { color: transparent !important; }
+
+        .day-box.qada::after {
+            content: '✓' !important;
+            color: white !important;
+            font-size: 1em !important;
+        }
+
+
         /* Sacred Interval Prayer Section Style */
         .prayer-section {
             background: var(--bg-card) !important;
@@ -2894,26 +3097,40 @@
             border: none !important;
         }
 
-        /* Sacred day boxes - circles */
+        /* Sacred day boxes - circles with dual calendar */
         .day-box {
-            width: 36px !important;
-            height: 36px !important;
+            width: 42px !important;
+            height: 42px !important;
             border-radius: 50% !important;
             border: 2px solid #e8e3da !important;
             background: #f8f5ef !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+            flex-direction: column !important;
             font-size: 0.7em !important;
             transition: all 0.25s ease !important;
             position: relative !important;
-            margin: 3px !important;
+            margin: 2px !important;
+            gap: 0px !important;
+            padding: 1px !important;
+            line-height: 1 !important;
         }
 
         .day-box .day-number {
             position: static !important;
-            font-size: 0.85em !important;
+            font-size: 0.9em !important;
+            color: var(--text-body) !important;
+            font-weight: 700 !important;
+            line-height: 1.1 !important;
+        }
+
+        .day-box .day-greg {
+            font-size: 0.6em !important;
             color: var(--text-muted) !important;
+            opacity: 0.7;
+            line-height: 1 !important;
+            font-weight: 400 !important;
         }
 
         .day-box.checked {
@@ -2922,6 +3139,7 @@
         }
 
         .day-box.checked .day-number { color: transparent !important; }
+        .day-box.checked .day-greg { display: none !important; }
 
         .day-box.checked::after {
             content: '✓' !important;
@@ -2935,11 +3153,16 @@
             border-color: var(--accent) !important;
             border-width: 3px !important;
         }
+        .day-box.congregation .day-number { color: transparent !important; }
+        .day-box.congregation .day-greg { display: none !important; }
 
         .day-box.congregation::after {
             content: '🕌' !important;
             font-size: 0.9em !important;
         }
+
+        .day-box.qada .day-number { color: transparent !important; }
+        .day-box.qada .day-greg { display: none !important; }
 
         .day-box.exempt {
             background: #f5e6ea !important;
@@ -2957,6 +3180,33 @@
             gap: 4px !important;
             justify-content: center !important;
         }
+
+        /* Ramadan fasting grid — wider boxes, not circles */
+        #fastingGrid.days-grid {
+            display: grid !important;
+            grid-template-columns: repeat(6, 1fr) !important;
+            gap: 8px !important;
+        }
+
+        #fastingGrid .fasting-day-box {
+            width: auto !important;
+            height: auto !important;
+            border-radius: 12px !important;
+            aspect-ratio: 1 !important;
+            font-size: 0.85em !important;
+            border-width: 2px !important;
+            flex-direction: column !important;
+            gap: 0px !important;
+        }
+        .fasting-day-box .day-greg {
+            font-size: 0.6em !important;
+            color: var(--text-muted) !important;
+            opacity: 0.7;
+            line-height: 1 !important;
+        }
+        .fasting-day-box.fasted .day-greg,
+        .fasting-day-box.missed .day-greg,
+        .fasting-day-box.exempt-fast .day-greg { display: none !important; }
 
 
         /* iOS Safari fixes */
@@ -3147,25 +3397,30 @@
                     <div class="input-group">
                         <label data-t="month">الشهر:</label>
                         <select id="fardTrackerMonthSelect" onchange="updateTrackerView('fard')">
-                            <option value="1">يناير</option>
-                            <option value="2">فبراير</option>
-                            <option value="3">مارس</option>
-                            <option value="4">أبريل</option>
-                            <option value="5">مايو</option>
-                            <option value="6">يونيو</option>
-                            <option value="7">يوليو</option>
-                            <option value="8">أغسطس</option>
-                            <option value="9">سبتمبر</option>
-                            <option value="10">أكتوبر</option>
-                            <option value="11">نوفمبر</option>
-                            <option value="12">ديسمبر</option>
+                            <option value="1">محرم</option>
+                            <option value="2">صفر</option>
+                            <option value="3">ربيع الأول</option>
+                            <option value="4">ربيع الآخر</option>
+                            <option value="5">جمادى الأولى</option>
+                            <option value="6">جمادى الآخرة</option>
+                            <option value="7">رجب</option>
+                            <option value="8">شعبان</option>
+                            <option value="9">رمضان</option>
+                            <option value="10">شوال</option>
+                            <option value="11">ذو القعدة</option>
+                            <option value="12">ذو الحجة</option>
                         </select>
                     </div>
 
                     <div class="input-group">
-                        <label data-t="year">السنة:</label>
-                        <input type="number" id="fardTrackerYearInput" min="2000" max="2100" onchange="updateTrackerView('fard')">
+                        <label data-t="hijri_year">السنة الهجرية:</label>
+                        <input type="number" id="fardTrackerYearInput" min="1400" max="1500" onchange="updateTrackerView('fard')">
                     </div>
+                </div>
+
+                <div id="fardTrackerHijriHeader" style="text-align:center;font-family:'Amiri',serif;font-size:1.2em;color:var(--primary-dark);margin:8px 0 4px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <span id="fardTrackerHijriHeaderText"></span>
+                    <button type="button" onclick="showHijriOverrideDialog()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:2px 8px;font-size:0.7em;cursor:pointer;color:var(--text-muted);" title="تعديل بداية الشهر الهجري">⚙️</button>
                 </div>
 
                 <div class="stats">
@@ -3197,23 +3452,33 @@
                 </div>
 
 
+                <!-- Prayer Times Bar -->
+                <div class="prayer-times-bar" id="prayerTimesBar">
+                    <div class="prayer-times-header">
+                        <span>🕐</span>
+                        <span id="prayerTimesTitle" data-t="prayer_times">مواقيت الصلاة</span>
+                        <span id="prayerTimesLocation" style="font-size:0.75em;color:var(--text-muted);"></span>
+                        <div style="margin-inline-start:auto;display:flex;gap:6px;align-items:center;">
+                            <button type="button" id="notifToggleBtn" onclick="togglePrayerNotifications()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:3px 10px;font-size:0.8em;cursor:pointer;font-family:'Cairo',sans-serif;" title="تفعيل التنبيهات">🔕</button>
+                            <button type="button" onclick="refreshPrayerTimes()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:3px 8px;font-size:0.8em;cursor:pointer;" title="تحديث">🔄</button>
+                        </div>
+                    </div>
+                    <div class="prayer-times-grid" id="prayerTimesGrid">
+                        <div class="pt-item"><div class="pt-name">الفجر</div><div class="pt-time" style="color:var(--text-muted);">--:--</div></div>
+                        <div class="pt-item"><div class="pt-name">الظهر</div><div class="pt-time" style="color:var(--text-muted);">--:--</div></div>
+                        <div class="pt-item"><div class="pt-name">العصر</div><div class="pt-time" style="color:var(--text-muted);">--:--</div></div>
+                        <div class="pt-item"><div class="pt-name">المغرب</div><div class="pt-time" style="color:var(--text-muted);">--:--</div></div>
+                        <div class="pt-item"><div class="pt-name">العشاء</div><div class="pt-time" style="color:var(--text-muted);">--:--</div></div>
+                    </div>
+                    <div id="nextPrayerInfo" style="text-align:center;font-size:0.85em;color:var(--text-muted);font-weight:600;margin-top:6px;">⏳ جاري تحميل المواقيت...</div>
+                </div>
+
                 <!-- Smart Reminder -->
                 <div class="reminder-bar" id="prayerReminder" onclick="scrollToUnmarkedPrayer()">
                     <span class="icon">⏰</span>
                     <span class="msg" id="reminderMsg"></span>
                     <button class="dismiss" onclick="event.stopPropagation();dismissReminder()">✕</button>
                 </div>
-                <!-- Congregation Toggle (Fard Only) -->
-                <div class="congregation-toggle-bar" id="fardCongregationBar">
-                    <span>🕌</span>
-                    <label data-t="congregation_mode">وضع تحديد صلاة الجماعة</label>
-                    <label class="exempt-switch">
-                        <input type="checkbox" id="fardCongregationMode" onchange="window.congregationMode=this.checked;window.renderTrackerMonth('fard')">
-                        <span class="exempt-slider"></span>
-                    </label>
-                    <div class="congregation-stats" id="fardCongStats"></div>
-                </div>
-
                 <div class="prayers-container" id="fardTrackerPrayersContainer"></div>
 
                 <div class="action-buttons">
@@ -3226,7 +3491,7 @@
             <div id="fardYearlyView" class="view">
                 <div class="year-controls">
                     <label data-t="year">السنة:</label>
-                    <input type="number" id="fardYearlyYear" min="2000" max="2100" onchange="updateYearlyView('fard')">
+                    <input type="number" id="fardYearlyYear" min="1400" max="1500" onchange="updateYearlyView('fard')">
                 </div>
                 <div class="months-grid" id="fardMonthsGrid"></div>
             </div>
@@ -3235,7 +3500,7 @@
             <div id="fardDashboardView" class="view">
                 <div class="year-controls">
                     <label data-t="year">السنة:</label>
-                    <input type="number" id="fardDashboardYear" min="2000" max="2100" onchange="updateDashboard('fard')">
+                    <input type="number" id="fardDashboardYear" min="1400" max="1500" onchange="updateDashboard('fard')">
                 </div>
 
                 <div class="dashboard-grid">
@@ -3317,6 +3582,17 @@
                     <div class="streak-grid" id="fardStreakGrid"></div>
                 </div>
 
+                <!-- Qada (Missed Prayers) Report -->
+                <div class="chart-card" id="fardQadaReport" style="margin-top:16px;">
+                    <h3>🔴 تقرير الصلوات المقضية (قضاء)</h3>
+                    <p style="font-size:0.8em;color:var(--text-muted);margin:0 0 12px;">الصلوات التي أُديت في غير وقتها</p>
+                    <div class="dashboard-grid" id="fardQadaStatsGrid" style="margin-bottom:12px;"></div>
+                    <div class="chart-wrapper" style="height:260px;">
+                        <canvas id="fardQadaChart" role="img" aria-label="Qada prayers chart"></canvas>
+                    </div>
+                    <div id="fardQadaMonthlyBreakdown" style="margin-top:12px;"></div>
+                </div>
+
                 <!-- Period History (Females Only) -->
                 <div class="period-history-dashboard" id="fardPeriodDashboard" style="display:none;">
                     <div class="chart-card">
@@ -3370,26 +3646,28 @@
                     <div class="input-group">
                         <label data-t="month">الشهر:</label>
                         <select id="sunnahTrackerMonthSelect" onchange="updateTrackerView('sunnah')">
-                            <option value="1">يناير</option>
-                            <option value="2">فبراير</option>
-                            <option value="3">مارس</option>
-                            <option value="4">أبريل</option>
-                            <option value="5">مايو</option>
-                            <option value="6">يونيو</option>
-                            <option value="7">يوليو</option>
-                            <option value="8">أغسطس</option>
-                            <option value="9">سبتمبر</option>
-                            <option value="10">أكتوبر</option>
-                            <option value="11">نوفمبر</option>
-                            <option value="12">ديسمبر</option>
+                            <option value="1">محرم</option>
+                            <option value="2">صفر</option>
+                            <option value="3">ربيع الأول</option>
+                            <option value="4">ربيع الآخر</option>
+                            <option value="5">جمادى الأولى</option>
+                            <option value="6">جمادى الآخرة</option>
+                            <option value="7">رجب</option>
+                            <option value="8">شعبان</option>
+                            <option value="9">رمضان</option>
+                            <option value="10">شوال</option>
+                            <option value="11">ذو القعدة</option>
+                            <option value="12">ذو الحجة</option>
                         </select>
                     </div>
 
                     <div class="input-group">
-                        <label data-t="year">السنة:</label>
-                        <input type="number" id="sunnahTrackerYearInput" min="2000" max="2100" onchange="updateTrackerView('sunnah')">
+                        <label data-t="hijri_year">السنة الهجرية:</label>
+                        <input type="number" id="sunnahTrackerYearInput" min="1400" max="1500" onchange="updateTrackerView('sunnah')">
                     </div>
                 </div>
+
+                <div id="sunnahTrackerHijriHeader" style="text-align:center;font-family:'Amiri',serif;font-size:1.2em;color:var(--primary-dark);margin:8px 0 4px;font-weight:700;"></div>
 
                 <div class="stats">
                     <div class="stat-item">
@@ -3430,7 +3708,7 @@
             <div id="sunnahYearlyView" class="view">
                 <div class="year-controls">
                     <label data-t="year">السنة:</label>
-                    <input type="number" id="sunnahYearlyYear" min="2000" max="2100" onchange="updateYearlyView('sunnah')">
+                    <input type="number" id="sunnahYearlyYear" min="1400" max="1500" onchange="updateYearlyView('sunnah')">
                 </div>
                 <div class="months-grid" id="sunnahMonthsGrid"></div>
             </div>
@@ -3439,7 +3717,7 @@
             <div id="sunnahDashboardView" class="view">
                 <div class="year-controls">
                     <label data-t="year">السنة:</label>
-                    <input type="number" id="sunnahDashboardYear" min="2000" max="2100" onchange="updateDashboard('sunnah')">
+                    <input type="number" id="sunnahDashboardYear" min="1400" max="1500" onchange="updateDashboard('sunnah')">
                 </div>
 
                 <div class="dashboard-grid">
@@ -3539,23 +3817,23 @@
                     <div class="input-group">
                         <label data-t="month">الشهر:</label>
                         <select id="fastingMonthSelect" onchange="updateVoluntaryFasting()">
-                            <option value="1">يناير</option>
-                            <option value="2">فبراير</option>
-                            <option value="3">مارس</option>
-                            <option value="4">أبريل</option>
-                            <option value="5">مايو</option>
-                            <option value="6">يونيو</option>
-                            <option value="7">يوليو</option>
-                            <option value="8">أغسطس</option>
-                            <option value="9">سبتمبر</option>
-                            <option value="10">أكتوبر</option>
-                            <option value="11">نوفمبر</option>
-                            <option value="12">ديسمبر</option>
+                            <option value="1">محرم</option>
+                            <option value="2">صفر</option>
+                            <option value="3">ربيع الأول</option>
+                            <option value="4">ربيع الآخر</option>
+                            <option value="5">جمادى الأولى</option>
+                            <option value="6">جمادى الآخرة</option>
+                            <option value="7">رجب</option>
+                            <option value="8">شعبان</option>
+                            <option value="9">رمضان</option>
+                            <option value="10">شوال</option>
+                            <option value="11">ذو القعدة</option>
+                            <option value="12">ذو الحجة</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label data-t="year">السنة:</label>
-                        <input type="number" id="fastingYearVoluntary" min="2000" max="2100" onchange="updateVoluntaryFasting()">
+                        <label data-t="hijri_year">السنة الهجرية:</label>
+                        <input type="number" id="fastingYearVoluntary" min="1400" max="1500" onchange="updateVoluntaryFasting()">
                     </div>
                 </div>
 
@@ -3604,9 +3882,10 @@
             <div id="fastingRamadanView" class="view">
                 <div class="controls">
                     <div class="input-group">
-                        <label data-t="year">السنة:</label>
-                        <input type="number" id="fastingYearInput" min="2000" max="2100" onchange="updateFastingView()">
+                        <label data-t="hijri_year">السنة الهجرية:</label>
+                        <input type="number" id="fastingYearInput" min="1400" max="1500" onchange="updateFastingView()">
                     </div>
+                    <div style="text-align:center;font-family:'Amiri',serif;font-size:1em;color:var(--text-muted);margin-top:4px;" id="ramadanHijriRef"></div>
                 </div>
 
                 <div class="fasting-legend">
@@ -3667,7 +3946,7 @@
             <div id="fastingDashboardView" class="view">
                 <div class="year-controls">
                     <label data-t="year">السنة:</label>
-                    <input type="number" id="fastingDashboardYear" min="2000" max="2100" onchange="updateFastingDashboard()">
+                    <input type="number" id="fastingDashboardYear" min="1400" max="1500" onchange="updateFastingDashboard()">
                 </div>
 
                 <div class="dashboard-grid">
@@ -3734,8 +4013,8 @@
         ];
 
         const monthNames = [
-            'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+            'محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر', 'جمادى الأولى', 'جمادى الآخرة',
+            'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
         ];
 
         let currentYear, currentMonth;
@@ -3744,21 +4023,215 @@
         let charts = { fard: {}, sunnah: {}, fasting: null, fardCong: null, fardWeekly: null, fardHeatmap: null };
         let currentSection = 'fard';
 
+        // ==================== HIJRI CALENDAR ENGINE ====================
+        var currentHijriYear, currentHijriMonth;
+
+        var hijriMonthNamesAr = [
+            'محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر',
+            'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان',
+            'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
+        ];
+        var hijriMonthNamesEn = [
+            'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani',
+            'Jumada al-Ula', 'Jumada al-Thani', 'Rajab', 'Sha\'ban',
+            'Ramadan', 'Shawwal', 'Dhul Qi\'dah', 'Dhul Hijjah'
+        ];
+
+        function getHijriMonthNames() {
+            return currentLang === 'ar' ? hijriMonthNamesAr : hijriMonthNamesEn;
+        }
+
+        function getHijriMonthName(index) {
+            // index: 0-11
+            return getHijriMonthNames()[index];
+        }
+
+        // Convert a Gregorian Date object to Hijri {year, month, day}
+        function gregorianToHijri(gDate) {
+            try {
+                var fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    timeZone: 'Asia/Riyadh'
+                });
+                var parts = fmt.formatToParts(gDate);
+                var hYear = 0, hMonth = 0, hDay = 0;
+                parts.forEach(function(p) {
+                    if (p.type === 'year') hYear = parseInt(p.value);
+                    if (p.type === 'month') hMonth = parseInt(p.value);
+                    if (p.type === 'day') hDay = parseInt(p.value);
+                });
+                return { year: hYear, month: hMonth, day: hDay };
+            } catch(e) {
+                console.error('Hijri conversion error:', e);
+                return { year: 1446, month: 1, day: 1 };
+            }
+        }
+
+        // Get today's Hijri date
+        function getTodayHijri() {
+            return gregorianToHijri(new Date());
+        }
+
+        // Get Hijri overrides from localStorage
+        function getHijriOverrides() {
+            try {
+                var stored = localStorage.getItem('salah_hijri_overrides');
+                return stored ? JSON.parse(stored) : {};
+            } catch(e) { return {}; }
+        }
+
+        function saveHijriOverrides(overrides) {
+            try { localStorage.setItem('salah_hijri_overrides', JSON.stringify(overrides)); }
+            catch(e) { console.error('Save hijri overrides error:', e); }
+        }
+
+        // Get the number of days in a Hijri month
+        // Strategy: find Gregorian dates for day 1 of this month and day 1 of next month, count difference
+        function getHijriDaysInMonth(hYear, hMonth) {
+            var overrides = getHijriOverrides();
+            var key = hYear + '_' + hMonth;
+            var nextMonth = hMonth === 12 ? 1 : hMonth + 1;
+            var nextYear = hMonth === 12 ? hYear + 1 : hYear;
+            var nextKey = nextYear + '_' + nextMonth;
+
+            // If we have overrides for both this and next month, use those
+            if (overrides[key] && overrides[nextKey]) {
+                var d1 = new Date(overrides[key]);
+                var d2 = new Date(overrides[nextKey]);
+                return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+            }
+
+            // Otherwise compute using Intl
+            var startG = hijriToGregorianDay1(hYear, hMonth);
+            var endG = hijriToGregorianDay1(nextYear, nextMonth);
+            var diff = Math.round((endG - startG) / (1000 * 60 * 60 * 24));
+            return diff > 0 ? diff : 30; // fallback
+        }
+
+        // Cache for hijriToGregorianDay1 results
+        var _hijriDay1Cache = {};
+
+        // Convert Hijri year/month/day=1 to approximate Gregorian Date
+        // Uses binary search with Intl as the oracle
+        function hijriToGregorianDay1(hYear, hMonth) {
+            var overrides = getHijriOverrides();
+            var key = hYear + '_' + hMonth;
+            if (overrides[key]) return new Date(overrides[key]);
+            if (_hijriDay1Cache[key]) return new Date(_hijriDay1Cache[key]);
+
+            // Approximate: Hijri year ≈ Gregorian year - 579 (rough)
+            // More precise: each Hijri year ≈ 354.37 days
+            var approxDays = ((hYear - 1) * 354.36667) + ((hMonth - 1) * 29.53056);
+            var epochGreg = new Date(622, 6, 19); // Hijri epoch approximate
+            var guess = new Date(epochGreg.getTime() + approxDays * 86400000);
+
+            // Binary search: find the Gregorian date where Hijri = hYear/hMonth/1
+            var low = new Date(guess.getTime() - 45 * 86400000);
+            var high = new Date(guess.getTime() + 45 * 86400000);
+
+            for (var i = 0; i < 60; i++) {
+                var mid = new Date((low.getTime() + high.getTime()) / 2);
+                var h = gregorianToHijri(mid);
+                var midVal = h.year * 10000 + h.month * 100 + h.day;
+                var targetVal = hYear * 10000 + hMonth * 100 + 1;
+
+                if (midVal < targetVal) {
+                    low = new Date(mid.getTime() + 86400000);
+                } else if (midVal > targetVal) {
+                    high = new Date(mid.getTime() - 86400000);
+                } else {
+                    _hijriDay1Cache[key] = mid.getTime();
+                    return mid;
+                }
+            }
+
+            // Fallback: walk from low
+            for (var d = new Date(low); d <= high; d = new Date(d.getTime() + 86400000)) {
+                var hh = gregorianToHijri(d);
+                if (hh.year === hYear && hh.month === hMonth && hh.day === 1) {
+                    _hijriDay1Cache[key] = d.getTime();
+                    return d;
+                }
+            }
+            _hijriDay1Cache[key] = guess.getTime();
+            return guess;
+        }
+
+        // Convert Hijri date to Gregorian
+        function hijriToGregorian(hYear, hMonth, hDay) {
+            var day1 = hijriToGregorianDay1(hYear, hMonth);
+            return new Date(day1.getTime() + (hDay - 1) * 86400000);
+        }
+
+        // Check if a Hijri date is in the future
+        function isFutureDateHijri(hDay, hMonth, hYear) {
+            var today = getTodayHijri();
+            if (hYear > today.year) return true;
+            if (hYear < today.year) return false;
+            if (hMonth > today.month) return true;
+            if (hMonth < today.month) return false;
+            return hDay > today.day;
+        }
+
+        // Get Gregorian months that a Hijri month spans
+        function getGregorianSpanForHijriMonth(hYear, hMonth) {
+            var day1 = hijriToGregorianDay1(hYear, hMonth);
+            var daysInMonth = getHijriDaysInMonth(hYear, hMonth);
+            var lastDay = new Date(day1.getTime() + (daysInMonth - 1) * 86400000);
+
+            var gMonthNames = currentLang === 'ar'
+                ? ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+                : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+            var m1 = gMonthNames[day1.getMonth()];
+            var m2 = gMonthNames[lastDay.getMonth()];
+            var y1 = day1.getFullYear();
+            var y2 = lastDay.getFullYear();
+
+            if (day1.getMonth() === lastDay.getMonth() && y1 === y2) {
+                return m1 + ' ' + y1;
+            } else if (y1 === y2) {
+                return m1 + '-' + m2 + ' ' + y1;
+            } else {
+                return m1 + ' ' + y1 + ' - ' + m2 + ' ' + y2;
+            }
+        }
+
+        // Get the Gregorian day number for a given Hijri day in a month
+        function getGregorianDayForHijri(hYear, hMonth, hDay) {
+            var gDate = hijriToGregorian(hYear, hMonth, hDay);
+            return gDate.getDate();
+        }
+
+        // Format display header: "رمضان ١٤٤٧ (فبراير-مارس ٢٠٢٦)"
+        function formatHijriMonthHeader(hYear, hMonth) {
+            var monthName = getHijriMonthName(hMonth - 1);
+            var gregSpan = getGregorianSpanForHijriMonth(hYear, hMonth);
+            return monthName + ' ' + hYear + ' (' + gregSpan + ')';
+        }
+
+        // ==================== END HIJRI ENGINE ====================
+
         function init() {
             const today = new Date();
-            currentMonth = today.getMonth() + 1;
-            currentYear = today.getFullYear();
+
+            // Set Hijri state
+            var todayH = getTodayHijri();
+            currentHijriMonth = todayH.month;
+            currentHijriYear = todayH.year;
+            currentMonth = currentHijriMonth;
+            currentYear = currentHijriYear;
             
-            // Initialize all year inputs
-            document.getElementById('fardDashboardYear').value = currentYear;
-            document.getElementById('fardYearlyYear').value = currentYear;
-            document.getElementById('fardTrackerMonthSelect').value = currentMonth;
-            document.getElementById('fardTrackerYearInput').value = currentYear;
+            // Initialize all year/month inputs with Hijri values
+            document.getElementById('fardDashboardYear').value = currentHijriYear;
+            document.getElementById('fardYearlyYear').value = currentHijriYear;
+            document.getElementById('fardTrackerMonthSelect').value = currentHijriMonth;
+            document.getElementById('fardTrackerYearInput').value = currentHijriYear;
             
-            document.getElementById('sunnahDashboardYear').value = currentYear;
-            document.getElementById('sunnahYearlyYear').value = currentYear;
-            document.getElementById('sunnahTrackerMonthSelect').value = currentMonth;
-            document.getElementById('sunnahTrackerYearInput').value = currentYear;
+            document.getElementById('sunnahDashboardYear').value = currentHijriYear;
+            document.getElementById('sunnahYearlyYear').value = currentHijriYear;
+            document.getElementById('sunnahTrackerMonthSelect').value = currentHijriMonth;
+            document.getElementById('sunnahTrackerYearInput').value = currentHijriYear;
             
             loadAllData('fard');
             loadAllData('sunnah');
@@ -3766,21 +4239,13 @@
         }
 
         function getDaysInMonth(month, year) {
-            return new Date(year, month, 0).getDate();
+            // Now works with Hijri months
+            return getHijriDaysInMonth(year, month);
         }
 
         function isFutureDate(day, month, year) {
-            const now = new Date();
-            const todayYear = now.getFullYear();
-            const todayMonth = now.getMonth() + 1;
-            const todayDay = now.getDate();
-            
-            // Pure numeric comparison — no timezone/DST issues
-            if (year > todayYear) return true;
-            if (year < todayYear) return false;
-            if (month > todayMonth) return true;
-            if (month < todayMonth) return false;
-            return day > todayDay;
+            // Now compares in Hijri
+            return isFutureDateHijri(day, month, year);
         }
 
         function getPrayersArray(type) {
@@ -3796,7 +4261,7 @@
             const prayers = getPrayersArray(type);
             
             for (let month = 1; month <= 12; month++) {
-                const key = getStorageKey(type, month, currentYear);
+                const key = getStorageKey(type, month, currentHijriYear);
                 const stored = localStorage.getItem(key);
                 if (stored) {
                     dataObj[month] = JSON.parse(stored);
@@ -3811,7 +4276,7 @@
 
         function saveMonthData(type, month) {
             const dataObj = getDataObject(type);
-            const key = getStorageKey(type, month, currentYear);
+            const key = getStorageKey(type, month, currentHijriYear);
             try {
                 localStorage.setItem(key, JSON.stringify(dataObj[month]));
             } catch(e) {
@@ -3869,17 +4334,21 @@
             if (section === 'fard') {
                 document.getElementById('fardSection').classList.add('active');
                 try { document.querySelector('.main-toggle-btn:nth-child(1)').classList.add('active'); } catch(e) {}
-                const today = new Date();
-                currentMonth = parseInt(document.getElementById('fardTrackerMonthSelect').value) || (today.getMonth() + 1);
-                currentYear = parseInt(document.getElementById('fardTrackerYearInput').value) || today.getFullYear();
+                var todayH = getTodayHijri();
+                currentHijriMonth = parseInt(document.getElementById('fardTrackerMonthSelect').value) || todayH.month;
+                currentHijriYear = parseInt(document.getElementById('fardTrackerYearInput').value) || todayH.year;
+                currentMonth = currentHijriMonth;
+                currentYear = currentHijriYear;
                 loadAllData('fard');
                 updateTrackerView('fard');
             } else {
                 document.getElementById('sunnahSection').classList.add('active');
                 try { document.querySelector('.main-toggle-btn:nth-child(2)').classList.add('active'); } catch(e) {}
-                const today = new Date();
-                currentMonth = parseInt(document.getElementById('sunnahTrackerMonthSelect').value) || (today.getMonth() + 1);
-                currentYear = parseInt(document.getElementById('sunnahTrackerYearInput').value) || today.getFullYear();
+                var todayH = getTodayHijri();
+                currentHijriMonth = parseInt(document.getElementById('sunnahTrackerMonthSelect').value) || todayH.month;
+                currentHijriYear = parseInt(document.getElementById('sunnahTrackerYearInput').value) || todayH.year;
+                currentMonth = currentHijriMonth;
+                currentYear = currentHijriYear;
                 loadAllData('sunnah');
                 updateTrackerView('sunnah');
             }
@@ -3893,30 +4362,35 @@
             if (view === 'tracker') {
                 document.getElementById(`${prefix}TrackerView`).classList.add('active');
                 try { document.querySelector(`#${prefix}Section .toggle-btn:nth-child(1)`).classList.add('active'); } catch(e) {}
-                const today = new Date();
-                currentMonth = parseInt(document.getElementById(`${prefix}TrackerMonthSelect`).value) || (today.getMonth() + 1);
-                currentYear = parseInt(document.getElementById(`${prefix}TrackerYearInput`).value) || today.getFullYear();
-                document.getElementById(`${prefix}TrackerMonthSelect`).value = currentMonth;
-                document.getElementById(`${prefix}TrackerYearInput`).value = currentYear;
+                var todayH = getTodayHijri();
+                currentHijriMonth = parseInt(document.getElementById(`${prefix}TrackerMonthSelect`).value) || todayH.month;
+                currentHijriYear = parseInt(document.getElementById(`${prefix}TrackerYearInput`).value) || todayH.year;
+                currentMonth = currentHijriMonth;
+                currentYear = currentHijriYear;
+                document.getElementById(`${prefix}TrackerMonthSelect`).value = currentHijriMonth;
+                document.getElementById(`${prefix}TrackerYearInput`).value = currentHijriYear;
                 loadAllData(type);
                 updateTrackerView(type);
             } else if (view === 'yearly') {
                 document.getElementById(`${prefix}YearlyView`).classList.add('active');
                 try { document.querySelector(`#${prefix}Section .toggle-btn:nth-child(2)`).classList.add('active'); } catch(e) {}
-                currentYear = parseInt(document.getElementById(`${prefix}YearlyYear`).value);
+                currentHijriYear = parseInt(document.getElementById(`${prefix}YearlyYear`).value);
+                currentYear = currentHijriYear;
                 loadAllData(type);
                 updateYearlyView(type);
             } else if (view === 'dashboard') {
                 document.getElementById(`${prefix}DashboardView`).classList.add('active');
                 try { document.querySelector(`#${prefix}Section .toggle-btn:nth-child(3)`).classList.add('active'); } catch(e) {}
-                currentYear = parseInt(document.getElementById(`${prefix}DashboardYear`).value);
+                currentHijriYear = parseInt(document.getElementById(`${prefix}DashboardYear`).value);
+                currentYear = currentHijriYear;
                 loadAllData(type);
                 updateDashboard(type);
             }
         }
 
         function updateDashboard(type) {
-            currentYear = parseInt(document.getElementById(`${type}DashboardYear`).value);
+            currentHijriYear = parseInt(document.getElementById(`${type}DashboardYear`).value);
+            currentYear = currentHijriYear;
             loadAllData(type);
             
             const yearStats = getYearStats(type, currentYear);
@@ -4029,6 +4503,11 @@
                 if (fardPeriodDash) fardPeriodDash.style.display = '';
                 renderPeriodHistoryDashboard();
             }
+            
+            // Render Qada report (fard only)
+            if (type === 'fard') {
+                renderQadaReport();
+            }
         }
 
         function renderPeriodHistoryDashboard() {
@@ -4036,7 +4515,7 @@
             if (!container) return;
             
             const year = parseInt(document.getElementById('fardDashboardYear').value) || currentYear;
-            const stored = localStorage.getItem(`salah_periods_${getProfilePrefix()}${year}`);
+            const stored = localStorage.getItem(`salah_periods_${getProfilePrefix()}h${year}`);
             const periods = stored ? JSON.parse(stored) : [];
             
             if (periods.length === 0) {
@@ -4049,7 +4528,7 @@
                 const entry = document.createElement('div');
                 entry.className = 'period-entry';
                 entry.innerHTML = `
-                    <div class="dates">🗓️ ${p.start}/${p.month}/${year} → ${p.end}/${p.month}/${year}</div>
+                    <div class="dates">🗓️ ${p.start} ${getHijriMonthName(p.month - 1)} → ${p.end} ${getHijriMonthName(p.month - 1)} ${year}</div>
                     <div class="duration">${p.duration} يوم</div>
                 `;
                 container.appendChild(entry);
@@ -4232,14 +4711,15 @@
         }
 
         function updateYearlyView(type) {
-            currentYear = parseInt(document.getElementById(`${type}YearlyYear`).value);
+            currentHijriYear = parseInt(document.getElementById(`${type}YearlyYear`).value);
+            currentYear = currentHijriYear;
             loadAllData(type);
             
             const grid = document.getElementById(`${type}MonthsGrid`);
             grid.innerHTML = '';
             
             for (let month = 1; month <= 12; month++) {
-                const stats = getMonthStats(type, month, currentYear);
+                const stats = getMonthStats(type, month, currentHijriYear);
                 const card = document.createElement('div');
                 card.className = 'month-card';
                 card.setAttribute('role', 'button');
@@ -4249,7 +4729,7 @@
                 // Calculate congregation stats for fard
                 let congHtml = '';
                 if (type === 'fard') {
-                    const congData = getCongregationData(currentYear, month);
+                    const congData = getCongregationData(currentHijriYear, month);
                     const prayers = getPrayersArray('fard');
                     const dataObj = getDataObject('fard');
                     let monthCong = 0, monthCompleted = 0;
@@ -4273,8 +4753,12 @@
                     `;
                 }
                 
+                var hijriLabel = getHijriMonthName(month - 1);
+                var gregSpan = getGregorianSpanForHijriMonth(currentHijriYear, month);
+                
                 card.innerHTML = `
-                    <h3>${getMonthName(month - 1)} ${currentYear}</h3>
+                    <h3>${hijriLabel} ${currentHijriYear}</h3>
+                    <div class="month-greg-ref" style="font-size:0.75em;color:var(--text-muted);margin-top:-6px;margin-bottom:8px;">${gregSpan}</div>
                     <div class="month-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${stats.percentage}%">
@@ -4301,7 +4785,8 @@
 
         function openMonth(type, month) {
             currentMonth = month;
-            document.getElementById(`${type}CurrentMonthTitle`).textContent = `${getMonthName(month - 1)} ${currentYear}`;
+            currentHijriMonth = month;
+            document.getElementById(`${type}CurrentMonthTitle`).textContent = formatHijriMonthHeader(currentHijriYear, month);
             
             document.getElementById(`${type}YearlyView`).classList.remove('active');
             document.getElementById(`${type}MonthlyView`).classList.add('active');
@@ -4357,23 +4842,14 @@
                     if (day > daysInMonth) {
                         dayBox.classList.add('disabled');
                     } else if (isPrayerExempt(exemptData, prayer.id, day)) {
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('exempt');
                     } else if (isFutureDate(day, currentMonth, currentYear)) {
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('disabled');
                         dayBox.style.opacity = '0.3';
                     } else {
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         
                         if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
                             dayBox.classList.add('checked');
@@ -4385,9 +4861,15 @@
                                     dayBox.classList.remove('checked');
                                 }
                             }
+                            // Show qada
+                            const qadaData = getQadaData(currentYear, currentMonth);
+                            if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
+                                dayBox.classList.remove('checked', 'congregation');
+                                dayBox.classList.add('qada');
+                            }
                         }
                         
-                        dayBox.onclick = () => toggleDay(type, prayer.id, day);
+                        dayBox.onclick = () => handleDayClick(type, prayer.id, day);
                     }
                     
                     grid.appendChild(dayBox);
@@ -4428,8 +4910,22 @@
         }
 
         function updateTrackerView(type) {
-            currentMonth = parseInt(document.getElementById(`${type}TrackerMonthSelect`).value);
-            currentYear = parseInt(document.getElementById(`${type}TrackerYearInput`).value);
+            currentHijriMonth = parseInt(document.getElementById(`${type}TrackerMonthSelect`).value);
+            currentHijriYear = parseInt(document.getElementById(`${type}TrackerYearInput`).value);
+            currentMonth = currentHijriMonth;
+            currentYear = currentHijriYear;
+            
+            // Update header with Hijri display
+            var headerEl = document.getElementById(`${type}TrackerHijriHeader`);
+            if (headerEl) {
+                // For fard, the text is in a child span
+                var textEl = document.getElementById(`${type}TrackerHijriHeaderText`);
+                if (textEl) {
+                    textEl.textContent = formatHijriMonthHeader(currentHijriYear, currentHijriMonth);
+                } else {
+                    headerEl.textContent = formatHijriMonthHeader(currentHijriYear, currentHijriMonth);
+                }
+            }
             
             loadAllData(type);
             renderTrackerMonth(type);
@@ -4479,24 +4975,18 @@
                         dayBox.classList.add('disabled');
                     } else if (isFutureDate(day, currentMonth, currentYear)) {
                         // Future date - disable it
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('disabled');
                         dayBox.style.opacity = '0.3';
                         dayBox.title = t('future_date_short');
                     } else {
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         
                         if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
                             dayBox.classList.add('checked');
                         }
                         
-                        dayBox.onclick = () => toggleTrackerDay(type, prayer.id, day);
+                        dayBox.onclick = () => handleDayClick(type, prayer.id, day);
                     }
                     
                     grid.appendChild(dayBox);
@@ -4552,17 +5042,19 @@
         }
 
         function changeTrackerMonth(type, delta) {
-            currentMonth += delta;
-            if (currentMonth > 12) {
-                currentMonth = 1;
-                currentYear++;
-            } else if (currentMonth < 1) {
-                currentMonth = 12;
-                currentYear--;
+            currentHijriMonth += delta;
+            if (currentHijriMonth > 12) {
+                currentHijriMonth = 1;
+                currentHijriYear++;
+            } else if (currentHijriMonth < 1) {
+                currentHijriMonth = 12;
+                currentHijriYear--;
             }
+            currentMonth = currentHijriMonth;
+            currentYear = currentHijriYear;
             
-            document.getElementById(`${type}TrackerMonthSelect`).value = currentMonth;
-            document.getElementById(`${type}TrackerYearInput`).value = currentYear;
+            document.getElementById(`${type}TrackerMonthSelect`).value = currentHijriMonth;
+            document.getElementById(`${type}TrackerYearInput`).value = currentHijriYear;
             loadAllData(type);
             updateTrackerView(type);
         }
@@ -4675,9 +5167,11 @@
                         }
                         
                         // Reload everything
-                        const today = new Date();
-                        currentMonth = today.getMonth() + 1;
-                        currentYear = today.getFullYear();
+                        var todayH = getTodayHijri();
+                        currentHijriMonth = todayH.month;
+                        currentHijriYear = todayH.year;
+                        currentMonth = currentHijriMonth;
+                        currentYear = currentHijriYear;
                         loadAllData('fard');
                         loadAllData('sunnah');
                         
@@ -4758,27 +5252,28 @@
             let checkDate = new Date(today);
             checkDate.setHours(0, 0, 0, 0);
             
-            const todayMonth = today.getMonth() + 1;
-            const todayDay = today.getDate();
-            const todayYear = today.getFullYear();
+            var todayH = gregorianToHijri(today);
+            var todayHMonth = todayH.month;
+            var todayHDay = todayH.day;
+            var todayHYear = todayH.year;
             
-            // Check if today is already marked
+            // Check if today is already marked (using Hijri keys)
             let startFromToday = false;
             if (isCongStreak) {
-                const congKey = getCongregationKey(todayYear, todayMonth);
+                const congKey = getCongregationKey(todayHYear, todayHMonth);
                 const congData = localStorage.getItem(congKey);
                 if (congData) {
                     const parsed = JSON.parse(congData);
-                    if (parsed[prayerId] && parsed[prayerId][todayDay]) {
+                    if (parsed[prayerId] && parsed[prayerId][todayHDay]) {
                         startFromToday = true;
                     }
                 }
             } else {
-                const todayKey = `salah_tracker_${getProfilePrefix()}${type}_${todayYear}_${todayMonth}`;
+                const todayKey = getStorageKey(type, todayHMonth, todayHYear);
                 const todayData = localStorage.getItem(todayKey);
                 if (todayData) {
                     const parsed = JSON.parse(todayData);
-                    if (parsed[prayerId] && parsed[prayerId][todayDay]) {
+                    if (parsed[prayerId] && parsed[prayerId][todayHDay]) {
                         startFromToday = true;
                     }
                 }
@@ -4788,27 +5283,28 @@
                 checkDate.setDate(checkDate.getDate() - 1);
             }
             
-            // Calculate current streak (going backwards)
+            // Calculate current streak (going backwards, convert each day to Hijri)
             for (let i = 0; i < 730; i++) {
-                const cMonth = checkDate.getMonth() + 1;
-                const cDay = checkDate.getDate();
-                const cYear = checkDate.getFullYear();
+                var hDate = gregorianToHijri(checkDate);
+                var cHMonth = hDate.month;
+                var cHDay = hDate.day;
+                var cHYear = hDate.year;
                 
                 let isChecked = false;
                 
                 if (isCongStreak) {
-                    const congKey = getCongregationKey(cYear, cMonth);
+                    const congKey = getCongregationKey(cHYear, cHMonth);
                     const stored = localStorage.getItem(congKey);
                     if (stored) {
                         const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][cDay]) isChecked = true;
+                        if (parsed[prayerId] && parsed[prayerId][cHDay]) isChecked = true;
                     }
                 } else {
-                    const key = `salah_tracker_${getProfilePrefix()}${type}_${cYear}_${cMonth}`;
+                    const key = getStorageKey(type, cHMonth, cHYear);
                     const stored = localStorage.getItem(key);
                     if (stored) {
                         const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][cDay]) isChecked = true;
+                        if (parsed[prayerId] && parsed[prayerId][cHDay]) isChecked = true;
                     }
                 }
                 
@@ -4820,30 +5316,32 @@
                 }
             }
             
-            // Calculate best streak (scan from Jan of current year)
-            let scanDate = new Date(currentYear, 0, 1);
+            // Calculate best streak (scan from Muharram 1 of current Hijri year)
+            var scanStartG = hijriToGregorianDay1(currentHijriYear, 1);
+            let scanDate = new Date(scanStartG);
             scanDate.setHours(0, 0, 0, 0);
             
             while (scanDate <= today) {
-                const sMonth = scanDate.getMonth() + 1;
-                const sDay = scanDate.getDate();
-                const sYear = scanDate.getFullYear();
+                var hScan = gregorianToHijri(scanDate);
+                var sHMonth = hScan.month;
+                var sHDay = hScan.day;
+                var sHYear = hScan.year;
                 
                 let isChecked = false;
                 
                 if (isCongStreak) {
-                    const congKey = getCongregationKey(sYear, sMonth);
+                    const congKey = getCongregationKey(sHYear, sHMonth);
                     const stored = localStorage.getItem(congKey);
                     if (stored) {
                         const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][sDay]) isChecked = true;
+                        if (parsed[prayerId] && parsed[prayerId][sHDay]) isChecked = true;
                     }
                 } else {
-                    const key = `salah_tracker_${getProfilePrefix()}${type}_${sYear}_${sMonth}`;
+                    const key = getStorageKey(type, sHMonth, sHYear);
                     const stored = localStorage.getItem(key);
                     if (stored) {
                         const parsed = JSON.parse(stored);
-                        if (parsed[prayerId] && parsed[prayerId][sDay]) isChecked = true;
+                        if (parsed[prayerId] && parsed[prayerId][sHDay]) isChecked = true;
                     }
                 }
                 
@@ -4924,10 +5422,10 @@
             return activeProfile ? activeProfile.id + '_' : '';
         }
 
-        // Override storage key to include profile
+        // Override storage key to include profile + Hijri format
         const _originalGetStorageKey = getStorageKey;
         function getStorageKey(type, month, year) {
-            return `salah_tracker_${getProfilePrefix()}${type}_${year}_${month}`;
+            return `salah_tracker_${getProfilePrefix()}${type}_h${year}_${month}`;
         }
 
         function showProfileScreen() {
@@ -5197,23 +5695,26 @@
             hideProfileScreen();
             applyProfileUI();
             
-            // Reload all data for this profile
-            const today = new Date();
-            currentMonth = today.getMonth() + 1;
-            currentYear = today.getFullYear();
+            // Reload all data for this profile with Hijri dates
+            var todayH = getTodayHijri();
+            currentHijriMonth = todayH.month;
+            currentHijriYear = todayH.year;
+            currentMonth = currentHijriMonth;
+            currentYear = currentHijriYear;
             
-            document.getElementById('fardTrackerMonthSelect').value = currentMonth;
-            document.getElementById('fardTrackerYearInput').value = currentYear;
-            document.getElementById('sunnahTrackerMonthSelect').value = currentMonth;
-            document.getElementById('sunnahTrackerYearInput').value = currentYear;
-            document.getElementById('fardDashboardYear').value = currentYear;
-            document.getElementById('fardYearlyYear').value = currentYear;
-            document.getElementById('sunnahDashboardYear').value = currentYear;
-            document.getElementById('sunnahYearlyYear').value = currentYear;
+            document.getElementById('fardTrackerMonthSelect').value = currentHijriMonth;
+            document.getElementById('fardTrackerYearInput').value = currentHijriYear;
+            document.getElementById('sunnahTrackerMonthSelect').value = currentHijriMonth;
+            document.getElementById('sunnahTrackerYearInput').value = currentHijriYear;
+            document.getElementById('fardDashboardYear').value = currentHijriYear;
+            document.getElementById('fardYearlyYear').value = currentHijriYear;
+            document.getElementById('sunnahDashboardYear').value = currentHijriYear;
+            document.getElementById('sunnahYearlyYear').value = currentHijriYear;
             
             loadAllData('fard');
             loadAllData('sunnah');
             switchSection('fard');
+            setTimeout(startPrayerTimesMonitor, 500);
         }
 
         function applyProfileUI() {
@@ -5347,26 +5848,27 @@
             
             const now = new Date();
             const hour = now.getHours();
-            const todayDay = now.getDate();
-            const todayMonth = now.getMonth() + 1;
-            const todayYear = now.getFullYear();
+            var todayH = gregorianToHijri(now);
+            var todayHDay = todayH.day;
+            var todayHMonth = todayH.month;
+            var todayHYear = todayH.year;
             
-            // Only check if we're viewing the current month
-            if (currentMonth !== todayMonth || currentYear !== todayYear) {
+            // Only check if we're viewing the current Hijri month
+            if (currentHijriMonth !== todayHMonth || currentHijriYear !== todayHYear) {
                 hideReminder();
                 return;
             }
             
             const dataObj = getDataObject('fard');
-            if (!dataObj[todayMonth]) return;
+            if (!dataObj[todayHMonth]) return;
             
             // Find unmarked prayers that should have been done by now
             const unmarked = [];
             for (const [id, times] of Object.entries(PRAYER_REMINDER_TIMES)) {
                 if (hour >= times.end) {
                     // Past the expected time
-                    const isMarked = dataObj[todayMonth][id] && dataObj[todayMonth][id][todayDay];
-                    if (!isMarked && !reminderDismissed[`${id}_${todayDay}`]) {
+                    const isMarked = dataObj[todayHMonth][id] && dataObj[todayHMonth][id][todayHDay];
+                    if (!isMarked && !reminderDismissed[`${id}_${todayHDay}`]) {
                         unmarked.push({ id, name: t(times.name_key) });
                     }
                 }
@@ -5545,6 +6047,78 @@
             }
         });
 
+
+        // ==================== 3-STATE CLICK SYSTEM ====================
+        // Each click cycles: empty → ✓ prayed → 🕌 congregation → ⏰ qada → empty
+        
+        function handleDayClick(type, prayerId, day) {
+            if (isFutureDate(day, currentMonth, currentYear)) {
+                showToast(t('future_date'), 'warning');
+                return;
+            }
+            
+            const dataObj = getDataObject(type);
+            if (!dataObj[currentMonth]) dataObj[currentMonth] = {};
+            if (!dataObj[currentMonth][prayerId]) dataObj[currentMonth][prayerId] = {};
+            
+            const isChecked = dataObj[currentMonth][prayerId][day];
+            const congData = (type === 'fard') ? getCongregationData(currentYear, currentMonth) : null;
+            const isCong = congData && congData[prayerId] && congData[prayerId][day];
+            const qadaData = getQadaData(currentYear, currentMonth);
+            const isQada = qadaData[prayerId] && qadaData[prayerId][day];
+            
+            if (!isChecked) {
+                // State 0 → State 1: Mark as prayed (alone) ✓
+                dataObj[currentMonth][prayerId][day] = true;
+            } else if (isChecked && !isCong && !isQada) {
+                // State 1 → State 2: Mark as congregation 🕌
+                if (type === 'fard' && congData) {
+                    if (!congData[prayerId]) congData[prayerId] = {};
+                    congData[prayerId][day] = true;
+                } else {
+                    // For sunnah: skip congregation, go to qada
+                    if (!qadaData[prayerId]) qadaData[prayerId] = {};
+                    qadaData[prayerId][day] = true;
+                }
+            } else if (isCong) {
+                // State 2 → State 3: Mark as qada ⏰
+                if (congData[prayerId]) { delete congData[prayerId][day]; if (Object.keys(congData[prayerId]).length === 0) delete congData[prayerId]; }
+                if (!qadaData[prayerId]) qadaData[prayerId] = {};
+                qadaData[prayerId][day] = true;
+            } else if (isQada) {
+                // State 3 → State 0: Remove everything
+                dataObj[currentMonth][prayerId][day] = false;
+                if (qadaData[prayerId]) { delete qadaData[prayerId][day]; if (Object.keys(qadaData[prayerId]).length === 0) delete qadaData[prayerId]; }
+                if (congData && congData[prayerId]) { delete congData[prayerId][day]; }
+            }
+            
+            saveMonthData(type, currentMonth);
+            if (type === 'fard' && congData) saveCongregationData(currentYear, currentMonth, congData);
+            saveQadaData(currentYear, currentMonth, qadaData);
+            renderTrackerMonth(type);
+            updateTrackerStats(type);
+            renderStreaks(type);
+            if (type === 'fard') { updateCongregationStats(); checkPrayerReminders(); }
+        }
+
+        // Qada data storage
+        function getQadaKey(year, month) {
+            return `salah_qada_${getProfilePrefix()}h${year}_${month}`;
+        }
+
+        function getQadaData(year, month) {
+            const stored = localStorage.getItem(getQadaKey(year, month));
+            return stored ? JSON.parse(stored) : {};
+        }
+
+        function saveQadaData(year, month, data) {
+            try { localStorage.setItem(getQadaKey(year, month), JSON.stringify(data)); }
+            catch(e) { showToast(t('storage_full'), 'error'); }
+        }
+
+        window.handleDayClick = handleDayClick;
+
+
         // ==================== BATCH SELECTION ====================
         
         function batchMarkPrayer(type, prayerId) {
@@ -5595,7 +6169,7 @@
         var congregationMode = false;
 
         function getCongregationKey(year, month) {
-            return `salah_cong_${getProfilePrefix()}${year}_${month}`;
+            return `salah_cong_${getProfilePrefix()}h${year}_${month}`;
         }
 
         function getCongregationData(year, month) {
@@ -5657,7 +6231,7 @@
         // ==================== EXEMPT DAYS (PER PRAYER PER DAY) ====================
 
         function getExemptKey(year, month) {
-            return `salah_exempt_${getProfilePrefix()}${year}_${month}`;
+            return `salah_exempt_${getProfilePrefix()}h${year}_${month}`;
         }
 
         function getExemptDays(year, month) {
@@ -5782,7 +6356,7 @@
                 periods.push({ month, start, end, duration: end - start + 1 });
             }
             
-            localStorage.setItem(`salah_periods_${getProfilePrefix()}${currentYear}`, JSON.stringify(periods));
+            localStorage.setItem(`salah_periods_${getProfilePrefix()}h${currentYear}`, JSON.stringify(periods));
         }
 
         function renderPeriodHistory() {
@@ -5790,7 +6364,7 @@
             if (!container) return;
             
             const year = parseInt(document.getElementById('fastingYearInput').value) || currentYear;
-            const stored = localStorage.getItem(`salah_periods_${getProfilePrefix()}${year}`);
+            const stored = localStorage.getItem(`salah_periods_${getProfilePrefix()}h${year}`);
             const periods = stored ? JSON.parse(stored) : [];
             
             if (periods.length === 0) {
@@ -5803,7 +6377,7 @@
                 const entry = document.createElement('div');
                 entry.className = 'period-entry';
                 entry.innerHTML = `
-                    <div class="dates">🗓️ ${p.start}/${p.month}/${year} → ${p.end}/${p.month}/${year}</div>
+                    <div class="dates">🗓️ ${p.start} ${getHijriMonthName(p.month - 1)} → ${p.end} ${getHijriMonthName(p.month - 1)} ${year}</div>
                     <div class="duration">${p.duration} يوم</div>
                 `;
                 container.appendChild(entry);
@@ -5813,7 +6387,7 @@
         // ==================== RAMADAN FASTING ====================
 
         function getFastingKey(year) {
-            return `salah_fasting_${getProfilePrefix()}${year}`;
+            return `salah_fasting_${getProfilePrefix()}h${year}`;
         }
 
         function getFastingData(year) {
@@ -5852,7 +6426,7 @@
         // ==================== VOLUNTARY FASTING ====================
 
         function getVolFastingKey(year, month) {
-            return `salah_volfasting_${getProfilePrefix()}${year}_${month}`;
+            return `salah_volfasting_${getProfilePrefix()}h${year}_${month}`;
         }
 
         function getVolFastingData(year, month) {
@@ -5885,17 +6459,11 @@
                 if (day > daysInMonth) {
                     dayBox.classList.add('disabled');
                 } else if (isFutureDate(day, fastingMonth, fastingYear)) {
-                    const dayNum = document.createElement('span');
-                    dayNum.className = 'day-number';
-                    dayNum.textContent = day;
-                    dayBox.appendChild(dayNum);
+                    dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
                     dayBox.classList.add('disabled');
                     dayBox.style.opacity = '0.3';
                 } else if (isFemale && fastingExemptModeOn) {
-                    const dayNum = document.createElement('span');
-                    dayNum.className = 'day-number';
-                    dayNum.textContent = day;
-                    dayBox.appendChild(dayNum);
+                    dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
                     
                     // Check if any prayer is exempt on this day (reuse prayer exempt data)
                     const dayExempt = exemptData[day] && Object.values(exemptData[day]).some(v => v);
@@ -5906,10 +6474,7 @@
                     dayBox.style.cursor = 'default';
                     dayBox.title = t('exempt_linked_prayer');
                 } else {
-                    const dayNum = document.createElement('span');
-                    dayNum.className = 'day-number';
-                    dayNum.textContent = day;
-                    dayBox.appendChild(dayNum);
+                    dayBox.appendChild(createDualDayNum(day, fastingYear, fastingMonth));
                     
                     // Check if exempt day for female
                     const dayExempt = isFemale && exemptData[day] && Object.values(exemptData[day]).some(v => v);
@@ -5965,7 +6530,7 @@
         // ==================== FASTING DASHBOARD ====================
 
         function updateFastingDashboard() {
-            const year = parseInt(document.getElementById('fastingDashboardYear').value) || currentYear;
+            const year = parseInt(document.getElementById('fastingDashboardYear').value) || currentHijriYear;
             
             let totalVol = 0;
             let bestMonth = { month: 0, days: 0 };
@@ -5982,16 +6547,17 @@
             }
             
             document.getElementById('fastDashVolTotal').textContent = totalVol;
-            document.getElementById('fastDashBestMonth').textContent = bestMonth.month > 0 ? monthNames[bestMonth.month - 1] : '-';
+            document.getElementById('fastDashBestMonth').textContent = bestMonth.month > 0 ? getHijriMonthName(bestMonth.month - 1) : '-';
             document.getElementById('fastDashBestMonthDays').textContent = bestMonth.days + ' يوم';
             document.getElementById('fastDashAvg').textContent = Math.round(totalVol / 12);
             
             // Ramadan stats
             const ramadanData = getFastingData(year);
+            const ramadanDays = getHijriDaysInMonth(year, 9);
             let ramadanFasted = 0;
             Object.values(ramadanData).forEach(v => { if (v === 'fasted') ramadanFasted++; });
-            document.getElementById('fastDashRamadan').textContent = `${ramadanFasted}/30`;
-            document.getElementById('fastDashRamadanRate').textContent = Math.round((ramadanFasted / 30) * 100) + '%';
+            document.getElementById('fastDashRamadan').textContent = `${ramadanFasted}/${ramadanDays}`;
+            document.getElementById('fastDashRamadanRate').textContent = Math.round((ramadanFasted / ramadanDays) * 100) + '%';
             
             // Monthly chart
             if (charts.fasting) charts.fasting.destroy();
@@ -6000,9 +6566,9 @@
                 charts.fasting = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: monthNames,
+                        labels: getHijriMonthNames(),
                         datasets: [{
-                            label: 'أيام الصيام',
+                            label: t('fasting_days_chart'),
                             data: monthlyVol,
                             backgroundColor: 'rgba(5, 150, 105, 0.7)',
                             borderColor: '#059669',
@@ -6021,21 +6587,27 @@
         }
 
         function updateFastingView() {
-            const year = parseInt(document.getElementById('fastingYearInput').value) || currentYear;
+            const year = parseInt(document.getElementById('fastingYearInput').value) || currentHijriYear;
             const data = getFastingData(year);
             const grid = document.getElementById('fastingGrid');
             grid.innerHTML = '';
             
+            // Ramadan is always Hijri month 9 - get its days
+            const ramadanDays = getHijriDaysInMonth(year, 9);
+            
+            // Show Gregorian reference
+            var refEl = document.getElementById('ramadanHijriRef');
+            if (refEl) {
+                refEl.textContent = '🌙 ' + getHijriMonthName(8) + ' ' + year + ' (' + getGregorianSpanForHijriMonth(year, 9) + ')';
+            }
+            
             let fasted = 0, exempt = 0, missed = 0;
             
-            for (let day = 1; day <= 30; day++) {
+            for (let day = 1; day <= ramadanDays; day++) {
                 const box = document.createElement('div');
                 box.className = 'fasting-day-box';
                 
-                const dayNum = document.createElement('span');
-                dayNum.className = 'day-number';
-                dayNum.textContent = day;
-                box.appendChild(dayNum);
+                box.appendChild(createDualDayNum(day, year, 9));
                 
                 const status = data[day] || '';
                 
@@ -6052,7 +6624,7 @@
             document.getElementById('fastingDaysMissed').textContent = missed;
             const isFemaleRamadan = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
             document.getElementById('fastingDaysOwed').textContent = isFemaleRamadan ? (exempt + missed) : missed;
-            document.getElementById('fastingCounter').textContent = `${fasted} / 30`;
+            document.getElementById('fastingCounter').textContent = `${fasted} / ${ramadanDays}`;
         }
 
         function cycleFastingDay(year, day) {
@@ -6092,10 +6664,10 @@
                 document.getElementById('fastingSection').classList.add('active');
                 document.getElementById('fastingToggleBtn').classList.add('active');
                 
-                const today = new Date();
-                document.getElementById('fastingYearInput').value = currentYear;
-                document.getElementById('fastingMonthSelect').value = today.getMonth() + 1;
-                document.getElementById('fastingYearVoluntary').value = currentYear;
+                var todayH = getTodayHijri();
+                document.getElementById('fastingYearInput').value = currentHijriYear;
+                document.getElementById('fastingMonthSelect').value = todayH.month;
+                document.getElementById('fastingYearVoluntary').value = currentHijriYear;
                 
                 switchFastingView('voluntary');
             } else {
@@ -6105,6 +6677,25 @@
         }
 
         // ==================== OVERRIDE TRACKER TO SUPPORT EXEMPT DAYS ====================
+
+        // Helper: create dual calendar day display (Hijri primary + Gregorian secondary)
+        function createDualDayNum(hijriDay, hYear, hMonth) {
+            var frag = document.createDocumentFragment();
+            var dayNum = document.createElement('span');
+            dayNum.className = 'day-number';
+            dayNum.textContent = hijriDay;
+            frag.appendChild(dayNum);
+
+            try {
+                var gDate = hijriToGregorian(hYear, hMonth, hijriDay);
+                var gregSpan = document.createElement('span');
+                gregSpan.className = 'day-greg';
+                gregSpan.textContent = gDate.getDate();
+                frag.appendChild(gregSpan);
+            } catch(e) {}
+
+            return frag;
+        }
 
         const _origRenderTrackerMonth = renderTrackerMonth;
         renderTrackerMonth = function(type) {
@@ -6165,14 +6756,18 @@
                     const dayBox = document.createElement('div');
                     dayBox.className = 'day-box';
                     
+                    // Add Gregorian date reference as tooltip for valid days
+                    if (day <= daysInMonth) {
+                        try {
+                            var gDate = hijriToGregorian(currentHijriYear, currentHijriMonth, day);
+                            dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
+                        } catch(e) {}
+                    }
+                    
                     if (day > daysInMonth) {
                         dayBox.classList.add('disabled');
                     } else if (isPrayerExempt(exemptData, prayer.id, day)) {
-                        // This specific prayer on this day is exempt
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('exempt');
                         
                         if (isExemptModeOn) {
@@ -6180,64 +6775,17 @@
                             dayBox.title = t('click_remove_exempt');
                         }
                     } else if (isFutureDate(day, currentMonth, currentYear)) {
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         dayBox.classList.add('disabled');
                         dayBox.style.opacity = '0.3';
                     } else {
-                        const dayNum = document.createElement('span');
-                        dayNum.className = 'day-number';
-                        dayNum.textContent = day;
-                        dayBox.appendChild(dayNum);
+                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
                         
                         if (isExemptModeOn) {
-                            // In exempt mode, clicking marks THIS prayer on THIS day as exempt
                             dayBox.onclick = () => toggleExemptPrayer(prayer.id, day);
                             dayBox.title = t('click_mark_exempt');
                             dayBox.style.cursor = 'crosshair';
-                        } else if (type === 'fard' && congregationMode) {
-                            // Congregation mode: click cycles through states
-                            const isChecked = dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day];
-                            const congData = getCongregationData(currentYear, currentMonth);
-                            const isCong = isCongregation(congData, prayer.id, day);
-                            
-                            if (isCong) {
-                                dayBox.classList.add('congregation');
-                            } else if (isChecked) {
-                                dayBox.classList.add('checked');
-                            }
-                            
-                            dayBox.onclick = () => {
-                                const d = getDataObject('fard');
-                                const c = getCongregationData(currentYear, currentMonth);
-                                const checked = d[currentMonth][prayer.id] && d[currentMonth][prayer.id][day];
-                                const cong = isCongregation(c, prayer.id, day);
-                                
-                                if (!checked) {
-                                    // Not marked → mark as prayed + congregation
-                                    if (!d[currentMonth][prayer.id]) d[currentMonth][prayer.id] = {};
-                                    d[currentMonth][prayer.id][day] = true;
-                                    if (!c[prayer.id]) c[prayer.id] = {};
-                                    c[prayer.id][day] = true;
-                                } else if (cong) {
-                                    // Congregation → remove congregation (keep prayer)
-                                    if (c[prayer.id]) { delete c[prayer.id][day]; if (Object.keys(c[prayer.id]).length === 0) delete c[prayer.id]; }
-                                } else {
-                                    // Prayed alone → add congregation
-                                    if (!c[prayer.id]) c[prayer.id] = {};
-                                    c[prayer.id][day] = true;
-                                }
-                                
-                                saveMonthData('fard', currentMonth);
-                                saveCongregationData(currentYear, currentMonth, c);
-                                renderTrackerMonth('fard');
-                                updateTrackerStats('fard');
-                                updateCongregationStats();
-                                renderStreaks('fard');
-                            };
-                            dayBox.style.cursor = 'pointer';
+
                         } else {
                             if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
                                 dayBox.classList.add('checked');
@@ -6249,8 +6797,14 @@
                                         dayBox.classList.remove('checked');
                                     }
                                 }
+                                // Show qada
+                                const qadaData = getQadaData(currentYear, currentMonth);
+                                if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
+                                    dayBox.classList.remove('checked', 'congregation');
+                                    dayBox.classList.add('qada');
+                                }
                             }
-                            dayBox.onclick = () => toggleTrackerDay(type, prayer.id, day);
+                            dayBox.onclick = () => handleDayClick(type, prayer.id, day);
                         }
                     }
                     
@@ -6378,6 +6932,104 @@
 
         // ==================== DATA MIGRATION ====================
         // Migrate existing data (no profile prefix) to default profile
+
+        // ==================== HIJRI DATA MIGRATION ====================
+        // Migrate existing Gregorian-keyed data to Hijri-keyed data
+        function migrateGregorianToHijri() {
+            if (localStorage.getItem('salah_hijri_migrated')) return;
+            
+            var keysToMigrate = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (!key) continue;
+                
+                // Match keys like salah_tracker_PROFILEID_fard_2025_3 (Gregorian year, no 'h' prefix)
+                var trackerMatch = key.match(/^(salah_tracker_(?:p_[a-z0-9]+_)?)(\w+)_(\d{4})_(\d{1,2})$/);
+                if (trackerMatch && !key.includes('_h')) {
+                    var prefix = trackerMatch[1];
+                    var type = trackerMatch[2];
+                    var gYear = parseInt(trackerMatch[3]);
+                    var gMonth = parseInt(trackerMatch[4]);
+                    
+                    // Only migrate if the year looks Gregorian (2000+)
+                    if (gYear >= 2000 && gYear <= 2100) {
+                        keysToMigrate.push({ key: key, prefix: prefix, type: type, gYear: gYear, gMonth: gMonth });
+                    }
+                }
+                
+                // Match other key types: qada, cong, exempt, fasting, volfasting, periods
+                var otherPatterns = [
+                    { regex: /^(salah_qada_(?:p_[a-z0-9]+_)?)(\d{4})_(\d{1,2})$/, keyType: 'qada' },
+                    { regex: /^(salah_cong_(?:p_[a-z0-9]+_)?)(\d{4})_(\d{1,2})$/, keyType: 'cong' },
+                    { regex: /^(salah_exempt_(?:p_[a-z0-9]+_)?)(\d{4})_(\d{1,2})$/, keyType: 'exempt' },
+                    { regex: /^(salah_fasting_(?:p_[a-z0-9]+_)?)(\d{4})$/, keyType: 'fasting' },
+                    { regex: /^(salah_volfasting_(?:p_[a-z0-9]+_)?)(\d{4})_(\d{1,2})$/, keyType: 'volfasting' },
+                    { regex: /^(salah_periods_(?:p_[a-z0-9]+_)?)(\d{4})$/, keyType: 'periods' }
+                ];
+                
+                otherPatterns.forEach(function(pat) {
+                    var m = key.match(pat.regex);
+                    if (m && !key.includes('_h')) {
+                        var yr = parseInt(m[2]);
+                        if (yr >= 2000 && yr <= 2100) {
+                            keysToMigrate.push({ key: key, keyType: pat.keyType, prefix: m[1], gYear: yr, gMonth: m[3] ? parseInt(m[3]) : null });
+                        }
+                    }
+                });
+            }
+            
+            if (keysToMigrate.length === 0) {
+                localStorage.setItem('salah_hijri_migrated', 'true');
+                return;
+            }
+            
+            console.log('Hijri migration: migrating ' + keysToMigrate.length + ' keys');
+            
+            keysToMigrate.forEach(function(item) {
+                try {
+                    var data = localStorage.getItem(item.key);
+                    if (!data) return;
+                    
+                    // Determine Hijri equivalent
+                    // For tracker/qada/cong/exempt/volfasting: convert gYear/gMonth to Hijri
+                    // For fasting/periods: Ramadan year - approximate
+                    var newKey;
+                    
+                    if (item.gMonth !== null && item.gMonth !== undefined) {
+                        // Mid-month Gregorian date → Hijri
+                        var midDate = new Date(item.gYear, item.gMonth - 1, 15);
+                        var h = gregorianToHijri(midDate);
+                        
+                        if (item.type) {
+                            // Tracker data
+                            newKey = item.prefix + item.type + '_h' + h.year + '_' + h.month;
+                        } else {
+                            // Other keyed data (qada, cong, etc.)
+                            newKey = item.prefix + 'h' + h.year + '_' + h.month;
+                        }
+                    } else {
+                        // Year-only (fasting = Ramadan, periods)
+                        var janDate = new Date(item.gYear, 0, 15);
+                        var h = gregorianToHijri(janDate);
+                        newKey = item.prefix + 'h' + h.year;
+                    }
+                    
+                    // Only write if new key doesn't already exist
+                    if (!localStorage.getItem(newKey)) {
+                        localStorage.setItem(newKey, data);
+                        console.log('Migrated: ' + item.key + ' → ' + newKey);
+                    }
+                } catch(e) {
+                    console.error('Migration error for key ' + item.key + ':', e);
+                }
+            });
+            
+            localStorage.setItem('salah_hijri_migrated', 'true');
+            console.log('Hijri migration complete');
+        }
+
+        // Run migration before profiles init
+        migrateGregorianToHijri();
 
         function migrateExistingData() {
             const profiles = getProfiles();
@@ -6580,11 +7232,21 @@
             'dark_mode': { ar: 'دارك مود', en: 'Dark Mode' },
             'olive_cream': { ar: 'زيتوني', en: 'Olive' },
             
-            // Months
+            // Months (Hijri)
             'months': {
-                ar: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
-                en: ['January','February','March','April','May','June','July','August','September','October','November','December']
+                ar: ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'],
+                en: ['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Ula','Jumada al-Thani','Rajab','Sha\'ban','Ramadan','Shawwal','Dhul Qi\'dah','Dhul Hijjah']
             },
+            'hijri_year': { ar: 'السنة الهجرية:', en: 'Hijri Year:' },
+            'hijri_month': { ar: 'الشهر الهجري:', en: 'Hijri Month:' },
+            'hijri_override': { ar: 'تعديل بداية الشهر', en: 'Adjust month start' },
+            'prayer_times': { ar: 'مواقيت الصلاة', en: 'Prayer Times' },
+            'notif_enabled': { ar: 'التنبيهات مفعّلة', en: 'Notifications enabled' },
+            'notif_disabled': { ar: 'التنبيهات متوقفة', en: 'Notifications disabled' },
+            'qada_report': { ar: 'تقرير صلوات القضاء', en: 'Qada Prayers Report' },
+            'total_qada': { ar: 'إجمالي صلوات القضاء', en: 'Total Qada Prayers' },
+            'most_qada_prayer': { ar: 'أكثر صلاة قضاءً', en: 'Most Qada Prayer' },
+            'worst_month': { ar: 'أسوأ شهر', en: 'Worst Month' },
             
             // Prayer names
             'prayer_fajr': { ar: 'الفجر', en: 'Fajr' },
@@ -6648,6 +7310,11 @@
             'duplicate_name': { ar: 'هذا الاسم مستخدم بالفعل', en: 'This name is already taken' },
             'profile_limit': { ar: 'الحد الأقصى ١٠ ملفات شخصية', en: 'Maximum 10 profiles allowed' },
             'storage_full': { ar: 'مساحة التخزين ممتلئة! صدّر بياناتك.', en: 'Storage full! Export your data.' },
+            'qada_prayer': { ar: 'قضاء', en: 'Qada' },
+            'prayed_alone': { ar: 'منفرد', en: 'Alone' },
+            'click_hint': { ar: 'ضغطة=منفرد ، ضغطتين=جماعة ، ٣=قضاء', en: 'Tap=alone, 2=congregation, 3=qada' },
+            'annual_consistency': { ar: 'نسبة الالتزام السنوية', en: 'Annual Consistency' },
+            'total_prayers_word': { ar: 'إجمالي الصلوات', en: 'Total Prayers' },
             'future_date_short': { ar: 'لا يمكن التعليم في المستقبل', en: 'Cannot mark future dates' },
             'exempt_linked_prayer': { ar: 'أيام الإعفاء مربوطة ببيانات الصلاة', en: 'Exempt days linked to prayer data' },
             'click_remove_exempt': { ar: 'اضغط لإلغاء الإعفاء', en: 'Click to remove exemption' },
@@ -6719,7 +7386,7 @@
                 }
             });
             
-            // Update month selects
+            // Update month selects with Hijri months
             document.querySelectorAll('select[id*="MonthSelect"], #fastingMonthSelect').forEach(select => {
                 const months = getMonthNames();
                 Array.from(select.options).forEach((opt, i) => {
@@ -6727,9 +7394,13 @@
                 });
             });
             
-            // Update monthNames array used by charts
+            // Update monthNames array used by charts (now Hijri)
             monthNames.length = 0;
             getMonthNames().forEach(m => monthNames.push(m));
+            
+            // Update Hijri month name arrays for current language
+            hijriMonthNamesAr = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+            hijriMonthNamesEn = ['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Ula','Jumada al-Thani','Rajab','Sha\'ban','Ramadan','Shawwal','Dhul Qi\'dah','Dhul Hijjah'];
             
             // Re-render current view if loaded
             try {
@@ -6789,7 +7460,8 @@
                 const congData = getCongregationData(currentYear, month);
                 const daysInMonth = getDaysInMonth(month, currentYear);
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(currentYear, month - 1, day);
+                    // Convert Hijri date to Gregorian to get day of week
+                    const date = hijriToGregorian(currentYear, month, day);
                     const dow = date.getDay();
                     weekTotals[dow]++;
                     prayers.forEach(p => {
@@ -6987,6 +7659,621 @@
         window.hideProfileForm = hideProfileForm;
         window.showProfileForm = showProfileForm;
         window.selectGender = selectGender;
+        // ==================== PRAYER TIMES API (ALADHAN) ====================
+        
+        var prayerTimesData = null;
+        var prayerTimesDate = '';
+        var notificationsEnabled = localStorage.getItem('salah_notif_enabled') === 'true';
+        var userLocation = null;
+        var notifSentToday = {};
+        var prayerTimesCheckInterval = null;
+
+        // Prayer ID to Aladhan mapping
+        var PRAYER_API_MAP = {
+            'Fajr': 'fajr',
+            'Dhuhr': 'dhuhr',
+            'Asr': 'asr',
+            'Maghrib': 'maghrib',
+            'Isha': 'isha'
+        };
+
+        function getPrayerTimesFromStorage() {
+            try {
+                var stored = localStorage.getItem('salah_prayer_times');
+                if (stored) {
+                    var data = JSON.parse(stored);
+                    var todayStr = new Date().toISOString().split('T')[0];
+                    if (data.date === todayStr) {
+                        return data;
+                    }
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        function savePrayerTimesToStorage(data) {
+            try {
+                localStorage.setItem('salah_prayer_times', JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        function getUserLocation() {
+            return new Promise(function(resolve, reject) {
+                // Check cached location
+                try {
+                    var cached = localStorage.getItem('salah_user_location');
+                    if (cached) {
+                        var loc = JSON.parse(cached);
+                        // Use cached for up to 7 days
+                        if (loc.timestamp && (Date.now() - loc.timestamp) < 7 * 86400000) {
+                            resolve(loc);
+                            return;
+                        }
+                    }
+                } catch(e) {}
+
+                if (!navigator.geolocation) {
+                    reject('Geolocation not supported');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        var loc = {
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem('salah_user_location', JSON.stringify(loc));
+                        resolve(loc);
+                    },
+                    function(err) {
+                        reject(err.message);
+                    },
+                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 3600000 }
+                );
+            });
+        }
+
+        async function fetchPrayerTimes(forceRefresh) {
+            // Check cache first
+            if (!forceRefresh) {
+                var cached = getPrayerTimesFromStorage();
+                if (cached) {
+                    prayerTimesData = cached;
+                    renderPrayerTimes();
+                    return;
+                }
+            }
+
+            try {
+                var loc = await getUserLocation();
+                userLocation = loc;
+                
+                var today = new Date();
+                var dateStr = String(today.getDate()).padStart(2,'0') + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + today.getFullYear();
+                
+                // Aladhan API - Method 4 = Umm al-Qura
+                var url = 'https://api.aladhan.com/v1/timings/' + dateStr + '?latitude=' + loc.lat + '&longitude=' + loc.lng + '&method=4';
+                
+                var response = await fetch(url);
+                var json = await response.json();
+                
+                if (json.code === 200 && json.data && json.data.timings) {
+                    var timings = json.data.timings;
+                    prayerTimesData = {
+                        date: today.toISOString().split('T')[0],
+                        timings: {
+                            fajr: timings.Fajr,
+                            sunrise: timings.Sunrise,
+                            dhuhr: timings.Dhuhr,
+                            asr: timings.Asr,
+                            maghrib: timings.Maghrib,
+                            isha: timings.Isha
+                        },
+                        location: json.data.meta ? json.data.meta.timezone : '',
+                        lat: loc.lat,
+                        lng: loc.lng
+                    };
+                    savePrayerTimesToStorage(prayerTimesData);
+                    renderPrayerTimes();
+                }
+            } catch(e) {
+                console.log('Prayer times fetch error:', e);
+                // Try to show cached data even if expired
+                var cached = getPrayerTimesFromStorage();
+                if (cached) {
+                    prayerTimesData = cached;
+                    renderPrayerTimes();
+                } else {
+                    // Show error in the bar
+                    var nextInfo = document.getElementById('nextPrayerInfo');
+                    if (nextInfo) {
+                        nextInfo.textContent = currentLang === 'ar' 
+                            ? '⚠️ تعذر تحميل المواقيت — اضغط 🔄 أو فعّل الموقع' 
+                            : '⚠️ Could not load times — tap 🔄 or enable location';
+                        nextInfo.style.color = '#dc2626';
+                    }
+                }
+            }
+        }
+
+        function parseTimeToMinutes(timeStr) {
+            if (!timeStr) return 0;
+            // Handle "(EET)" or other timezone suffixes
+            var clean = timeStr.replace(/\s*\(.*\)/, '').trim();
+            var parts = clean.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+
+        function formatTime12h(timeStr) {
+            if (!timeStr) return '--:--';
+            var clean = timeStr.replace(/\s*\(.*\)/, '').trim();
+            var parts = clean.split(':');
+            var h = parseInt(parts[0]);
+            var m = parts[1];
+            var ampm = h >= 12 ? (currentLang === 'ar' ? 'م' : 'PM') : (currentLang === 'ar' ? 'ص' : 'AM');
+            if (h > 12) h -= 12;
+            if (h === 0) h = 12;
+            return h + ':' + m + ' ' + ampm;
+        }
+
+        function getCurrentPrayerState() {
+            if (!prayerTimesData || !prayerTimesData.timings) return null;
+            
+            var now = new Date();
+            var nowMin = now.getHours() * 60 + now.getMinutes();
+            var timings = prayerTimesData.timings;
+            
+            var prayers = [
+                { id: 'fajr', time: parseTimeToMinutes(timings.fajr) },
+                { id: 'dhuhr', time: parseTimeToMinutes(timings.dhuhr) },
+                { id: 'asr', time: parseTimeToMinutes(timings.asr) },
+                { id: 'maghrib', time: parseTimeToMinutes(timings.maghrib) },
+                { id: 'isha', time: parseTimeToMinutes(timings.isha) }
+            ];
+
+            var active = null;
+            var next = null;
+
+            for (var i = 0; i < prayers.length; i++) {
+                var nextIdx = (i + 1) < prayers.length ? i + 1 : null;
+                var endTime = nextIdx !== null ? prayers[nextIdx].time : 1440;
+                
+                if (nowMin >= prayers[i].time && nowMin < endTime) {
+                    active = prayers[i].id;
+                    if (nextIdx !== null) next = prayers[nextIdx];
+                    break;
+                }
+            }
+
+            // Before Fajr
+            if (nowMin < prayers[0].time) {
+                next = prayers[0];
+            }
+
+            return { active: active, next: next, prayers: prayers, nowMin: nowMin };
+        }
+
+        function renderPrayerTimes() {
+            var bar = document.getElementById('prayerTimesBar');
+            var grid = document.getElementById('prayerTimesGrid');
+            if (!bar || !grid || !prayerTimesData || !prayerTimesData.timings) return;
+
+            grid.innerHTML = '';
+
+            var state = getCurrentPrayerState();
+            var timings = prayerTimesData.timings;
+            
+            var prayersList = [
+                { id: 'fajr', name: getPrayerName('fajr'), time: timings.fajr },
+                { id: 'dhuhr', name: getPrayerName('dhuhr'), time: timings.dhuhr },
+                { id: 'asr', name: getPrayerName('asr'), time: timings.asr },
+                { id: 'maghrib', name: getPrayerName('maghrib'), time: timings.maghrib },
+                { id: 'isha', name: getPrayerName('isha'), time: timings.isha }
+            ];
+
+            prayersList.forEach(function(p) {
+                var item = document.createElement('div');
+                item.className = 'pt-item';
+                
+                if (state) {
+                    if (p.id === state.active) {
+                        item.classList.add('active-prayer');
+                    } else {
+                        var pMin = parseTimeToMinutes(p.time);
+                        if (pMin < state.nowMin && p.id !== state.active) {
+                            item.classList.add('passed-prayer');
+                        }
+                    }
+                }
+
+                item.innerHTML = '<div class="pt-name">' + p.name + '</div><div class="pt-time">' + formatTime12h(p.time) + '</div>';
+                grid.appendChild(item);
+            });
+
+            // Next prayer countdown
+            var nextInfo = document.getElementById('nextPrayerInfo');
+            if (nextInfo && state && state.next) {
+                var diff = state.next.time - state.nowMin;
+                if (diff < 0) diff += 1440;
+                var hrs = Math.floor(diff / 60);
+                var mins = diff % 60;
+                var nextName = getPrayerName(state.next.id);
+                if (hrs > 0) {
+                    nextInfo.textContent = '⏳ ' + (currentLang === 'ar' ? 'الصلاة القادمة: ' : 'Next: ') + nextName + ' ' + (currentLang === 'ar' ? 'بعد ' : 'in ') + hrs + (currentLang === 'ar' ? ' ساعة و ' : 'h ') + mins + (currentLang === 'ar' ? ' دقيقة' : 'm');
+                } else {
+                    nextInfo.textContent = '⏳ ' + (currentLang === 'ar' ? 'الصلاة القادمة: ' : 'Next: ') + nextName + ' ' + (currentLang === 'ar' ? 'بعد ' : 'in ') + mins + (currentLang === 'ar' ? ' دقيقة' : ' min');
+                }
+            } else if (nextInfo) {
+                nextInfo.textContent = '';
+            }
+
+            // Location display
+            var locEl = document.getElementById('prayerTimesLocation');
+            if (locEl && prayerTimesData.location) {
+                locEl.textContent = '📍 ' + prayerTimesData.location;
+            }
+
+            // Update notification toggle button state
+            updateNotifButton();
+        }
+
+        function refreshPrayerTimes() {
+            fetchPrayerTimes(true);
+            showToast(currentLang === 'ar' ? 'جاري تحديث مواقيت الصلاة...' : 'Refreshing prayer times...', 'info');
+        }
+
+        // ==================== PUSH NOTIFICATIONS ====================
+
+        function updateNotifButton() {
+            var btn = document.getElementById('notifToggleBtn');
+            if (!btn) return;
+            if (notificationsEnabled) {
+                btn.textContent = '🔔';
+                btn.style.background = 'rgba(5,150,105,0.15)';
+                btn.style.borderColor = '#059669';
+                btn.title = currentLang === 'ar' ? 'التنبيهات مفعّلة - اضغط لإيقاف' : 'Notifications ON - tap to disable';
+            } else {
+                btn.textContent = '🔕';
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.title = currentLang === 'ar' ? 'تفعيل التنبيهات' : 'Enable notifications';
+            }
+        }
+
+        async function togglePrayerNotifications() {
+            if (notificationsEnabled) {
+                // Disable
+                notificationsEnabled = false;
+                localStorage.setItem('salah_notif_enabled', 'false');
+                showToast(currentLang === 'ar' ? '🔕 تم إيقاف التنبيهات' : '🔕 Notifications disabled', 'info');
+            } else {
+                // Request permission
+                if (!('Notification' in window)) {
+                    showToast(currentLang === 'ar' ? 'المتصفح لا يدعم التنبيهات' : 'Browser does not support notifications', 'error');
+                    return;
+                }
+
+                var permission = Notification.permission;
+                if (permission === 'denied') {
+                    showToast(currentLang === 'ar' ? 'تم حظر التنبيهات في إعدادات المتصفح' : 'Notifications blocked in browser settings', 'error');
+                    return;
+                }
+
+                if (permission !== 'granted') {
+                    permission = await Notification.requestPermission();
+                }
+
+                if (permission === 'granted') {
+                    notificationsEnabled = true;
+                    localStorage.setItem('salah_notif_enabled', 'true');
+                    showToast(currentLang === 'ar' ? '🔔 تم تفعيل التنبيهات' : '🔔 Notifications enabled', 'success');
+                    
+                    // Show a test notification
+                    new Notification(currentLang === 'ar' ? '🕌 متتبع الصلاة' : '🕌 Prayer Tracker', {
+                        body: currentLang === 'ar' ? 'سيتم تذكيرك قبل كل صلاة بـ ٢٠ دقيقة' : 'You will be reminded 20 minutes before each prayer',
+                        icon: 'icons/icon-192x192.png',
+                        tag: 'prayer-test'
+                    });
+                } else {
+                    showToast(currentLang === 'ar' ? 'لم يتم السماح بالتنبيهات' : 'Notification permission not granted', 'warning');
+                }
+            }
+            updateNotifButton();
+        }
+
+        function sendPrayerNotification(prayerName, type) {
+            if (!notificationsEnabled) return;
+            if (Notification.permission !== 'granted') return;
+
+            var title, body, tag;
+            
+            if (type === 'before') {
+                title = '🕌 ' + (currentLang === 'ar' ? 'قرب وقت الصلاة' : 'Prayer time approaching');
+                body = (currentLang === 'ar' ? 'يقترب وقت صلاة ' : '') + prayerName + (currentLang === 'ar' ? ' - استعد!' : ' is coming in ~20 minutes');
+                tag = 'prayer-before-' + prayerName;
+            } else {
+                title = '⏰ ' + (currentLang === 'ar' ? 'هل صليت؟' : 'Did you pray?');
+                body = (currentLang === 'ar' ? 'مرّ وقت صلاة ' : '') + prayerName + (currentLang === 'ar' ? ' — سجّل صلاتك' : ' time has passed — log your prayer');
+                tag = 'prayer-after-' + prayerName;
+            }
+
+            try {
+                new Notification(title, {
+                    body: body,
+                    icon: 'icons/icon-192x192.png',
+                    tag: tag,
+                    renotify: true
+                });
+            } catch(e) {
+                console.log('Notification error:', e);
+            }
+        }
+
+        function checkPrayerTimeNotifications() {
+            if (!notificationsEnabled || !prayerTimesData || !prayerTimesData.timings || !activeProfile) return;
+            
+            var now = new Date();
+            var nowMin = now.getHours() * 60 + now.getMinutes();
+            var todayStr = now.toISOString().split('T')[0];
+            var timings = prayerTimesData.timings;
+            
+            var todayH = gregorianToHijri(now);
+            var dataObj = getDataObject('fard');
+            
+            var prayers = [
+                { id: 'fajr', time: parseTimeToMinutes(timings.fajr) },
+                { id: 'dhuhr', time: parseTimeToMinutes(timings.dhuhr) },
+                { id: 'asr', time: parseTimeToMinutes(timings.asr) },
+                { id: 'maghrib', time: parseTimeToMinutes(timings.maghrib) },
+                { id: 'isha', time: parseTimeToMinutes(timings.isha) }
+            ];
+
+            prayers.forEach(function(p) {
+                var beforeKey = todayStr + '_before_' + p.id;
+                var afterKey = todayStr + '_after_' + p.id;
+
+                // 20 min before prayer
+                var beforeMin = p.time - 20;
+                if (nowMin >= beforeMin && nowMin < p.time && !notifSentToday[beforeKey]) {
+                    sendPrayerNotification(getPrayerName(p.id), 'before');
+                    notifSentToday[beforeKey] = true;
+                }
+
+                // 30 min after prayer - only if NOT marked
+                var afterMin = p.time + 30;
+                if (nowMin >= afterMin && nowMin < afterMin + 10 && !notifSentToday[afterKey]) {
+                    // Check if this prayer was marked today
+                    var isMarked = false;
+                    if (dataObj[todayH.month] && dataObj[todayH.month][p.id] && dataObj[todayH.month][p.id][todayH.day]) {
+                        isMarked = true;
+                    }
+                    if (!isMarked) {
+                        sendPrayerNotification(getPrayerName(p.id), 'after');
+                    }
+                    notifSentToday[afterKey] = true;
+                }
+            });
+        }
+
+        function startPrayerTimesMonitor() {
+            // Fetch prayer times
+            fetchPrayerTimes(false);
+            
+            // Check every minute for notifications and refresh display
+            if (prayerTimesCheckInterval) clearInterval(prayerTimesCheckInterval);
+            prayerTimesCheckInterval = setInterval(function() {
+                // Re-render to update active/next prayer
+                renderPrayerTimes();
+                
+                // Check notifications
+                checkPrayerTimeNotifications();
+                
+                // At midnight, reset and refetch
+                var now = new Date();
+                if (now.getHours() === 0 && now.getMinutes() === 0) {
+                    notifSentToday = {};
+                    fetchPrayerTimes(true);
+                }
+            }, 60000);
+        }
+
+        // ==================== QADA (MISSED PRAYERS) REPORT ====================
+
+        function renderQadaReport() {
+            var statsGrid = document.getElementById('fardQadaStatsGrid');
+            var breakdown = document.getElementById('fardQadaMonthlyBreakdown');
+            var chartCanvas = document.getElementById('fardQadaChart');
+            if (!statsGrid || !breakdown) return;
+
+            var year = currentHijriYear;
+            var prayers = getPrayersArray('fard');
+            
+            // Collect qada data for all months
+            var qadaByPrayer = {};
+            var qadaByMonth = [];
+            var totalQada = 0;
+            
+            prayers.forEach(function(p) { qadaByPrayer[p.id] = 0; });
+
+            for (var month = 1; month <= 12; month++) {
+                var qadaData = getQadaData(year, month);
+                var monthTotal = 0;
+                
+                prayers.forEach(function(p) {
+                    if (qadaData[p.id]) {
+                        var count = Object.values(qadaData[p.id]).filter(function(v) { return v; }).length;
+                        qadaByPrayer[p.id] += count;
+                        monthTotal += count;
+                        totalQada += count;
+                    }
+                });
+                
+                qadaByMonth.push(monthTotal);
+            }
+
+            // Stats cards
+            var worstPrayer = { id: '', count: 0 };
+            var worstMonth = { month: 0, count: 0 };
+            
+            prayers.forEach(function(p) {
+                if (qadaByPrayer[p.id] > worstPrayer.count) {
+                    worstPrayer = { id: p.id, count: qadaByPrayer[p.id] };
+                }
+            });
+            
+            qadaByMonth.forEach(function(count, i) {
+                if (count > worstMonth.count) {
+                    worstMonth = { month: i + 1, count: count };
+                }
+            });
+
+            statsGrid.innerHTML = '' +
+                '<div class="stat-card" style="border-right:3px solid #dc2626;">' +
+                    '<div class="label">' + (currentLang === 'ar' ? 'إجمالي صلوات القضاء' : 'Total Qada Prayers') + '</div>' +
+                    '<div class="value" style="color:#dc2626;">' + totalQada + '</div>' +
+                    '<div class="sublabel">' + (currentLang === 'ar' ? 'هذه السنة الهجرية' : 'This Hijri year') + '</div>' +
+                '</div>' +
+                '<div class="stat-card" style="border-right:3px solid #f97316;">' +
+                    '<div class="label">' + (currentLang === 'ar' ? 'أكثر صلاة قضاءً' : 'Most Qada Prayer') + '</div>' +
+                    '<div class="value" style="color:#f97316;">' + (worstPrayer.id ? getPrayerName(worstPrayer.id) : '-') + '</div>' +
+                    '<div class="sublabel">' + worstPrayer.count + ' ' + (currentLang === 'ar' ? 'مرة' : 'times') + '</div>' +
+                '</div>' +
+                '<div class="stat-card" style="border-right:3px solid #eab308;">' +
+                    '<div class="label">' + (currentLang === 'ar' ? 'أسوأ شهر' : 'Worst Month') + '</div>' +
+                    '<div class="value" style="color:#eab308;">' + (worstMonth.month > 0 ? getHijriMonthName(worstMonth.month - 1) : '-') + '</div>' +
+                    '<div class="sublabel">' + worstMonth.count + ' ' + (currentLang === 'ar' ? 'صلاة قضاء' : 'qada prayers') + '</div>' +
+                '</div>';
+
+            // Monthly breakdown bars
+            var maxMonthQada = Math.max.apply(null, qadaByMonth) || 1;
+            var breakdownHtml = '';
+            
+            for (var m = 0; m < 12; m++) {
+                if (qadaByMonth[m] > 0) {
+                    var pct = Math.round((qadaByMonth[m] / maxMonthQada) * 100);
+                    breakdownHtml += '<div class="qada-month-row">' +
+                        '<span class="qm-month">' + getHijriMonthName(m) + '</span>' +
+                        '<div class="qm-bar"><div class="qm-bar-fill" style="width:' + pct + '%"></div></div>' +
+                        '<span class="qm-count">' + qadaByMonth[m] + '</span>' +
+                    '</div>';
+                }
+            }
+            
+            if (!breakdownHtml) {
+                breakdownHtml = '<p style="text-align:center;color:var(--text-muted);padding:16px;font-size:0.9em;">' + 
+                    (currentLang === 'ar' ? '🎉 لا توجد صلوات قضاء هذه السنة — أحسنت!' : '🎉 No qada prayers this year — great job!') + '</p>';
+            }
+            breakdown.innerHTML = breakdownHtml;
+
+            // Chart - Qada by prayer type
+            if (charts.fardQada) charts.fardQada.destroy();
+            if (chartCanvas && totalQada > 0) {
+                var prayerLabels = prayers.map(function(p) { return getPrayerName(p.id); });
+                var prayerQadaCounts = prayers.map(function(p) { return qadaByPrayer[p.id]; });
+                var prayerColors = prayers.map(function(p) { return p.color + 'cc'; });
+                
+                charts.fardQada = new Chart(chartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: prayerLabels,
+                        datasets: [{
+                            label: currentLang === 'ar' ? 'صلوات القضاء' : 'Qada Prayers',
+                            data: prayerQadaCounts,
+                            backgroundColor: prayerColors,
+                            borderColor: prayers.map(function(p) { return p.color; }),
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    }
+                });
+            }
+        }
+
+        // Add fardQada to charts object
+        charts.fardQada = null;
+
+        window.togglePrayerNotifications = togglePrayerNotifications;
+        window.refreshPrayerTimes = refreshPrayerTimes;
+
+        // ==================== HIJRI OVERRIDE DIALOG ====================
+        function showHijriOverrideDialog() {
+            var hYear = currentHijriYear;
+            var hMonth = currentHijriMonth;
+            var key = hYear + '_' + hMonth;
+            var overrides = getHijriOverrides();
+            var currentOverride = overrides[key] || '';
+            var currentDay1 = hijriToGregorianDay1(hYear, hMonth);
+            var isoStr = currentDay1.getFullYear() + '-' + String(currentDay1.getMonth()+1).padStart(2,'0') + '-' + String(currentDay1.getDate()).padStart(2,'0');
+            
+            // Build overlay
+            var overlay = document.createElement('div');
+            overlay.id = 'hijriOverrideOverlay';
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;';
+            
+            var monthLabel = getHijriMonthName(hMonth - 1) + ' ' + hYear;
+            
+            overlay.innerHTML = `
+                <div style="background:var(--bg-card);border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.2);font-family:'Cairo',sans-serif;direction:rtl;">
+                    <h3 style="margin:0 0 12px;color:var(--primary-dark);font-size:1.1em;">⚙️ تعديل بداية الشهر الهجري</h3>
+                    <p style="color:var(--text-muted);font-size:0.85em;margin:0 0 16px;">
+                        ${currentLang === 'ar' ? 'حدد التاريخ الميلادي لأول يوم من' : 'Set the Gregorian date for the 1st of'} <strong>${monthLabel}</strong>
+                    </p>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;margin-bottom:6px;font-size:0.85em;color:var(--text-body);">${currentLang === 'ar' ? 'أول يوم ميلادي:' : 'First Gregorian day:'}</label>
+                        <input type="date" id="hijriOverrideDateInput" value="${isoStr}" style="width:100%;padding:10px;border:1px solid var(--accent-border);border-radius:10px;font-size:16px;font-family:'Cairo',sans-serif;box-sizing:border-box;">
+                    </div>
+                    ${currentOverride ? '<p style="font-size:0.75em;color:var(--accent-dark);">✏️ ' + (currentLang === 'ar' ? 'تم تعديل هذا الشهر مسبقاً' : 'This month has a manual override') + '</p>' : ''}
+                    <div style="display:flex;gap:8px;margin-top:8px;">
+                        <button type="button" id="hijriOverrideSaveBtn" style="flex:1;padding:10px;background:var(--primary-dark);color:var(--text-on-dark);border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;">${currentLang === 'ar' ? 'حفظ' : 'Save'}</button>
+                        ${currentOverride ? '<button type="button" id="hijriOverrideResetBtn" style="padding:10px 16px;background:#fee2e2;color:#dc2626;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif;">' + (currentLang === 'ar' ? 'إعادة تعيين' : 'Reset') + '</button>' : ''}
+                        <button type="button" id="hijriOverrideCancelBtn" style="padding:10px 16px;background:#f3f4f6;color:var(--text-body);border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;">${currentLang === 'ar' ? 'إلغاء' : 'Cancel'}</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            document.getElementById('hijriOverrideSaveBtn').onclick = function() {
+                var dateVal = document.getElementById('hijriOverrideDateInput').value;
+                if (!dateVal) return;
+                overrides[key] = dateVal;
+                saveHijriOverrides(overrides);
+                _hijriDay1Cache = {}; // Clear cache
+                document.body.removeChild(overlay);
+                updateTrackerView(currentSection === 'sunnah' ? 'sunnah' : 'fard');
+                showToast(currentLang === 'ar' ? 'تم تعديل بداية الشهر الهجري ✓' : 'Hijri month start updated ✓', 'success');
+            };
+            
+            var resetBtn = document.getElementById('hijriOverrideResetBtn');
+            if (resetBtn) {
+                resetBtn.onclick = function() {
+                    delete overrides[key];
+                    saveHijriOverrides(overrides);
+                    _hijriDay1Cache = {};
+                    document.body.removeChild(overlay);
+                    updateTrackerView(currentSection === 'sunnah' ? 'sunnah' : 'fard');
+                    showToast(currentLang === 'ar' ? 'تم إعادة التعيين ✓' : 'Reset to default ✓', 'info');
+                };
+            }
+            
+            document.getElementById('hijriOverrideCancelBtn').onclick = function() {
+                document.body.removeChild(overlay);
+            };
+            
+            overlay.onclick = function(e) {
+                if (e.target === overlay) document.body.removeChild(overlay);
+            };
+        }
+
+        window.showHijriOverrideDialog = showHijriOverrideDialog;
         window.selectProfile = selectProfile;
         window.editProfile = editProfile;
         window.deleteProfile = deleteProfile;
@@ -7025,6 +8312,11 @@
         window.fastingExemptModeOn = fastingExemptModeOn;
 
         init();
+        
+        // Start prayer times monitor
+        setTimeout(function() {
+            if (activeProfile) startPrayerTimesMonitor();
+        }, 1500);
 
         // ==================== PWA Service Worker ====================
         if ('serviceWorker' in navigator) {
