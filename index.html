@@ -2307,6 +2307,33 @@
             .pt-item .pt-time { font-size: 0.75em; }
         }
 
+        /* Weekly View */
+        .week-toggle-btn.active {
+            background: var(--primary-dark) !important;
+            color: var(--text-on-dark) !important;
+            border-color: var(--primary-dark) !important;
+        }
+        .week-day-header {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .week-day-label {
+            width: 42px;
+            text-align: center;
+            font-size: 0.65em;
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-family: 'Cairo', sans-serif;
+        }
+        .week-day-label.today {
+            color: var(--primary-dark);
+            background: rgba(201,162,39,0.2);
+            border-radius: 6px;
+            padding: 1px 0;
+        }
+
         /* Qada Report */
         .qada-month-row {
             display: flex;
@@ -3424,6 +3451,17 @@
                     <button type="button" onclick="showHijriOverrideDialog()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:2px 8px;font-size:0.7em;cursor:pointer;color:var(--text-muted);" title="تعديل بداية الشهر الهجري">⚙️</button>
                 </div>
 
+                <!-- Weekly/Monthly Toggle -->
+                <div style="display:flex;justify-content:center;margin:6px 0 10px;gap:4px;">
+                    <button type="button" id="weekViewBtn" class="week-toggle-btn" onclick="setTrackerViewMode('week')" style="padding:5px 14px;border-radius:8px 0 0 8px;border:1.5px solid var(--accent-border);background:var(--bg-card);font-family:'Cairo',sans-serif;font-size:0.8em;font-weight:700;cursor:pointer;color:var(--text-body);">📆 أسبوعي</button>
+                    <button type="button" id="monthViewBtn" class="week-toggle-btn active" onclick="setTrackerViewMode('month')" style="padding:5px 14px;border-radius:0 8px 8px 0;border:1.5px solid var(--accent-border);background:var(--primary-dark);color:var(--text-on-dark);font-family:'Cairo',sans-serif;font-size:0.8em;font-weight:700;cursor:pointer;">📅 شهري</button>
+                </div>
+                <div id="weekNavBar" style="display:none;text-align:center;margin-bottom:8px;">
+                    <button type="button" onclick="changeWeek(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.85em;">◄</button>
+                    <span id="weekRangeLabel" style="display:inline-block;min-width:180px;font-weight:700;font-size:0.9em;color:var(--primary-dark);font-family:'Amiri',serif;"></span>
+                    <button type="button" onclick="changeWeek(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.85em;">►</button>
+                </div>
+
                 <div class="stats">
                     <div class="stat-item">
                         <div class="label" data-t="total_completed">إجمالي الصلوات المقضية</div>
@@ -4263,7 +4301,15 @@
         }
 
         function getDaysInMonth(month, year) {
-            // Now works with Hijri months
+            // Safety: if year looks Gregorian (>2000), convert to Hijri first
+            if (year > 2000) {
+                try {
+                    var midDate = new Date(year, month - 1, 15);
+                    var h = gregorianToHijri(midDate);
+                    console.warn('getDaysInMonth called with Gregorian year ' + year + ', converting to Hijri ' + h.year + '/' + h.month);
+                    return getHijriDaysInMonth(h.year, h.month);
+                } catch(e) {}
+            }
             return getHijriDaysInMonth(year, month);
         }
 
@@ -4441,7 +4487,7 @@
                 let completed = 0;
                 let total = 0;
                 for (let month = 1; month <= 12; month++) {
-                    const days = getDaysInMonth(month, currentYear);
+                    const days = getHijriDaysInMonth(currentHijriYear, month);
                     total += days;
                     if (dataObj[month] && dataObj[month][prayer.id]) {
                         completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
@@ -4469,7 +4515,7 @@
                 const congMonthlyData = [];
                 
                 for (let month = 1; month <= 12; month++) {
-                    const congData = getCongregationData(currentYear, month);
+                    const congData = getCongregationData(currentHijriYear, month);
                     const prayers = getPrayersArray('fard');
                     const dataObj = getDataObject('fard');
                     let monthCong = 0, monthCompleted = 0;
@@ -4501,7 +4547,7 @@
                     charts.fardCong = new Chart(congCtx, {
                         type: 'bar',
                         data: {
-                            labels: getMonthNames(),
+                            labels: getHijriMonthNames(),
                             datasets: [{
                                 label: t('cong_rate'),
                                 data: congMonthlyData,
@@ -4562,20 +4608,21 @@
         function updateCharts(type) {
             const prayers = getPrayersArray(type);
             const dataObj = getDataObject(type);
+            const hYear = currentHijriYear;
             
             // Monthly Progress Chart
             const monthlyData = [];
             for (let month = 1; month <= 12; month++) {
-                monthlyData.push(getMonthStats(type, month, currentYear).percentage);
+                monthlyData.push(getMonthStats(type, month, hYear).percentage);
             }
             
             if (charts[type].monthlyProgress) charts[type].monthlyProgress.destroy();
             charts[type].monthlyProgress = new Chart(document.getElementById(`${type}MonthlyProgressChart`), {
                 type: 'line',
                 data: {
-                    labels: monthNames,
+                    labels: getHijriMonthNames(),
                     datasets: [{
-                        label: 'نسبة الإنجاز %',
+                        label: t('chart_percentage'),
                         data: monthlyData,
                         borderColor: '#d4af37',
                         backgroundColor: 'rgba(212, 175, 55, 0.1)',
@@ -4588,18 +4635,8 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: value => value + '%'
-                            }
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }
                 }
             });
             
@@ -4608,11 +4645,10 @@
             let prayerTypeLabel;
             
             if (type === 'fard') {
-                // For fard: show congregation count per prayer
                 prayerTypeData = prayers.map(prayer => {
                     let congCount = 0;
                     for (let month = 1; month <= 12; month++) {
-                        const congData = getCongregationData(currentYear, month);
+                        const congData = getCongregationData(hYear, month);
                         if (congData[prayer.id]) {
                             congCount += Object.values(congData[prayer.id]).filter(v => v).length;
                         }
@@ -4621,7 +4657,6 @@
                 });
                 prayerTypeLabel = t('congregation');
             } else {
-                // For sunnah: show completion count
                 prayerTypeData = prayers.map(prayer => {
                     let completed = 0;
                     for (let month = 1; month <= 12; month++) {
@@ -4650,22 +4685,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
             
             // Completion Pie Chart
-            const yearStats = getYearStats(type, currentYear);
+            const yearStats = getYearStats(type, hYear);
             if (charts[type].completionPie) charts[type].completionPie.destroy();
             charts[type].completionPie = new Chart(document.getElementById(`${type}CompletionPieChart`), {
                 type: 'doughnut',
                 data: {
-                    labels: type === 'fard' ? ['مقضية', 'متبقية'] : ['مؤداة', 'متبقية'],
+                    labels: [t('chart_completed_label'), t('chart_remaining_label')],
                     datasets: [{
                         data: [yearStats.completed, yearStats.total - yearStats.completed],
                         backgroundColor: ['#2d7a4f', '#e0e0e0'],
@@ -4676,11 +4707,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
             
@@ -4689,7 +4716,7 @@
                 let completed = 0;
                 let total = 0;
                 for (let month = 1; month <= 12; month++) {
-                    const days = getDaysInMonth(month, currentYear);
+                    const days = getHijriDaysInMonth(hYear, month);
                     total += days;
                     if (dataObj[month] && dataObj[month][prayer.id]) {
                         completed += Object.values(dataObj[month][prayer.id]).filter(v => v).length;
@@ -4830,18 +4857,21 @@
             
             const prayers = getPrayersArray(type);
             const dataObj = getDataObject(type);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            // Use Hijri variables directly — never rely on currentYear which might be stale
+            const hYear = currentHijriYear;
+            const hMonth = currentHijriMonth;
+            const daysInMonth = getHijriDaysInMonth(hYear, hMonth);
             const isFemale = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
-            const exemptData = isFemale ? getExemptDays(currentYear, currentMonth) : {};
+            const exemptData = isFemale ? getExemptDays(hYear, hMonth) : {};
             
             prayers.forEach(prayer => {
                 const section = document.createElement('div');
                 section.className = `prayer-section ${prayer.class}`;
                 
                 let completed = 0;
-                const exemptCount = isFemale ? getExemptCountForPrayer(currentYear, currentMonth, prayer.id) : 0;
-                if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
-                    completed = Object.values(dataObj[currentMonth][prayer.id]).filter(v => v).length;
+                const exemptCount = isFemale ? getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
+                if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
+                    completed = Object.values(dataObj[hMonth][prayer.id]).filter(v => v).length;
                 }
                 const adjustedTotal = daysInMonth - exemptCount;
                 
@@ -4864,27 +4894,27 @@
                     dayBox.className = 'day-box';
                     
                     if (isPrayerExempt(exemptData, prayer.id, day)) {
-                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
+                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         dayBox.classList.add('exempt');
-                    } else if (isFutureDate(day, currentMonth, currentYear)) {
-                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
+                    } else if (isFutureDateHijri(day, hMonth, hYear)) {
+                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         dayBox.classList.add('disabled');
                         dayBox.style.opacity = '0.3';
                     } else {
-                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
+                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         
-                        if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
+                        if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
                             dayBox.classList.add('checked');
                             // Show congregation for fard
                             if (type === 'fard') {
-                                const congData = getCongregationData(currentYear, currentMonth);
+                                const congData = getCongregationData(hYear, hMonth);
                                 if (isCongregation(congData, prayer.id, day)) {
                                     dayBox.classList.add('congregation');
                                     dayBox.classList.remove('checked');
                                 }
                             }
                             // Show qada
-                            const qadaData = getQadaData(currentYear, currentMonth);
+                            const qadaData = getQadaData(hYear, hMonth);
                             if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
                                 dayBox.classList.remove('checked', 'congregation');
                                 dayBox.classList.add('qada');
@@ -4964,7 +4994,7 @@
             
             const prayers = getPrayersArray(type);
             const dataObj = getDataObject(type);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const daysInMonth = getHijriDaysInMonth(currentHijriYear, currentHijriMonth);
             
             prayers.forEach(prayer => {
                 const section = document.createElement('div');
@@ -5045,7 +5075,7 @@
         function updateTrackerStats(type) {
             const prayers = getPrayersArray(type);
             const dataObj = getDataObject(type);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const daysInMonth = getHijriDaysInMonth(currentHijriYear, currentHijriMonth);
             let totalCompleted = 0;
             let totalPossible = daysInMonth * prayers.length;
             
@@ -5075,6 +5105,16 @@
             }
             currentMonth = currentHijriMonth;
             currentYear = currentHijriYear;
+            
+            // Reset week start for weekly view
+            if (trackerViewMode === 'week') {
+                if (delta > 0) {
+                    currentWeekStart = 1;
+                } else {
+                    currentWeekStart = Math.max(1, getHijriDaysInMonth(currentHijriYear, currentHijriMonth) - 6);
+                }
+                updateWeekLabel();
+            }
             
             document.getElementById(`${type}TrackerMonthSelect`).value = currentHijriMonth;
             document.getElementById(`${type}TrackerYearInput`).value = currentHijriYear;
@@ -6210,8 +6250,10 @@
             if (!isChecked) {
                 // State 0 → State 1: Mark as prayed (alone) ✓
                 dataObj[currentMonth][prayerId][day] = true;
+                hapticFeedback('success');
             } else if (isChecked && !isCong && !isQada) {
                 // State 1 → State 2: Mark as congregation 🕌
+                hapticFeedback('medium');
                 if (type === 'fard' && congData) {
                     if (!congData[prayerId]) congData[prayerId] = {};
                     congData[prayerId][day] = true;
@@ -6222,11 +6264,13 @@
                 }
             } else if (isCong) {
                 // State 2 → State 3: Mark as qada ⏰
+                hapticFeedback('light');
                 if (congData[prayerId]) { delete congData[prayerId][day]; if (Object.keys(congData[prayerId]).length === 0) delete congData[prayerId]; }
                 if (!qadaData[prayerId]) qadaData[prayerId] = {};
                 qadaData[prayerId][day] = true;
             } else if (isQada) {
                 // State 3 → State 0: Remove everything
+                hapticFeedback('light');
                 dataObj[currentMonth][prayerId][day] = false;
                 if (qadaData[prayerId]) { delete qadaData[prayerId][day]; if (Object.keys(qadaData[prayerId]).length === 0) delete qadaData[prayerId]; }
                 if (congData && congData[prayerId]) { delete congData[prayerId][day]; }
@@ -6263,24 +6307,26 @@
         
         function batchMarkPrayer(type, prayerId) {
             const dataObj = getDataObject(type);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const hYear = currentHijriYear;
+            const hMonth = currentHijriMonth;
+            const daysInMonth = getHijriDaysInMonth(hYear, hMonth);
             const isFemaleUser = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
-            const exemptData = isFemaleUser ? getExemptDays(currentYear, currentMonth) : {};
+            const exemptData = isFemaleUser ? getExemptDays(hYear, hMonth) : {};
             
-            if (!dataObj[currentMonth][prayerId]) dataObj[currentMonth][prayerId] = {};
+            if (!dataObj[hMonth][prayerId]) dataObj[hMonth][prayerId] = {};
             
             // Count current state
             let markedCount = 0;
             for (let day = 1; day <= daysInMonth; day++) {
-                if (isFutureDate(day, currentMonth, currentYear)) continue;
+                if (isFutureDateHijri(day, hMonth, hYear)) continue;
                 if (isPrayerExempt(exemptData, prayerId, day)) continue;
-                if (dataObj[currentMonth][prayerId][day]) markedCount++;
+                if (dataObj[hMonth][prayerId][day]) markedCount++;
             }
             
             // Count available days
             let availableDays = 0;
             for (let day = 1; day <= daysInMonth; day++) {
-                if (isFutureDate(day, currentMonth, currentYear)) continue;
+                if (isFutureDateHijri(day, hMonth, hYear)) continue;
                 if (isPrayerExempt(exemptData, prayerId, day)) continue;
                 availableDays++;
             }
@@ -6289,12 +6335,12 @@
             const shouldMark = markedCount < availableDays / 2;
             
             for (let day = 1; day <= daysInMonth; day++) {
-                if (isFutureDate(day, currentMonth, currentYear)) continue;
+                if (isFutureDateHijri(day, hMonth, hYear)) continue;
                 if (isPrayerExempt(exemptData, prayerId, day)) continue;
-                dataObj[currentMonth][prayerId][day] = shouldMark;
+                dataObj[hMonth][prayerId][day] = shouldMark;
             }
             
-            saveMonthData(type, currentMonth);
+            saveMonthData(type, hMonth);
             renderTrackerMonth(type);
             updateTrackerStats(type);
             renderStreaks(type);
@@ -6628,6 +6674,7 @@
                         dayBox.onclick = () => {
                             const d = getVolFastingData(fastingYear, fastingMonth);
                             d[day] = !d[day];
+                            hapticFeedback(d[day] ? 'success' : 'light');
                             if (!d[day]) delete d[day];
                             saveVolFastingData(fastingYear, fastingMonth, d);
                             updateVoluntaryFasting();
@@ -6770,12 +6817,12 @@
             const current = data[day] || '';
             const isFemale = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
             
-            // Males: empty → fasted → missed → empty (no exempt)
-            // Females: empty → fasted → exempt → missed → empty
             const cycle = isFemale 
                 ? { '': 'fasted', 'fasted': 'exempt', 'exempt': 'missed', 'missed': '' }
                 : { '': 'fasted', 'fasted': 'missed', 'missed': '' };
             data[day] = cycle[current];
+            
+            hapticFeedback(data[day] === 'fasted' ? 'success' : 'light');
             
             if (!data[day]) delete data[day];
             
@@ -6842,9 +6889,12 @@
             
             const prayers = getPrayersArray(type);
             const dataObj = getDataObject(type);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            // Use Hijri variables directly
+            const hYear = currentHijriYear;
+            const hMonth = currentHijriMonth;
+            const daysInMonth = getHijriDaysInMonth(hYear, hMonth);
             const isFemale = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
-            const exemptData = isFemale ? getExemptDays(currentYear, currentMonth) : {};
+            const exemptData = isFemale ? getExemptDays(hYear, hMonth) : {};
             const isExemptModeOn = exemptMode[type];
             
             prayers.forEach(prayer => {
@@ -6852,9 +6902,9 @@
                 section.className = `prayer-section ${prayer.class}`;
                 
                 let completed = 0;
-                let exemptCount = isFemale ? getExemptCountForPrayer(currentYear, currentMonth, prayer.id) : 0;
-                if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
-                    completed = Object.values(dataObj[currentMonth][prayer.id]).filter(v => v).length;
+                let exemptCount = isFemale ? getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
+                if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
+                    completed = Object.values(dataObj[hMonth][prayer.id]).filter(v => v).length;
                 }
                 
                 const adjustedTotal = daysInMonth - exemptCount;
@@ -6890,30 +6940,55 @@
                 const grid = document.createElement('div');
                 grid.className = 'days-grid';
                 
-                for (let day = 1; day <= daysInMonth; day++) {
+                // Determine which days to show based on view mode
+                var daysToShow = [];
+                if (trackerViewMode === 'week') {
+                    daysToShow = getWeekDays();
+                } else {
+                    for (var _d = 1; _d <= daysInMonth; _d++) daysToShow.push(_d);
+                }
+                
+                // Add day-of-week headers for weekly view (only for first prayer in section)
+                if (trackerViewMode === 'week' && prayer === prayers[0]) {
+                    var weekHeaders = getWeekDayHeaders();
+                    var headerRow = document.createElement('div');
+                    headerRow.className = 'week-day-header';
+                    weekHeaders.forEach(function(wh) {
+                        var lbl = document.createElement('div');
+                        lbl.className = 'week-day-label' + (wh.isToday ? ' today' : '');
+                        lbl.textContent = wh.dayName;
+                        headerRow.appendChild(lbl);
+                    });
+                    section.appendChild(header);
+                    section.appendChild(headerRow);
+                } else {
+                    section.appendChild(header);
+                }
+                
+                daysToShow.forEach(function(day) {
                     const dayBox = document.createElement('div');
                     dayBox.className = 'day-box';
                     
                     // Add Gregorian date reference as tooltip
                     try {
-                        var gDate = hijriToGregorian(currentHijriYear, currentHijriMonth, day);
+                        var gDate = hijriToGregorian(hYear, hMonth, day);
                         dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
                     } catch(e) {}
                     
                     if (isPrayerExempt(exemptData, prayer.id, day)) {
-                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
+                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         dayBox.classList.add('exempt');
                         
                         if (isExemptModeOn) {
                             dayBox.onclick = () => toggleExemptPrayer(prayer.id, day);
                             dayBox.title = t('click_remove_exempt');
                         }
-                    } else if (isFutureDate(day, currentMonth, currentYear)) {
-                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
+                    } else if (isFutureDateHijri(day, hMonth, hYear)) {
+                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         dayBox.classList.add('disabled');
                         dayBox.style.opacity = '0.3';
                     } else {
-                        dayBox.appendChild(createDualDayNum(day, currentHijriYear, currentHijriMonth));
+                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         
                         if (isExemptModeOn) {
                             dayBox.onclick = () => toggleExemptPrayer(prayer.id, day);
@@ -6921,18 +6996,18 @@
                             dayBox.style.cursor = 'crosshair';
 
                         } else {
-                            if (dataObj[currentMonth][prayer.id] && dataObj[currentMonth][prayer.id][day]) {
+                            if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
                                 dayBox.classList.add('checked');
                                 // Show congregation icon if marked
                                 if (type === 'fard') {
-                                    const congData = getCongregationData(currentYear, currentMonth);
+                                    const congData = getCongregationData(hYear, hMonth);
                                     if (isCongregation(congData, prayer.id, day)) {
                                         dayBox.classList.add('congregation');
                                         dayBox.classList.remove('checked');
                                     }
                                 }
                                 // Show qada
-                                const qadaData = getQadaData(currentYear, currentMonth);
+                                const qadaData = getQadaData(hYear, hMonth);
                                 if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
                                     dayBox.classList.remove('checked', 'congregation');
                                     dayBox.classList.add('qada');
@@ -6943,9 +7018,8 @@
                     }
                     
                     grid.appendChild(dayBox);
-                }
+                });
                 
-                section.appendChild(header);
                 section.appendChild(grid);
                 container.appendChild(section);
             });
@@ -6956,20 +7030,22 @@
         updateTrackerStats = function(type) {
             const prayers = getPrayersArray(type);
             const dataObj = getDataObject(type);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const hYear = currentHijriYear;
+            const hMonth = currentHijriMonth;
+            const daysInMonth = getHijriDaysInMonth(hYear, hMonth);
             const isFemale = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
             
             let totalCompleted = 0;
             let totalPossible = 0;
             
             prayers.forEach(prayer => {
-                const exemptCount = isFemale ? getExemptCountForPrayer(currentYear, currentMonth, prayer.id) : 0;
+                const exemptCount = isFemale ? getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
                 const adjustedDays = daysInMonth - exemptCount;
                 totalPossible += adjustedDays;
                 
                 let completed = 0;
-                if (dataObj[currentMonth] && dataObj[currentMonth][prayer.id]) {
-                    completed = Object.values(dataObj[currentMonth][prayer.id]).filter(v => v).length;
+                if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
+                    completed = Object.values(dataObj[hMonth][prayer.id]).filter(v => v).length;
                 }
                 totalCompleted += completed;
             });
@@ -7578,11 +7654,11 @@
             const weekTotals = [0,0,0,0,0,0,0];
             
             for (let month = 1; month <= 12; month++) {
-                const congData = getCongregationData(currentYear, month);
-                const daysInMonth = getDaysInMonth(month, currentYear);
+                const congData = getCongregationData(currentHijriYear, month);
+                const daysInMonth = getHijriDaysInMonth(currentHijriYear, month);
                 for (let day = 1; day <= daysInMonth; day++) {
                     // Convert Hijri date to Gregorian to get day of week
-                    const date = hijriToGregorian(currentYear, month, day);
+                    const date = hijriToGregorian(currentHijriYear, month, day);
                     const dow = date.getDay();
                     weekTotals[dow]++;
                     prayers.forEach(p => {
@@ -7625,14 +7701,14 @@
             
             const prayers = getPrayersArray('fard');
             const dataObj = getDataObject('fard');
-            const mNames = getMonthNames();
+            const mNames = getHijriMonthNames();
             
             // Build monthly CONGREGATION rates
             const heatData = [];
             const labels = [];
             
             for (let month = 1; month <= 12; month++) {
-                const congData = getCongregationData(currentYear, month);
+                const congData = getCongregationData(currentHijriYear, month);
                 let totalCompleted = 0, totalCong = 0;
                 
                 prayers.forEach(p => {
@@ -8524,6 +8600,157 @@
         }
 
         window.toggleMonthDays = toggleMonthDays;
+
+        // ==================== WEEKLY VIEW ====================
+        var trackerViewMode = 'month'; // 'month' or 'week'
+        var currentWeekStart = 0; // Hijri day number that starts the current week view
+
+        function setTrackerViewMode(mode) {
+            trackerViewMode = mode;
+            
+            // Update toggle buttons
+            var weekBtn = document.getElementById('weekViewBtn');
+            var monthBtn = document.getElementById('monthViewBtn');
+            var weekNav = document.getElementById('weekNavBar');
+            var controls = document.querySelector('#fardTrackerView .controls');
+            
+            if (weekBtn) weekBtn.classList.toggle('active', mode === 'week');
+            if (monthBtn) monthBtn.classList.toggle('active', mode === 'month');
+            if (weekNav) weekNav.style.display = mode === 'week' ? 'block' : 'none';
+            if (controls) controls.style.display = mode === 'week' ? 'none' : '';
+            
+            if (mode === 'week') {
+                // Set current week to contain today's Hijri day
+                var todayH = getTodayHijri();
+                if (todayH.year === currentHijriYear && todayH.month === currentHijriMonth) {
+                    // Find the Saturday that starts this week (or day 1 if near start)
+                    var todayG = new Date();
+                    todayG.setHours(12, 0, 0, 0);
+                    var dow = todayG.getDay(); // 0=Sun
+                    // Go back to Saturday (dow 6)
+                    var daysBack = (dow + 1) % 7; // Sat=0, Sun=1, Mon=2...
+                    var satG = new Date(todayG.getTime() - daysBack * 86400000);
+                    var satH = gregorianToHijri(satG);
+                    if (satH.year === currentHijriYear && satH.month === currentHijriMonth) {
+                        currentWeekStart = satH.day;
+                    } else {
+                        currentWeekStart = 1;
+                    }
+                } else {
+                    currentWeekStart = 1;
+                }
+            }
+            
+            updateWeekLabel();
+            renderTrackerMonth(currentSection === 'sunnah' ? 'sunnah' : 'fard');
+            updateTrackerStats(currentSection === 'sunnah' ? 'sunnah' : 'fard');
+        }
+
+        function changeWeek(delta) {
+            var daysInMonth = getHijriDaysInMonth(currentHijriYear, currentHijriMonth);
+            currentWeekStart += delta * 7;
+            
+            if (currentWeekStart < 1) {
+                // Go to previous month
+                changeTrackerMonth(currentSection === 'sunnah' ? 'sunnah' : 'fard', -1);
+                var newDays = getHijriDaysInMonth(currentHijriYear, currentHijriMonth);
+                currentWeekStart = Math.max(1, newDays - 6);
+            } else if (currentWeekStart > daysInMonth) {
+                // Go to next month
+                changeTrackerMonth(currentSection === 'sunnah' ? 'sunnah' : 'fard', 1);
+                currentWeekStart = 1;
+            }
+            
+            updateWeekLabel();
+            renderTrackerMonth(currentSection === 'sunnah' ? 'sunnah' : 'fard');
+        }
+
+        function getWeekDays() {
+            var daysInMonth = getHijriDaysInMonth(currentHijriYear, currentHijriMonth);
+            var days = [];
+            for (var i = 0; i < 7; i++) {
+                var d = currentWeekStart + i;
+                if (d >= 1 && d <= daysInMonth) {
+                    days.push(d);
+                }
+            }
+            return days;
+        }
+
+        function updateWeekLabel() {
+            var label = document.getElementById('weekRangeLabel');
+            if (!label) return;
+            var days = getWeekDays();
+            if (days.length === 0) return;
+            
+            var first = days[0];
+            var last = days[days.length - 1];
+            var monthName = getHijriMonthName(currentHijriMonth - 1);
+            
+            // Show day names for the week
+            var firstG = hijriToGregorian(currentHijriYear, currentHijriMonth, first);
+            var lastG = hijriToGregorian(currentHijriYear, currentHijriMonth, last);
+            
+            label.textContent = first + ' - ' + last + ' ' + monthName + ' (' + firstG.getDate() + '-' + lastG.getDate() + '/' + (lastG.getMonth()+1) + ')';
+        }
+
+        function getWeekDayHeaders() {
+            var days = getWeekDays();
+            var dayNamesShort = currentLang === 'ar' 
+                ? ['سبت', 'أحد', 'إثن', 'ثلث', 'أرب', 'خمس', 'جمع']
+                : ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+            
+            var todayH = getTodayHijri();
+            var headers = [];
+            
+            days.forEach(function(hDay) {
+                var gDate = hijriToGregorian(currentHijriYear, currentHijriMonth, hDay);
+                var dow = gDate.getDay(); // 0=Sun
+                // Remap: Sat=0 in our display
+                var dayIdx = (dow + 1) % 7;
+                var isToday = (todayH.year === currentHijriYear && todayH.month === currentHijriMonth && todayH.day === hDay);
+                headers.push({
+                    hDay: hDay,
+                    gDay: gDate.getDate(),
+                    dayName: dayNamesShort[dayIdx],
+                    isToday: isToday
+                });
+            });
+            
+            return headers;
+        }
+
+        window.setTrackerViewMode = setTrackerViewMode;
+        window.changeWeek = changeWeek;
+
+        // ==================== HAPTIC FEEDBACK ====================
+        function hapticFeedback(type) {
+            // type: 'light', 'medium', 'success'
+            try {
+                if (navigator.vibrate) {
+                    if (type === 'light') navigator.vibrate(10);
+                    else if (type === 'medium') navigator.vibrate(25);
+                    else if (type === 'success') navigator.vibrate([15, 50, 15]);
+                    else navigator.vibrate(15);
+                }
+            } catch(e) {}
+            
+            // Also try AudioContext for a subtle click sound
+            try {
+                if (type === 'success' || type === 'medium') {
+                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = type === 'success' ? 880 : 660;
+                    gain.gain.value = 0.03; // Very subtle
+                    osc.start();
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.stop(ctx.currentTime + 0.08);
+                }
+            } catch(e) {}
+        }
 
         // ==================== HIJRI OVERRIDE DIALOG ====================
         function showHijriOverrideDialog() {
