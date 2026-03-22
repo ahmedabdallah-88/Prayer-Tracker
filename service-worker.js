@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v41
-const CACHE_NAME = 'prayer-tracker-v41';
+// Prayer Tracker PWA — Service Worker v47
+const CACHE_NAME = 'prayer-tracker-v47';
 const ASSETS = [
     './',
     './index.html',
@@ -16,7 +16,7 @@ const ASSETS = [
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v41...');
+    console.log('[SW] Installing v47...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -26,7 +26,7 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v41...');
+    console.log('[SW] Activating v47...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
