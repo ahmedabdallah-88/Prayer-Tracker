@@ -5571,14 +5571,17 @@
             
             var todayH = gregorianToHijri(checkDate);
             
+            // Check if a day exceeds user's month-length override (ghost day from Intl mismatch)
+            function isOverflowDay(hYear, hMonth, hDay) {
+                var maxDays = getHijriDaysInMonth(hYear, hMonth);
+                return hDay > maxDays;
+            }
+            
             // Helper: check if a Hijri date has the relevant data
             function isDayChecked(hYear, hMonth, hDay) {
-                // Validate day is within month bounds
-                var maxDays = getHijriDaysInMonth(hYear, hMonth);
-                if (hDay > maxDays || hDay < 1) return false;
+                if (hDay < 1) return false;
                 
                 if (useCongregation) {
-                    // Check congregation data
                     var congKey = getCongregationKey(hYear, hMonth);
                     var stored = localStorage.getItem(congKey);
                     if (stored) {
@@ -5587,7 +5590,6 @@
                     }
                     return false;
                 } else {
-                    // Check tracker data
                     var key = getStorageKey(type, hMonth, hYear);
                     var stored = localStorage.getItem(key);
                     if (stored) {
@@ -5599,7 +5601,10 @@
             }
             
             // Check if today is already marked
-            let startFromToday = isDayChecked(todayH.year, todayH.month, todayH.day);
+            let startFromToday = false;
+            if (!isOverflowDay(todayH.year, todayH.month, todayH.day)) {
+                startFromToday = isDayChecked(todayH.year, todayH.month, todayH.day);
+            }
             
             if (!startFromToday) {
                 checkDate = new Date(checkDate.getTime() - 86400000);
@@ -5608,6 +5613,12 @@
             // Calculate current streak (going backwards)
             for (let i = 0; i < 730; i++) {
                 var hDate = gregorianToHijri(checkDate);
+                
+                // Skip overflow days (Intl says day 30 but user set month to 29)
+                if (isOverflowDay(hDate.year, hDate.month, hDate.day)) {
+                    checkDate = new Date(checkDate.getTime() - 86400000);
+                    continue; // Don't break streak, just skip
+                }
                 
                 if (isDayChecked(hDate.year, hDate.month, hDate.day)) {
                     currentStreak++;
@@ -5624,6 +5635,12 @@
             
             while (scanDate <= todayNoon) {
                 var hScan = gregorianToHijri(scanDate);
+                
+                // Skip overflow days
+                if (isOverflowDay(hScan.year, hScan.month, hScan.day)) {
+                    scanDate = new Date(scanDate.getTime() + 86400000);
+                    continue; // Don't break streak, just skip
+                }
                 
                 if (isDayChecked(hScan.year, hScan.month, hScan.day)) {
                     tempStreak++;
