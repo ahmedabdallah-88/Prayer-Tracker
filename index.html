@@ -18,6 +18,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+        
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 20;
+            display: inline-block;
+            vertical-align: middle;
+        }
 
         /* ==================== THEME SYSTEM ==================== */
         :root {
@@ -819,42 +827,66 @@
 
         .stat-card {
             background: var(--bg-card);
-            padding: 20px;
-            border-radius: var(--card-radius, 16px);
+            padding: 16px;
+            border-radius: 20px;
             border: none;
-            box-shadow: var(--card-shadow, 0 2px 12px rgba(0,0,0,0.04));
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
             text-align: center;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
         }
 
         .stat-card .label {
             color: var(--text-muted);
-            font-size: 0.8em;
-            margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 0.65em;
+            margin-bottom: 4px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         .stat-card .value {
             color: var(--text-primary);
-            font-size: 2.2em;
+            font-size: 2em;
             font-weight: 800;
+            line-height: 1.1;
         }
 
         .stat-card .sublabel {
             color: var(--text-muted);
-            font-size: 0.75em;
+            font-size: 0.7em;
             margin-top: 4px;
         }
-            font-size: 0.9em;
-            margin-top: 5px;
+        
+        /* Hero stat card - gradient green */
+        .stat-card.hero-stat {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--primary-dark, #003527), var(--primary-medium, #064e3b));
+            color: white;
+            padding: 20px 24px;
+            text-align: start;
         }
+        .stat-card.hero-stat .label { color: rgba(255,255,255,0.7); }
+        .stat-card.hero-stat .value { color: white; font-size: 2.8em; }
+        .stat-card.hero-stat .sublabel { color: rgba(255,255,255,0.6); }
+        .stat-card.hero-stat .hero-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(5,150,105,0.35);
+            color: white;
+            font-size: 0.75em;
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 20px;
+        }
+        [dir="rtl"] .stat-card.hero-stat .hero-badge { left: auto; right: 14px; }
 
         .charts-container {
             display: grid;
@@ -2553,55 +2585,73 @@
         .tab-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            height: 66px;
+            height: 72px;
             padding-bottom: env(safe-area-inset-bottom, 0px);
-            background: var(--bg-card);
+            background: rgba(245, 245, 220, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
-            align-items: stretch;
+            align-items: center;
+            justify-content: space-around;
             z-index: 10000;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.04);
             border-top: none;
-            border-radius: 24px 24px 0 0;
+            border-radius: 20px 20px 0 0;
         }
 
         .tab-item {
-            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 2px;
             cursor: pointer;
-            color: var(--text-muted, #999);
+            color: rgba(15, 76, 58, 0.5);
             font-family: 'Cairo', sans-serif;
-            font-size: 0.7em;
+            font-size: 0.65em;
             font-weight: 600;
-            transition: color 0.2s;
+            transition: all 0.3s;
             border: none;
             background: transparent;
             padding: 4px 0;
             -webkit-tap-highlight-color: transparent;
             position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .tab-item .tab-icon { font-size: 1.8em; }
-        .tab-item .tab-label { line-height: 1; }
-
-        .tab-item.active {
-            color: var(--primary-dark);
-        }
-
-        .tab-item.active .tab-icon {
-            background: var(--primary-dark);
-            color: white;
-            width: 44px; height: 44px;
-            border-radius: 16px;
+        .tab-item .tab-icon {
+            font-size: 1em;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2em;
-            margin-top: -12px;
-            box-shadow: 0 4px 12px rgba(26,60,52,0.25);
+        }
+        .tab-item .tab-icon .material-symbols-outlined { font-size: 24px; }
+        .tab-item .tab-label { line-height: 1; margin-top: 2px; }
+
+        .tab-item.active {
+            color: var(--bg-card, #f8f5ef);
+        }
+
+        .tab-item.active .tab-icon {
+            background: var(--primary-dark, #0f4c3a);
+            color: var(--bg-card, #f8f5ef);
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -18px;
+            box-shadow: 0 6px 20px rgba(15, 76, 58, 0.3);
+            transition: all 0.3s;
+        }
+        .tab-item.active .tab-icon .material-symbols-outlined { 
+            font-size: 26px;
+            font-variation-settings: 'FILL' 1, 'wght' 600;
+        }
+        .tab-item.active .tab-label {
+            color: var(--primary-dark, #0f4c3a);
+            font-weight: 700;
         }
 
         /* Sub-tabs inside each section (tracker/yearly/dashboard) */
@@ -3099,75 +3149,238 @@
             border: none !important;
         }
 
-        /* Sacred day boxes - circles with dual calendar */
+        /* Sacred day boxes - calendar circles with Material icons */
+        .days-grid {
+            display: grid !important;
+            grid-template-columns: repeat(7, 1fr) !important;
+            gap: 10px 2px !important;
+            position: relative;
+            z-index: 1;
+        }
+
+        .weekday-header {
+            text-align: center;
+            font-size: 0.6em;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 0 0 6px;
+            font-family: 'Cairo', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .day-box {
-            width: 42px !important;
-            height: 42px !important;
+            width: 40px !important;
+            height: 40px !important;
             border-radius: 50% !important;
-            border: 2px solid #e8e3da !important;
-            background: #f8f5ef !important;
+            border: none !important;
+            background: rgba(200, 195, 180, 0.3) !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             flex-direction: column !important;
             font-size: 0.7em !important;
-            transition: all 0.25s ease !important;
+            transition: all 0.2s ease !important;
             position: relative !important;
-            margin: 2px !important;
+            margin: 0 auto !important;
             gap: 0px !important;
             padding: 1px !important;
             line-height: 1 !important;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            box-sizing: border-box !important;
         }
 
         .day-box .day-number {
             position: static !important;
-            font-size: 0.95em !important;
+            font-size: 1.05em !important;
             color: var(--text-body) !important;
             font-weight: 700 !important;
             line-height: 1.1 !important;
         }
 
         .day-box .day-greg {
-            font-size: 0.75em !important;
-            color: var(--accent-dark, #a8871f) !important;
-            opacity: 0.85;
+            font-size: 0.65em !important;
+            color: var(--text-muted) !important;
+            opacity: 0.7;
             line-height: 1 !important;
-            font-weight: 600 !important;
+            font-weight: 500 !important;
         }
 
-        .day-box.checked {
-            background: var(--primary-dark) !important;
-            border-color: var(--primary-dark) !important;
+        .day-box .day-icon {
+            font-size: 12px !important;
+            line-height: 1 !important;
         }
 
-        .day-box.checked .day-number { color: transparent !important; }
-        .day-box.checked .day-greg { display: none !important; }
+        /* Empty placeholder cells */
+        .day-box.empty-cell {
+            background: transparent !important;
+            pointer-events: none !important;
+            cursor: default !important;
+        }
 
-        .day-box.checked::after {
-            content: '✓' !important;
-            color: white !important;
-            font-size: 1em !important;
+        /* Today */
+        .day-box.today-box {
+            box-shadow: 0 0 0 2.5px var(--accent, #d4af37), 0 0 0 4.5px var(--bg-card, #f8f5ef) !important;
+        }
+        .day-box.today-box .day-greg {
+            color: var(--accent, #d4af37) !important;
             font-weight: 700 !important;
         }
 
+        /* Checked (prayed alone) - dark green circle */
+        .day-box.checked {
+            background: var(--primary-dark, #0f4c3a) !important;
+        }
+        .day-box.checked .day-number { color: white !important; }
+        .day-box.checked .day-greg { color: rgba(255,255,255,0.6) !important; }
+        .day-box.checked::after {
+            content: 'check';
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 1, 'wght' 700, 'opsz' 20;
+            position: absolute !important;
+            top: -4px !important;
+            right: -4px !important;
+            width: 16px !important;
+            height: 16px !important;
+            background: white !important;
+            border-radius: 50% !important;
+            font-size: 10px !important;
+            color: var(--primary-dark, #0f4c3a) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25) !important;
+            line-height: 1 !important;
+        }
+
+        /* Congregation - brown/amber circle with mosque icon inside */
         .day-box.congregation {
-            background: var(--primary-dark) !important;
-            border-color: var(--accent) !important;
-            border-width: 3px !important;
+            background: #a0722a !important;
         }
-        .day-box.congregation .day-number { color: transparent !important; }
+        .day-box.congregation .day-number { color: white !important; }
         .day-box.congregation .day-greg { display: none !important; }
-
+        .day-box.congregation .day-icon { display: block !important; color: white !important; }
         .day-box.congregation::after {
-            content: '🕌' !important;
-            font-size: 0.9em !important;
+            content: 'mosque';
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 1, 'wght' 600, 'opsz' 20;
+            position: absolute !important;
+            top: -5px !important;
+            right: -5px !important;
+            width: 18px !important;
+            height: 18px !important;
+            background: white !important;
+            border-radius: 50% !important;
+            font-size: 11px !important;
+            color: #a0722a !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25) !important;
+            line-height: 1 !important;
         }
 
-        .day-box.qada .day-number { color: transparent !important; }
+        /* Qada - red circle with schedule icon inside */
+        .day-box.qada {
+            background: #dc2626 !important;
+        }
+        .day-box.qada .day-number { color: white !important; }
         .day-box.qada .day-greg { display: none !important; }
+        .day-box.qada .day-icon { display: block !important; color: white !important; }
+        .day-box.qada::after {
+            content: 'schedule';
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 1, 'wght' 600, 'opsz' 20;
+            position: absolute !important;
+            top: -5px !important;
+            right: -5px !important;
+            width: 18px !important;
+            height: 18px !important;
+            background: white !important;
+            border-radius: 50% !important;
+            font-size: 11px !important;
+            color: #dc2626 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25) !important;
+            line-height: 1 !important;
+        }
 
+        /* Future disabled */
+        .day-box.disabled {
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+        }
+
+        /* Exempt */
         .day-box.exempt {
             background: #f5e6ea !important;
+        }
+        .day-box.exempt::after {
+            content: 'block';
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 1, 'wght' 600, 'opsz' 20;
+            position: absolute !important;
+            top: -5px !important;
+            right: -5px !important;
+            width: 18px !important;
+            height: 18px !important;
+            background: white !important;
+            border-radius: 50% !important;
+            font-size: 11px !important;
+            color: #db2777 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25) !important;
+        }
+
+        /* Hover */
+        .day-box:not(.disabled):not(.empty-cell):hover {
+            transform: scale(1.12) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            z-index: 10 !important;
+        }
+        .day-box:not(.disabled):not(.empty-cell):active {
+            transform: scale(0.92) !important;
+        }
+
+        /* Pop animation */
+        .day-box.pop {
+            animation: dayPop 0.3s ease !important;
+        }
+
+        /* Prayer legend with Material icons */
+        .prayer-legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            font-size: 0.75em;
+            font-weight: 700;
+        }
+        .prayer-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .prayer-legend .legend-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .prayer-legend .legend-dot .material-symbols-outlined {
+            font-size: 12px;
+        }
             border-color: #dbb5c0 !important;
         }
 
@@ -3176,12 +3389,7 @@
             border-color: #e0dbd3 !important;
         }
 
-        .days-grid {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 4px !important;
-            justify-content: center !important;
-        }
+        /* Prayer grid uses the Sacred 7-column grid defined above */
 
         /* Ramadan fasting grid — wider boxes, not circles */
         #fastingGrid.days-grid {
@@ -3239,7 +3447,7 @@
     <!-- Fiori Shell Bar -->
     <div class="shell-bar" id="shellBar">
         <div class="shell-bar-title">
-            <span class="app-icon">🕌</span>
+            <span class="app-icon"><span class="material-symbols-outlined" style="font-size:22px;">mosque</span></span>
             <span data-t="app_title_short" id="shellTitle">متتبع الصلاة</span>
         </div>
         <div class="shell-bar-profile" onclick="showProfileScreen()" id="shellProfile" style="display:none;">
@@ -3247,7 +3455,7 @@
             <span class="name" id="shellName">الاسم</span>
         </div>
         <div class="shell-bar-actions">
-            <button class="shell-btn" onclick="toggleThemeMenu()" id="shellThemeBtn" title="Theme">🎨</button>
+            <button class="shell-btn" onclick="toggleThemeMenu()" id="shellThemeBtn" title="Theme"><span class="material-symbols-outlined" style="font-size:20px;">palette</span></button>
             <button class="shell-btn" onclick="toggleLang()" id="langBtn" role="button" aria-label="Switch language">EN</button>
         </div>
     </div>
@@ -3292,7 +3500,7 @@
     <!-- Profile Selection Overlay -->
     <div class="profile-overlay" id="profileOverlay" role="dialog" aria-modal="true" aria-label="Profile selection">
         <div class="profile-screen">
-            <h2>🕌 سجل قضاء الصلوات</h2>
+            <h2><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> سجل قضاء الصلوات</h2>
             <p class="subtitle" data-t="choose_profile">اختر الملف الشخصي أو أنشئ واحداً جديداً</p>
             
             <div class="profiles-list" id="profilesList"></div>
@@ -3341,7 +3549,7 @@
                     </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="button" class="form-btn save" onclick="saveProfile()" data-t="save">💾 حفظ</button>
+                    <button type="button" class="form-btn save" onclick="saveProfile()" data-t="save"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">save</span> حفظ</button>
                     <button type="button" class="form-btn cancel" onclick="hideProfileForm()" data-t="cancel">إلغاء</button>
                 </div>
             </div>
@@ -3350,13 +3558,13 @@
 
 
     <a href="#mainContent" class="skip-link" data-t="skip_to_content">تخطي إلى المحتوى</a>
-    <div class="offline-bar" id="offlineBar" role="alert" data-t="offline_msg">⚡ أنت غير متصل بالإنترنت — التطبيق يعمل بدون اتصال</div>
+    <div class="offline-bar" id="offlineBar" role="alert" data-t="offline_msg"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">wifi_off</span> أنت غير متصل بالإنترنت — التطبيق يعمل بدون اتصال</div>
     <div class="toast-container" id="toastContainer"></div>
 
     <div class="container" id="mainContent">
         <div class="header">
             <div class="islamic-pattern"></div>
-            <h1 data-t="app_title">🕌 سجل قضاء الصلوات - الفرائض والسنن</h1>
+            <h1 data-t="app_title"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> سجل قضاء الصلوات - الفرائض والسنن</h1>
             <p class="quran-verse" style="direction:rtl;">إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًۭا مَّوْقُوتًۭا</p>
             <p class="verse-ref" style="direction:rtl;">[سورة النساء: 103]</p>
 
@@ -3369,9 +3577,9 @@
 
         <!-- Main Toggle between Fard and Sunnah -->
         <div class="main-toggle" role="tablist" aria-label="Main sections">
-            <button class="main-toggle-btn active" onclick="switchSection('fard')" data-t="fard_prayers">🕌 الفرائض</button>
-            <button class="main-toggle-btn" onclick="switchSection('sunnah')" data-t="sunnah_prayers">✨ السنن والرواتب</button>
-            <button class="main-toggle-btn" onclick="switchSection('fasting')" id="fastingToggleBtn" data-t="fasting_section">🌙 الصيام</button>
+            <button class="main-toggle-btn active" onclick="switchSection('fard')" data-t="fard_prayers"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> الفرائض</button>
+            <button class="main-toggle-btn" onclick="switchSection('sunnah')" data-t="sunnah_prayers"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">auto_awesome</span> السنن والرواتب</button>
+            <button class="main-toggle-btn" onclick="switchSection('fasting')" id="fastingToggleBtn" data-t="fasting_section"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">dark_mode</span> الصيام</button>
         </div>
 
         <!-- ==================== FARD SECTION ==================== -->
@@ -3423,7 +3631,7 @@
                 <div id="fardTrackerHijriHeader" style="text-align:center;font-family:'Amiri',serif;font-size:1.2em;color:var(--primary-dark);margin:8px 0 4px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <span id="fardTrackerHijriHeaderText"></span>
                     <button type="button" id="monthDaysToggleBtn" onclick="toggleMonthDays()" style="background:var(--primary-light);border:1.5px solid var(--accent-border);border-radius:8px;padding:2px 10px;font-size:0.6em;cursor:pointer;color:var(--primary-dark);font-family:'Cairo',sans-serif;font-weight:700;" title="تعديل عدد أيام الشهر">30</button>
-                    <button type="button" onclick="showHijriOverrideDialog()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:2px 8px;font-size:0.7em;cursor:pointer;color:var(--text-muted);" title="تعديل بداية الشهر الهجري">⚙️</button>
+                    <button type="button" onclick="showHijriOverrideDialog()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:2px 8px;font-size:0.7em;cursor:pointer;color:var(--text-muted);" title="تعديل بداية الشهر الهجري"><span class="material-symbols-outlined" style="font-size:16px;">settings</span></button>
                 </div>
 
                 <div class="stats">
@@ -3445,7 +3653,7 @@
 
                 <!-- Exempt Days Toggle (Females Only) -->
                 <div class="exempt-toggle-bar" id="fardExemptBar" style="display:none;">
-                    <span>🩸</span>
+                    <span><span class="material-symbols-outlined" style="font-size:16px;color:#db2777;">water_drop</span></span>
                     <label data-t="exempt_mode">وضع تحديد الإعفاء (حيض/نفاس) — لكل صلاة على حدة</label>
                     <label class="exempt-switch">
                         <input type="checkbox" id="fardExemptMode" onchange="toggleExemptMode('fard')">
@@ -3458,12 +3666,12 @@
                 <!-- Prayer Times Bar -->
                 <div class="prayer-times-bar" id="prayerTimesBar">
                     <div class="prayer-times-header">
-                        <span>🕐</span>
+                        <span><span class="material-symbols-outlined" style="font-size:18px;">schedule</span></span>
                         <span id="prayerTimesTitle" data-t="prayer_times">مواقيت الصلاة</span>
                         <span id="prayerTimesLocation" style="font-size:0.75em;color:var(--text-muted);"></span>
                         <div style="margin-inline-start:auto;display:flex;gap:6px;align-items:center;">
-                            <button type="button" id="notifToggleBtn" onclick="togglePrayerNotifications()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:3px 10px;font-size:0.8em;cursor:pointer;font-family:'Cairo',sans-serif;" title="تفعيل التنبيهات">🔕</button>
-                            <button type="button" onclick="refreshPrayerTimes()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:3px 8px;font-size:0.8em;cursor:pointer;" title="تحديث">🔄</button>
+                            <button type="button" id="notifToggleBtn" onclick="togglePrayerNotifications()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:3px 10px;font-size:0.8em;cursor:pointer;font-family:'Cairo',sans-serif;" title="تفعيل التنبيهات"><span class="material-symbols-outlined" style="font-size:18px;">notifications_off</span></button>
+                            <button type="button" onclick="refreshPrayerTimes()" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:3px 8px;font-size:0.8em;cursor:pointer;" title="تحديث"><span class="material-symbols-outlined" style="font-size:18px;">refresh</span></button>
                         </div>
                     </div>
                     <div class="prayer-times-grid" id="prayerTimesGrid">
@@ -3485,8 +3693,8 @@
                 <div class="prayers-container" id="fardTrackerPrayersContainer"></div>
 
                 <div class="action-buttons">
-                    <button class="action-btn reset" onclick="resetTrackerMonth('fard')" data-t="clear_month">🔄 مسح بيانات الشهر</button>
-                    <button class="action-btn print" onclick="window.print()" data-t="print">🖨️ طباعة</button>
+                    <button class="action-btn reset" onclick="resetTrackerMonth('fard')" data-t="clear_month"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()" data-t="print"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">print</span> طباعة</button>
                 </div>
             </div>
 
@@ -3507,28 +3715,24 @@
                 </div>
 
                 <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <div class="label">إجمالي الصلوات المقضية</div>
+                    <div class="stat-card hero-stat">
+                        <div class="label" data-t="total_discipline">إجمالي الانضباط</div>
                         <div class="value" id="fardYearTotalCompleted">0</div>
-                        <div class="sublabel">من أصل <span id="fardYearTotalPossible">0</span> صلاة</div>
+                        <div class="sublabel">/ <span id="fardYearTotalPossible">0</span></div>
+                        <div class="hero-badge" id="fardYearCompletionRate">0%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">نسبة الإنجاز السنوية</div>
-                        <div class="value" id="fardYearCompletionRate">0%</div>
-                        <div class="sublabel">معدل الالتزام</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="label">أفضل شهر</div>
+                        <div class="label" data-t="best_month_label">أفضل شهر</div>
                         <div class="value" id="fardBestMonth">-</div>
                         <div class="sublabel" id="fardBestMonthRate">0%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label" data-t="best_prayer">الصلاة الأكثر انتظاماً</div>
+                        <div class="label" data-t="best_prayer">الأكثر انتظاماً</div>
                         <div class="value" id="fardBestPrayer">-</div>
                         <div class="sublabel" id="fardBestPrayerRate">0%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label" data-t="cong_rate">نسبة صلاة الجماعة</div>
+                        <div class="label" data-t="cong_rate">نسبة الجماعة</div>
                         <div class="value" id="fardYearCongRate">0%</div>
                         <div class="sublabel" id="fardYearCongCount">0</div>
                     </div>
@@ -3536,37 +3740,37 @@
 
                 <div class="charts-container">
                     <div class="chart-card">
-                        <h3 data-t="monthly_progress">📈 التقدم الشهري</h3>
+                        <h3 data-t="monthly_progress"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">trending_up</span> التقدم الشهري</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardMonthlyProgressChart" role="img" aria-label="Monthly progress chart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="fard_by_type">🕌 صلاة الجماعة حسب النوع</h3>
+                        <h3 data-t="fard_by_type"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">mosque</span> صلاة الجماعة حسب النوع</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardPrayerTypeChart" role="img" aria-label="Prayer type chart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="completion_pie">🎯 نسبة الإنجاز</h3>
+                        <h3 data-t="completion_pie"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">target</span> نسبة الإنجاز</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardCompletionPieChart" role="img" aria-label="Completion chart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="comparison">📉 مقارنة الصلوات</h3>
+                        <h3 data-t="comparison"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">compare_arrows</span> مقارنة الصلوات</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardPrayerComparisonChart" role="img" aria-label="Prayer comparison chart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="cong_chart_title">🕌 صلاة الجماعة الشهرية</h3>
+                        <h3 data-t="cong_chart_title"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">mosque</span> صلاة الجماعة الشهرية</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardCongregationChart" role="img" aria-label="Congregation chart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="weekly_pattern">🕌 نمط صلاة الجماعة الأسبوعي</h3>
+                        <h3 data-t="weekly_pattern"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> نمط صلاة الجماعة الأسبوعي</h3>
                         <div class="chart-wrapper">
                             <canvas id="fardWeeklyPatternChart" role="img" aria-label="Weekly pattern chart"></canvas>
                         </div>
@@ -3575,13 +3779,13 @@
 
                 <!-- Streaks in Dashboard -->
                 <div class="streak-section" id="fardStreakSection">
-                    <div class="streak-title" data-t="fard_streaks">🔥 سلاسل المواظبة على صلاة الجماعة</div>
+                    <div class="streak-title" data-t="fard_streaks"<span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">local_fire_department</span> سلاسل المواظبة على صلاة الجماعة</div>
                     <div class="streak-grid" id="fardStreakGrid"></div>
                 </div>
 
                 <!-- Qada (Missed Prayers) Report -->
                 <div class="chart-card" id="fardQadaReport" style="margin-top:16px;">
-                    <h3>🔴 تقرير الصلوات المقضية (قضاء)</h3>
+                    <h3<span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;color:#dc2626;">error</span> تقرير الصلوات المقضية (قضاء)</h3>
                     <p style="font-size:0.8em;color:var(--text-muted);margin:0 0 12px;">الصلوات التي أُديت في غير وقتها</p>
                     <div class="dashboard-grid" id="fardQadaStatsGrid" style="margin-bottom:12px;"></div>
                     <div class="chart-wrapper" style="height:180px;">
@@ -3612,8 +3816,8 @@
                 </div>
                 <div class="prayers-container" id="fardPrayersContainer"></div>
                 <div class="action-buttons">
-                    <button class="action-btn reset" onclick="resetMonth('fard')" data-t="clear_month">🔄 مسح بيانات الشهر</button>
-                    <button class="action-btn print" onclick="window.print()" data-t="print">🖨️ طباعة</button>
+                    <button class="action-btn reset" onclick="resetMonth('fard')" data-t="clear_month"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()" data-t="print"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">print</span> طباعة</button>
                 </div>
             </div>
         </div>
@@ -3685,7 +3889,7 @@
 
                 <!-- Exempt Days Toggle (Females Only) -->
                 <div class="exempt-toggle-bar" id="sunnahExemptBar" style="display:none;">
-                    <span>🩸</span>
+                    <span><span class="material-symbols-outlined" style="font-size:16px;color:#db2777;">water_drop</span></span>
                     <label data-t="exempt_mode">وضع تحديد الإعفاء (حيض/نفاس) — لكل صلاة على حدة</label>
                     <label class="exempt-switch">
                         <input type="checkbox" id="sunnahExemptMode" onchange="toggleExemptMode('sunnah')">
@@ -3696,8 +3900,8 @@
                 <div class="prayers-container" id="sunnahTrackerPrayersContainer"></div>
 
                 <div class="action-buttons">
-                    <button class="action-btn reset" onclick="resetTrackerMonth('sunnah')" data-t="clear_month">🔄 مسح بيانات الشهر</button>
-                    <button class="action-btn print" onclick="window.print()" data-t="print">🖨️ طباعة</button>
+                    <button class="action-btn reset" onclick="resetTrackerMonth('sunnah')" data-t="clear_month"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()" data-t="print"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">print</span> طباعة</button>
                 </div>
             </div>
 
@@ -3742,7 +3946,7 @@
 
                 <div class="charts-container">
                     <div class="chart-card">
-                        <h3 data-t="monthly_progress">📈 التقدم الشهري</h3>
+                        <h3 data-t="monthly_progress"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">trending_up</span> التقدم الشهري</h3>
                         <div class="chart-wrapper">
                             <canvas id="sunnahMonthlyProgressChart"></canvas>
                         </div>
@@ -3754,13 +3958,13 @@
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="completion_pie">🎯 نسبة الإنجاز</h3>
+                        <h3 data-t="completion_pie"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">target</span> نسبة الإنجاز</h3>
                         <div class="chart-wrapper">
                             <canvas id="sunnahCompletionPieChart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3 data-t="comparison">📉 مقارنة السنن</h3>
+                        <h3 data-t="comparison"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">compare_arrows</span> مقارنة السنن</h3>
                         <div class="chart-wrapper">
                             <canvas id="sunnahPrayerComparisonChart"></canvas>
                         </div>
@@ -3769,7 +3973,7 @@
 
                 <!-- Streaks in Dashboard -->
                 <div class="streak-section" id="sunnahStreakSection">
-                    <div class="streak-title" data-t="sunnah_streaks">🔥 سلاسل المواظبة على السنن</div>
+                    <div class="streak-title" data-t="sunnah_streaks"<span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">local_fire_department</span> سلاسل المواظبة على السنن</div>
                     <div class="streak-grid" id="sunnahStreakGrid"></div>
                 </div>
 
@@ -3783,8 +3987,8 @@
                 </div>
                 <div class="prayers-container" id="sunnahPrayersContainer"></div>
                 <div class="action-buttons">
-                    <button class="action-btn reset" onclick="resetMonth('sunnah')" data-t="clear_month">🔄 مسح بيانات الشهر</button>
-                    <button class="action-btn print" onclick="window.print()" data-t="print">🖨️ طباعة</button>
+                    <button class="action-btn reset" onclick="resetMonth('sunnah')" data-t="clear_month"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> مسح بيانات الشهر</button>
+                    <button class="action-btn print" onclick="window.print()" data-t="print"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">print</span> طباعة</button>
                 </div>
             </div>
         </div>
@@ -3794,14 +3998,14 @@
         <div id="fastingSection" class="section" role="tabpanel" aria-label="Fasting">
             <div class="view-toggle">
                 <button class="toggle-btn active" onclick="switchFastingView('voluntary')" data-t="voluntary_fasting">📝 صيام التطوع</button>
-                <button class="toggle-btn" onclick="switchFastingView('ramadan')" id="ramadanViewBtn" data-t="ramadan_fasting">🌙 صيام رمضان</button>
+                <button class="toggle-btn" onclick="switchFastingView('ramadan')" id="ramadanViewBtn" data-t="ramadan_fasting"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">dark_mode</span> صيام رمضان</button>
                 <button class="toggle-btn" onclick="switchFastingView('dashboard')" data-t="dashboard">📊 لوحة التحكم</button>
             </div>
 
 
             <div class="sub-tabs" id="fastingSubTabs">
                 <button class="sub-tab active" onclick="switchFastingView('voluntary')" data-t="voluntary_fasting">📝 تطوع</button>
-                <button class="sub-tab" onclick="switchFastingView('ramadan')" data-t="ramadan_fasting">🌙 رمضان</button>
+                <button class="sub-tab" onclick="switchFastingView('ramadan')" data-t="ramadan_fasting"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">dark_mode</span> رمضان</button>
                 <button class="sub-tab" onclick="switchFastingView('dashboard')" data-t="dashboard_short">📊 إحصائيات</button>
             </div>
             <!-- Voluntary Fasting Tracker -->
@@ -3836,7 +4040,7 @@
 
                 <!-- Female Exempt Bar for Fasting -->
                 <div class="exempt-toggle-bar" id="fastingExemptBar" style="display:none;">
-                    <span>🩸</span>
+                    <span><span class="material-symbols-outlined" style="font-size:16px;color:#db2777;">water_drop</span></span>
                     <label>وضع تحديد أيام الحيض</label>
                     <label class="exempt-switch">
                         <input type="checkbox" id="fastingExemptMode" onchange="window.fastingExemptModeOn=this.checked;window.updateVoluntaryFasting()">
@@ -3871,7 +4075,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="action-btn reset" onclick="resetVoluntaryFasting()" data-t="clear_month">🔄 مسح بيانات الشهر</button>
+                    <button class="action-btn reset" onclick="resetVoluntaryFasting()" data-t="clear_month"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> مسح بيانات الشهر</button>
                 </div>
             </div>
 
@@ -3935,7 +4139,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="action-btn reset" onclick="resetFasting()" data-t="clear_fasting">🔄 مسح بيانات الصيام</button>
+                    <button class="action-btn reset" onclick="resetFasting()" data-t="clear_fasting"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> مسح بيانات الصيام</button>
                 </div>
             </div>
 
@@ -3971,7 +4175,7 @@
 
                 <div class="charts-container">
                     <div class="chart-card">
-                        <h3>📈 صيام التطوع الشهري</h3>
+                        <h3><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">trending_up</span> صيام التطوع الشهري</h3>
                         <div class="chart-wrapper">
                             <canvas id="fastingMonthlyChart"></canvas>
                         </div>
@@ -3982,8 +4186,8 @@
 
         <!-- Global Action Buttons -->
         <div class="action-buttons">
-            <button class="action-btn export" onclick="exportData()" data-t="export_data">💾 تصدير البيانات</button>
-            <button class="action-btn import" onclick="importData()" data-t="import_data">📥 استيراد البيانات</button>
+            <button class="action-btn export" onclick="exportData()" data-t="export_data"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">save</span> تصدير البيانات</button>
+            <button class="action-btn import" onclick="importData()" data-t="import_data"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">download</span> استيراد البيانات</button>
         </div>
     </div>
 
@@ -4765,7 +4969,7 @@
                     const congRate = monthCompleted > 0 ? Math.round((monthCong / monthCompleted) * 100) : 0;
                     congHtml = `
                         <div class="month-stat" style="grid-column: 1 / -1;">
-                            <div class="label">🕌 ${t('congregation')}</div>
+                            <div class="label"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> ${t('congregation')}</div>
                             <div class="value">${congRate}%</div>
                         </div>
                     `;
@@ -5634,9 +5838,9 @@
                 const card = document.createElement('div');
                 card.className = 'streak-card' + (streak.current >= 7 ? ' high-streak' : '');
                 
-                const fireEmoji = streak.current >= 7 ? '🔥' : 
-                                  streak.current >= 3 ? '⚡' : 
-                                  streak.current >= 1 ? '✨' : '💤';
+                const fireEmoji = streak.current >= 7 ? '<span class="material-symbols-outlined" style="font-size:20px;color:#ea580c;">local_fire_department</span>' : 
+                                  streak.current >= 3 ? '<span class="material-symbols-outlined" style="font-size:20px;color:#d97706;">bolt</span>' : 
+                                  streak.current >= 1 ? '<span class="material-symbols-outlined" style="font-size:20px;color:#65a30d;">auto_awesome</span>' : '<span class="material-symbols-outlined" style="font-size:20px;color:#9ca3af;">bedtime</span>';
                 
                 const isOnFire = streak.current >= 3;
                 
@@ -6474,7 +6678,7 @@
             const congRate = totalCompleted > 0 ? Math.round((totalCong / totalCompleted) * 100) : 0;
             
             container.innerHTML = `
-                <span class="cong-stat mosque">🕌 ${t('congregation')}: ${totalCong} (${congRate}%)</span>
+                <span class="cong-stat mosque"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> ${t('congregation')}: ${totalCong} (${congRate}%)</span>
                 <span class="cong-stat alone">👤 ${t('individual')}: ${totalAlone}</span>
             `;
         }
@@ -6945,6 +7149,14 @@
                 frag.appendChild(gregSpan);
             } catch(e) {}
 
+            // Hidden Material icon (shown by CSS for congregation/qada)
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'day-icon material-symbols-outlined';
+            iconSpan.style.display = 'none';
+            iconSpan.style.fontSize = '13px';
+            iconSpan.textContent = 'mosque'; // default, overridden by CSS context
+            frag.appendChild(iconSpan);
+
             return frag;
         }
 
@@ -7006,77 +7218,87 @@
                 const grid = document.createElement('div');
                 grid.className = 'days-grid';
                 
-                // Determine which days to show based on view mode
-                var daysToShow = [];
-                if (trackerViewMode === 'week') {
-                    daysToShow = getWeekDays();
-                } else {
-                    for (var _d = 1; _d <= daysInMonth; _d++) daysToShow.push(_d);
+                // Get today's Hijri for "today" highlighting
+                var todayH = getTodayHijri();
+                var isCurrentMonth = (todayH.year === hYear && todayH.month === hMonth);
+                
+                // Weekday headers
+                var dayLabels = currentLang === 'ar' 
+                    ? ['أحد', 'إثن', 'ثلث', 'أرب', 'خمس', 'جمع', 'سبت']
+                    : ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+                dayLabels.forEach(function(lbl) {
+                    var hdr = document.createElement('div');
+                    hdr.className = 'weekday-header';
+                    hdr.textContent = lbl;
+                    grid.appendChild(hdr);
+                });
+                
+                // Calculate day-of-week offset for day 1
+                var day1Greg = hijriToGregorian(hYear, hMonth, 1);
+                var startDow = day1Greg.getDay(); // 0=Sun
+                
+                // Add empty cells for offset
+                for (var _e = 0; _e < startDow; _e++) {
+                    var emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-box empty-cell';
+                    grid.appendChild(emptyCell);
                 }
                 
-                // Add day-of-week headers for weekly view (only for first prayer in section)
-                if (trackerViewMode === 'week' && prayer === prayers[0]) {
-                    var weekHeaders = getWeekDayHeaders();
-                    var headerRow = document.createElement('div');
-                    headerRow.className = 'week-day-header';
-                    weekHeaders.forEach(function(wh) {
-                        var lbl = document.createElement('div');
-                        lbl.className = 'week-day-label' + (wh.isToday ? ' today' : '');
-                        lbl.textContent = wh.dayName;
-                        headerRow.appendChild(lbl);
-                    });
-                    section.appendChild(header);
-                    section.appendChild(headerRow);
-                } else {
-                    section.appendChild(header);
-                }
-                
-                daysToShow.forEach(function(day) {
+                // Render each day
+                for (let day = 1; day <= daysInMonth; day++) {
                     const dayBox = document.createElement('div');
                     dayBox.className = 'day-box';
                     
-                    // Add Gregorian date reference as tooltip
+                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                    
+                    // Tooltip
                     try {
                         var gDate = hijriToGregorian(hYear, hMonth, day);
                         dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
                     } catch(e) {}
                     
+                    // Today marker
+                    var isDayToday = isCurrentMonth && todayH.day === day;
+                    if (isDayToday) {
+                        dayBox.classList.add('today-box');
+                        // Replace greg text with TODAY
+                        var gregEl = dayBox.querySelector('.day-greg');
+                        if (gregEl) gregEl.textContent = currentLang === 'ar' ? 'اليوم' : 'TODAY';
+                    }
+                    
                     if (isPrayerExempt(exemptData, prayer.id, day)) {
-                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         dayBox.classList.add('exempt');
-                        
                         if (isExemptModeOn) {
                             dayBox.onclick = () => toggleExemptPrayer(prayer.id, day);
                             dayBox.title = t('click_remove_exempt');
                         }
                     } else if (isFutureDateHijri(day, hMonth, hYear)) {
-                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
                         dayBox.classList.add('disabled');
-                        dayBox.style.opacity = '0.3';
                     } else {
-                        dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
-                        
                         if (isExemptModeOn) {
                             dayBox.onclick = () => toggleExemptPrayer(prayer.id, day);
                             dayBox.title = t('click_mark_exempt');
                             dayBox.style.cursor = 'crosshair';
-
                         } else {
                             if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
                                 dayBox.classList.add('checked');
-                                // Show congregation icon if marked
                                 if (type === 'fard') {
                                     const congData = getCongregationData(hYear, hMonth);
                                     if (isCongregation(congData, prayer.id, day)) {
                                         dayBox.classList.add('congregation');
                                         dayBox.classList.remove('checked');
+                                        // Set mosque icon inside circle
+                                        var ico = dayBox.querySelector('.day-icon');
+                                        if (ico) ico.textContent = 'mosque';
                                     }
                                 }
-                                // Show qada
                                 const qadaData = getQadaData(hYear, hMonth);
                                 if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
                                     dayBox.classList.remove('checked', 'congregation');
                                     dayBox.classList.add('qada');
+                                    // Set schedule icon inside circle
+                                    var ico2 = dayBox.querySelector('.day-icon');
+                                    if (ico2) ico2.textContent = 'schedule';
                                 }
                             }
                             dayBox.onclick = () => handleDayClick(type, prayer.id, day);
@@ -7084,9 +7306,26 @@
                     }
                     
                     grid.appendChild(dayBox);
-                });
+                }
                 
+                section.appendChild(header);
                 section.appendChild(grid);
+                
+                // Add legend under each prayer
+                var legend = document.createElement('div');
+                legend.className = 'prayer-legend';
+                if (type === 'fard') {
+                    legend.innerHTML = 
+                        '<div class="legend-item"><div class="legend-dot" style="background:var(--primary-dark,#0f4c3a);"><span class="material-symbols-outlined" style="font-size:12px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'منفرد' : 'ALONE') + '</span></div>' +
+                        '<div class="legend-item"><div class="legend-dot" style="background:#a0722a;"><span class="material-symbols-outlined" style="font-size:12px;color:white;">mosque</span></div><span>' + (currentLang === 'ar' ? 'جماعة' : 'CONGREGATION') + '</span></div>' +
+                        '<div class="legend-item"><div class="legend-dot" style="background:#dc2626;"><span class="material-symbols-outlined" style="font-size:12px;color:white;">schedule</span></div><span>' + (currentLang === 'ar' ? 'قضاء' : 'QADA') + '</span></div>';
+                } else {
+                    legend.innerHTML = 
+                        '<div class="legend-item"><div class="legend-dot" style="background:var(--primary-dark,#0f4c3a);"><span class="material-symbols-outlined" style="font-size:12px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'مؤداة' : 'DONE') + '</span></div>' +
+                        '<div class="legend-item"><div class="legend-dot" style="background:#dc2626;"><span class="material-symbols-outlined" style="font-size:12px;color:white;">schedule</span></div><span>' + (currentLang === 'ar' ? 'قضاء' : 'QADA') + '</span></div>';
+                }
+                section.appendChild(legend);
+                
                 container.appendChild(section);
             });
         };
@@ -7443,7 +7682,7 @@
 
         const T = {
             // Header
-            'app_title': { ar: '🕌 سجل قضاء الصلوات - الفرائض والسنن', en: '🕌 Prayer Tracker - Obligatory & Sunnah' },
+            'app_title': { ar: 'سجل قضاء الصلوات - الفرائض والسنن', en: 'Prayer Tracker - Obligatory & Sunnah' },
             'quran_verse': { ar: 'إِنَّ ٱلصَّلَوٰةَ كَانَتْ عَلَى ٱلْمُؤْمِنِينَ كِتَـٰبًۭا مَّوْقُوتًۭا', en: 'Indeed, prayer has been decreed upon the believers at specified times' },
             'verse_ref': { ar: '[سورة النساء: 103]', en: '[An-Nisa: 103]' },
             
@@ -7467,8 +7706,8 @@
             'years_old': { ar: 'سنة', en: 'yrs' },
             
             // Main sections
-            'fard_prayers': { ar: '🕌 الفرائض', en: '🕌 Obligatory' },
-            'sunnah_prayers': { ar: '✨ السنن والرواتب', en: '✨ Sunnah' },
+            'fard_prayers': { ar: 'الفرائض', en: 'Obligatory' },
+            'sunnah_prayers': { ar: 'السنن والرواتب', en: 'Sunnah' },
             'fasting_section': { ar: '🌙 الصيام', en: '🌙 Fasting' },
             
             // Views
@@ -7500,15 +7739,15 @@
             'commitment_rate': { ar: 'معدل الالتزام', en: 'Commitment Rate' },
             'of_total': { ar: 'من أصل', en: 'out of' },
             'prayers_word': { ar: 'صلاة', en: 'prayers' },
-            'monthly_progress': { ar: '📈 التقدم الشهري', en: '📈 Monthly Progress' },
+            'monthly_progress': { ar: 'التقدم الشهري', en: 'Monthly Progress' },
             'by_type': { ar: '📊 السنن حسب النوع', en: '📊 Sunnah by Type' },
             'fard_by_type': { ar: '🕌 صلاة الجماعة حسب النوع', en: '🕌 Congregation by Prayer Type' },
-            'completion_pie': { ar: '🎯 نسبة الإنجاز', en: '🎯 Completion Rate' },
-            'comparison': { ar: '📉 مقارنة الصلوات', en: '📉 Prayer Comparison' },
+            'completion_pie': { ar: 'نسبة الإنجاز', en: 'Completion Rate' },
+            'comparison': { ar: 'مقارنة الصلوات', en: 'Prayer Comparison' },
             
             // Streaks
-            'fard_streaks': { ar: '🔥 سلاسل المواظبة على صلاة الجماعة', en: '🔥 Congregation Prayer Streaks' },
-            'sunnah_streaks': { ar: '🔥 سلاسل المواظبة على السنن', en: '🔥 Sunnah Prayer Streaks' },
+            'fard_streaks': { ar: 'سلاسل المواظبة على صلاة الجماعة', en: 'Congregation Prayer Streaks' },
+            'sunnah_streaks': { ar: 'سلاسل المواظبة على السنن', en: 'Sunnah Prayer Streaks' },
             'consecutive_days': { ar: 'يوم متتالي', en: 'consecutive days' },
             'best_streak': { ar: '🏆 أفضل سلسلة:', en: '🏆 Best streak:' },
             'days_word': { ar: 'يوم', en: 'days' },
@@ -7549,7 +7788,7 @@
             'monthly_avg': { ar: 'معدل الصيام الشهري', en: 'Monthly Average' },
             'day_per_month': { ar: 'يوم/شهر', en: 'days/month' },
             'during_year': { ar: 'خلال السنة', en: 'During the year' },
-            'vol_monthly_chart': { ar: '📈 صيام التطوع الشهري', en: '📈 Monthly Voluntary Fasting' },
+            'vol_monthly_chart': { ar: 'صيام التطوع الشهري', en: 'Monthly Voluntary Fasting' },
             
             // Themes
             'green_gold': { ar: 'أخضر وذهبي', en: 'Green & Gold' },
@@ -8359,12 +8598,12 @@
             var btn = document.getElementById('notifToggleBtn');
             if (!btn) return;
             if (notificationsEnabled) {
-                btn.textContent = '🔔';
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">notifications_active</span>';
                 btn.style.background = 'rgba(5,150,105,0.15)';
                 btn.style.borderColor = '#059669';
                 btn.title = currentLang === 'ar' ? 'التنبيهات مفعّلة - اضغط لإيقاف' : 'Notifications ON - tap to disable';
             } else {
-                btn.textContent = '🔕';
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">notifications_off</span>';
                 btn.style.background = '';
                 btn.style.borderColor = '';
                 btn.title = currentLang === 'ar' ? 'تفعيل التنبيهات' : 'Enable notifications';
@@ -9159,7 +9398,7 @@
                                     var updateBar = document.createElement('div');
                                     updateBar.id = 'updateBar';
                                     updateBar.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#059669,#047857);color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:10001;font-family:Cairo,sans-serif;font-size:0.9em;direction:rtl;box-shadow:0 4px 15px rgba(0,0,0,0.2);';
-                                    updateBar.innerHTML = '<span>🔄 ' + (currentLang === 'ar' ? 'تحديث جديد متاح' : 'Update available') + '</span>' +
+                                    updateBar.innerHTML = '<span><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">refresh</span> ' + (currentLang === 'ar' ? 'تحديث جديد متاح' : 'Update available') + '</span>' +
                                         '<button type="button" onclick="applyUpdate()" style="background:white;color:#047857;border:none;padding:6px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">' + 
                                         (currentLang === 'ar' ? 'تحديث الآن' : 'Update now') + '</button>';
                                     document.body.appendChild(updateBar);
@@ -9266,7 +9505,7 @@
                         padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
                         z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:3px solid var(--accent);direction:rtl;">
                         <div style="color:white;font-family:'Cairo',sans-serif;flex:1;">
-                            <div style="font-size:1.1em;font-weight:700;color:var(--accent);">🕌 تثبيت التطبيق</div>
+                            <div style="font-size:1.1em;font-weight:700;color:var(--accent);"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">mosque</span> تثبيت التطبيق</div>
                             <div style="font-size:0.85em;opacity:0.9;margin-top:4px;">أضف متتبع الصلاة إلى شاشتك الرئيسية</div>
                         </div>
                         <button onclick="deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBanner').remove();})" 
@@ -9282,15 +9521,15 @@
     <!-- Fiori Tab Bar -->
     <div class="tab-bar" id="tabBar">
         <button class="tab-item active" onclick="switchTab('fard')" id="tabFard">
-            <span class="tab-icon">🕌</span>
+            <span class="tab-icon"><span class="material-symbols-outlined">mosque</span></span>
             <span class="tab-label" data-t="fard_short">الفرائض</span>
         </button>
         <button class="tab-item" onclick="switchTab('sunnah')" id="tabSunnah">
-            <span class="tab-icon">✨</span>
+            <span class="tab-icon"><span class="material-symbols-outlined">auto_awesome</span></span>
             <span class="tab-label" data-t="sunnah_short">السنن</span>
         </button>
         <button class="tab-item" onclick="switchTab('fasting')" id="tabFasting">
-            <span class="tab-icon">🌙</span>
+            <span class="tab-icon"><span class="material-symbols-outlined">wb_twilight</span></span>
             <span class="tab-label" data-t="fasting_short">الصيام</span>
         </button>
     </div>
