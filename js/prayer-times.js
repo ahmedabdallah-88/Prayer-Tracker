@@ -6,7 +6,6 @@ window.App.PrayerTimes = (function() {
     // ==================== STATE ====================
     var prayerTimesData = null;
     var prayerTimesDate = '';
-    var notificationsEnabled = localStorage.getItem('salah_notif_enabled') === 'true';
     var userLocation = null;
     var notifSentToday = {};
     var prayerTimesCheckInterval = null;
@@ -393,11 +392,6 @@ window.App.PrayerTimes = (function() {
             locEl.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">location_on</span> ' + prayerTimesData.location;
         }
 
-        // Update notification toggle button state
-        if (typeof window.updateNotifButton === 'function') {
-            window.updateNotifButton();
-        }
-
         // Update next prayer countdown card
         renderNextPrayerCountdown();
     }
@@ -492,16 +486,10 @@ window.App.PrayerTimes = (function() {
         // Fetch prayer times
         fetchPrayerTimes(false);
 
-        // Check every 30 seconds for notifications and refresh display
+        // Render display every 30 seconds (notifications are handled by notifications.js monitor)
         if (prayerTimesCheckInterval) clearInterval(prayerTimesCheckInterval);
         prayerTimesCheckInterval = setInterval(function() {
-            // Re-render to update active/next prayer
             renderPrayerTimes();
-
-            // Check notifications (delegated to notifications module)
-            if (typeof window.checkPrayerTimeNotifications === 'function') {
-                window.checkPrayerTimeNotifications();
-            }
 
             // At midnight, reset and refetch
             var now = new Date();

@@ -398,17 +398,7 @@ window.App.Config = {
         'offline_body': { ar: '\u0644\u0627 \u064a\u0648\u062c\u062f \u0627\u062a\u0635\u0627\u0644 \u0628\u0627\u0644\u0625\u0646\u062a\u0631\u0646\u062a \u0648\u0644\u0645 \u064a\u062a\u0645 \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642 \u0628\u0639\u062f.\n\u0623\u0639\u062f \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0639\u0646\u062f \u0627\u0644\u0627\u062a\u0635\u0627\u0644.', en: 'No internet connection and the app has not been cached yet.\nPlease try again when connected.' },
         'offline_retry': { ar: '\u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629', en: 'Retry' },
 
-        // Notification onboarding (Feature 4)
-        'notif_onboard_title': { ar: '\u062a\u0630\u0643\u064a\u0631 \u0627\u0644\u0635\u0644\u0627\u0629', en: 'Prayer Reminders' },
-        'notif_onboard_body': { ar: '\u0641\u0639\u0651\u0644 \u0627\u0644\u062a\u0646\u0628\u064a\u0647\u0627\u062a \u0644\u062a\u0630\u0643\u064a\u0631\u0643 \u0642\u0628\u0644 \u0648\u0628\u0639\u062f \u0643\u0644 \u0635\u0644\u0627\u0629', en: 'Enable notifications to get reminded before and after each prayer' },
-        'notif_onboard_enable': { ar: '\u062a\u0641\u0639\u064a\u0644 \u0627\u0644\u062a\u0646\u0628\u064a\u0647\u0627\u062a', en: 'Enable Notifications' },
-        'notif_onboard_later': { ar: '\u0644\u0627\u062d\u0642\u0627\u064b', en: 'Maybe Later' },
-        'notif_test_body': { ar: 'سيتم تذكيرك قبل كل صلاة بـ ٢٠ دقيقة', en: 'You will be reminded 20 min before each prayer' },
-        'notif_before_title': { ar: 'قرب وقت الصلاة', en: 'Prayer time approaching' },
-        'notif_after_title': { ar: 'هل صليت؟', en: 'Did you pray?' },
-
-        // Fasting notification settings (Part 3)
-        'salah_notif_label': { ar: 'إشعارات الصلاة', en: 'Prayer Notifications' },
+        // Fasting notification settings
         'fasting_notif_label': { ar: 'إشعارات الصيام', en: 'Fasting Notifications' },
         'fasting_notif_subtitle': { ar: 'تذكير بأيام الصيام المسنونة', en: 'Sunnah fasting day reminders' },
         'fasting_notif_enabled': { ar: 'تم تفعيل إشعارات الصيام', en: 'Fasting notifications enabled' },
@@ -438,16 +428,18 @@ window.App.Config = {
         'sunnah_dhul_hijjah': { ar: 'أيام العشر من ذي الحجة', en: 'First 10 of Dhul Hijjah' },
         'sunnah_ashura': { ar: 'تاسوعاء / عاشوراء', en: "Tasu'a / Ashura" },
 
-        // Pre-Athan Alert (Feature: pre-athan)
-        'preathan_label': { ar: 'تنبيه قبل الأذان', en: 'Pre-Athan Alert' },
-        'preathan_subtitle': { ar: 'تذكير قبل دخول وقت الصلاة', en: 'Reminder before prayer time' },
+        // Before/After Athan Notifications
+        'before_athan_label': { ar: 'تنبيه قبل الأذان', en: 'Before-Athan Alert' },
+        'before_athan_subtitle': { ar: 'تذكير قبل دخول وقت الصلاة', en: 'Reminder before prayer time' },
+        'after_athan_label': { ar: 'تنبيه بعد الأذان', en: 'After-Athan Alert' },
+        'after_athan_subtitle': { ar: 'تذكير بعد دخول وقت الصلاة لمن لم يصلِّ', en: 'Reminder after prayer time for those who haven\'t prayed' },
         'minutes_short': { ar: 'د', en: 'min' },
 
-        // Daily Insight (Feature: daily-insight)
+        // Daily Insight
         'insight_label': { ar: 'ملخص يومي ذكي', en: 'Smart Daily Insight' },
         'insight_subtitle': { ar: 'إشعار بعد العشاء بملخص يومك', en: 'Post-Isha notification with your day summary' },
 
-        // Onboarding (Feature: onboarding)
+        // Onboarding
         'usage_guide': { ar: 'دليل الاستخدام', en: 'Usage Guide' },
         'usage_guide_subtitle': { ar: 'جولة تعريفية بالتطبيق', en: 'Guided app walkthrough' }
     }

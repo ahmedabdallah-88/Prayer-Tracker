@@ -357,7 +357,7 @@
                 <div class="prayer-times-compact" id="prayerTimesBar">
                     <span id="prayerTimesLocation" style="display:none"></span>
                     <span id="prayerTimesTitle" style="display:none"></span>
-                    <button type="button" id="notifToggleBtn" style="display:none"></button>
+                    <!-- notifToggleBtn removed: replaced by before/after athan settings -->
                     <div class="prayer-times-grid" id="prayerTimesGrid">
                         <div class="pt-item" data-prayer="fajr"><div class="pt-icon"><span class="material-symbols-rounded">wb_twilight</span></div><div class="pt-name">الفجر</div><div class="pt-time">--:--</div></div>
                         <div class="pt-item" data-prayer="dhuhr"><div class="pt-icon"><span class="material-symbols-rounded">wb_sunny</span></div><div class="pt-name">الظهر</div><div class="pt-time">--:--</div></div>
@@ -943,30 +943,30 @@
 
     <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImport(event)">
 
-    <script src="js/config.js?v=85"></script>
-    <script src="js/storage.js?v=85"></script>
-    <script src="js/hijri-calendar.js?v=85"></script>
-    <script src="js/ui-utils.js?v=85"></script>
-    <script src="js/i18n.js?v=85"></script>
-    <script src="js/themes.js?v=85"></script>
-    <script src="js/profiles.js?v=85"></script>
-    <script src="js/female-features.js?v=85"></script>
-    <script src="js/fard-tracker.js?v=85"></script>
-    <script src="js/sunnah-tracker.js?v=85"></script>
-    <script src="js/jamaah-tracker.js?v=85"></script>
-    <script src="js/weekly-view.js?v=85"></script>
-    <script src="js/fasting-tracker.js?v=85"></script>
-    <script src="js/prayer-times.js?v=85"></script>
-    <script src="js/notifications.js?v=85"></script>
-    <script src="js/azkar-tracker.js?v=85"></script>
-    <script src="js/svg-charts.js?v=85"></script>
-    <script src="js/qada-report.js?v=85"></script>
-    <script src="js/dashboard.js?v=85"></script>
-    <script src="js/year-overview.js?v=85"></script>
-    <script src="js/info-tooltips.js?v=85"></script>
-    <script src="js/data-io.js?v=85"></script>
-    <script src="js/onboarding.js?v=85"></script>
-    <script src="js/app.js?v=85"></script>
+    <script src="js/config.js?v=91"></script>
+    <script src="js/storage.js?v=91"></script>
+    <script src="js/hijri-calendar.js?v=91"></script>
+    <script src="js/ui-utils.js?v=91"></script>
+    <script src="js/i18n.js?v=91"></script>
+    <script src="js/themes.js?v=91"></script>
+    <script src="js/profiles.js?v=91"></script>
+    <script src="js/female-features.js?v=91"></script>
+    <script src="js/fard-tracker.js?v=91"></script>
+    <script src="js/sunnah-tracker.js?v=91"></script>
+    <script src="js/jamaah-tracker.js?v=91"></script>
+    <script src="js/weekly-view.js?v=91"></script>
+    <script src="js/fasting-tracker.js?v=91"></script>
+    <script src="js/prayer-times.js?v=91"></script>
+    <script src="js/notifications.js?v=91"></script>
+    <script src="js/azkar-tracker.js?v=91"></script>
+    <script src="js/svg-charts.js?v=91"></script>
+    <script src="js/qada-report.js?v=91"></script>
+    <script src="js/dashboard.js?v=91"></script>
+    <script src="js/year-overview.js?v=91"></script>
+    <script src="js/info-tooltips.js?v=91"></script>
+    <script src="js/data-io.js?v=91"></script>
+    <script src="js/onboarding.js?v=91"></script>
+    <script src="js/app.js?v=91"></script>
 
     <!-- Profile Settings Overlay -->
     <div class="profile-settings-overlay" id="profileSettingsOverlay">
@@ -1039,13 +1039,55 @@
             </div>
 
             <div class="ps-section">
-                <div class="ps-menu-item" onclick="togglePrayerNotifications()">
-                    <div class="ps-icon"><span class="material-symbols-rounded">notifications</span></div>
+                <!-- Before Athan -->
+                <div class="ps-menu-item" onclick="toggleBeforeAthan()" id="beforeAthanToggle">
+                    <div class="ps-icon"><span class="material-symbols-rounded">alarm</span></div>
                     <div class="ps-content">
-                        <div class="ps-title" data-t="salah_notif_label">إشعارات الصلاة</div>
-                        <div class="ps-subtitle" data-t="notif_subtitle">تذكير الصلاة قبل وبعد الوقت</div>
+                        <div class="ps-title" data-t="before_athan_label">تنبيه قبل الأذان</div>
+                        <div class="ps-subtitle" data-t="before_athan_subtitle">تذكير قبل دخول وقت الصلاة</div>
                     </div>
                 </div>
+                <div id="beforeAthanSettings" style="display:none;padding:0 16px 12px;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                        <button class="notif-pill" data-min="5" onclick="setBeforeMinutes(5)">5 <span data-t="minutes_short">د</span></button>
+                        <button class="notif-pill" data-min="10" onclick="setBeforeMinutes(10)">10 <span data-t="minutes_short">د</span></button>
+                        <button class="notif-pill" data-min="15" onclick="setBeforeMinutes(15)">15 <span data-t="minutes_short">د</span></button>
+                        <button class="notif-pill" data-min="30" onclick="setBeforeMinutes(30)">30 <span data-t="minutes_short">د</span></button>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="beforeAthanPrayers">
+                        <label class="notif-check"><input type="checkbox" value="fajr" checked><span data-t="prayer_fajr">الفجر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="dhuhr" checked><span data-t="prayer_dhuhr">الظهر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="asr" checked><span data-t="prayer_asr">العصر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="maghrib" checked><span data-t="prayer_maghrib">المغرب</span></label>
+                        <label class="notif-check"><input type="checkbox" value="isha" checked><span data-t="prayer_isha">العشاء</span></label>
+                    </div>
+                </div>
+
+                <!-- After Athan -->
+                <div class="ps-menu-item" onclick="toggleAfterAthan()" id="afterAthanToggle">
+                    <div class="ps-icon"><span class="material-symbols-rounded">notifications_active</span></div>
+                    <div class="ps-content">
+                        <div class="ps-title" data-t="after_athan_label">تنبيه بعد الأذان</div>
+                        <div class="ps-subtitle" data-t="after_athan_subtitle">تذكير بعد دخول وقت الصلاة لمن لم يصلِّ</div>
+                    </div>
+                </div>
+                <div id="afterAthanSettings" style="display:none;padding:0 16px 12px;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                        <button class="notif-pill" data-min="5" onclick="setAfterMinutes(5)">5 <span data-t="minutes_short">د</span></button>
+                        <button class="notif-pill" data-min="10" onclick="setAfterMinutes(10)">10 <span data-t="minutes_short">د</span></button>
+                        <button class="notif-pill" data-min="15" onclick="setAfterMinutes(15)">15 <span data-t="minutes_short">د</span></button>
+                        <button class="notif-pill" data-min="30" onclick="setAfterMinutes(30)">30 <span data-t="minutes_short">د</span></button>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="afterAthanPrayers">
+                        <label class="notif-check"><input type="checkbox" value="fajr" checked><span data-t="prayer_fajr">الفجر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="dhuhr" checked><span data-t="prayer_dhuhr">الظهر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="asr" checked><span data-t="prayer_asr">العصر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="maghrib" checked><span data-t="prayer_maghrib">المغرب</span></label>
+                        <label class="notif-check"><input type="checkbox" value="isha" checked><span data-t="prayer_isha">العشاء</span></label>
+                    </div>
+                </div>
+
+                <!-- Fasting Notifications (kept as-is) -->
                 <div class="ps-menu-item" onclick="toggleFastingNotifications()">
                     <div class="ps-icon"><span class="material-symbols-rounded">nights_stay</span></div>
                     <div class="ps-content">
@@ -1053,29 +1095,8 @@
                         <div class="ps-subtitle" data-t="fasting_notif_subtitle">تذكير بأيام الصيام المسنونة</div>
                     </div>
                 </div>
-                <div class="ps-menu-item" onclick="togglePreAthan()" id="preAthanToggle">
-                    <div class="ps-icon"><span class="material-symbols-rounded">alarm</span></div>
-                    <div class="ps-content">
-                        <div class="ps-title" data-t="preathan_label">تنبيه قبل الأذان</div>
-                        <div class="ps-subtitle" data-t="preathan_subtitle">تذكير قبل دخول وقت الصلاة</div>
-                    </div>
-                </div>
-                <div id="preAthanSettings" style="display:none;padding:0 16px 12px;">
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-                        <button class="preathan-pill" data-min="5" onclick="setPreAthanMinutes(5)">5 <span data-t="minutes_short">د</span></button>
-                        <button class="preathan-pill" data-min="10" onclick="setPreAthanMinutes(10)">10 <span data-t="minutes_short">د</span></button>
-                        <button class="preathan-pill active" data-min="15" onclick="setPreAthanMinutes(15)">15 <span data-t="minutes_short">د</span></button>
-                        <button class="preathan-pill" data-min="20" onclick="setPreAthanMinutes(20)">20 <span data-t="minutes_short">د</span></button>
-                        <button class="preathan-pill" data-min="30" onclick="setPreAthanMinutes(30)">30 <span data-t="minutes_short">د</span></button>
-                    </div>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="preAthanPrayers">
-                        <label class="preathan-check"><input type="checkbox" value="fajr" checked><span>الفجر</span></label>
-                        <label class="preathan-check"><input type="checkbox" value="dhuhr" checked><span>الظهر</span></label>
-                        <label class="preathan-check"><input type="checkbox" value="asr" checked><span>العصر</span></label>
-                        <label class="preathan-check"><input type="checkbox" value="maghrib" checked><span>المغرب</span></label>
-                        <label class="preathan-check"><input type="checkbox" value="isha" checked><span>العشاء</span></label>
-                    </div>
-                </div>
+
+                <!-- Daily Insight -->
                 <div class="ps-menu-item" onclick="toggleDailyInsight()" id="dailyInsightToggle">
                     <div class="ps-icon"><span class="material-symbols-rounded">auto_awesome</span></div>
                     <div class="ps-content">

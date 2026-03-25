@@ -98,10 +98,10 @@ window.App.Main = (function() {
             }
         }, 1000);
 
-        // Notification onboarding card (first-launch prompt)
+        // Notification reminder banner (shows if neither before/after enabled)
         setTimeout(function() {
-            if (window.App.Notifications && window.App.Notifications.showOnboardingCard) {
-                window.App.Notifications.showOnboardingCard();
+            if (window.App.Notifications && window.App.Notifications.updateReminderBanner) {
+                window.App.Notifications.updateReminderBanner();
             }
         }, 2000);
     }
@@ -237,11 +237,18 @@ window.App.Main = (function() {
             }
         });
 
-        // Start prayer times monitor
+        // Start prayer times display + notification monitor
         setTimeout(function() {
             var activeProfile = window.App.Storage.getActiveProfile();
-            if (activeProfile && typeof window.startPrayerTimesMonitor === 'function') {
-                window.startPrayerTimesMonitor();
+            if (activeProfile) {
+                // Prayer times display monitor (30s render refresh)
+                if (window.App.PrayerTimes && window.App.PrayerTimes.startPrayerTimesMonitor) {
+                    window.App.PrayerTimes.startPrayerTimesMonitor();
+                }
+                // Notification monitor (60s check interval)
+                if (window.App.Notifications && window.App.Notifications.startMonitor) {
+                    window.App.Notifications.startMonitor();
+                }
             }
         }, 1500);
 
@@ -304,8 +311,9 @@ window.App.Main = (function() {
                 var activeProfile = window.App.Storage.getActiveProfile();
                 if (activeProfile) {
                     if (typeof window.renderPrayerTimes === 'function') window.renderPrayerTimes();
-                    if (window.App.Notifications && window.App.Notifications.checkPrayerTimeNotifications) {
-                        window.App.Notifications.checkPrayerTimeNotifications();
+                    if (window.App.Notifications) {
+                        window.App.Notifications.checkBeforeAthan();
+                        window.App.Notifications.checkAfterAthan();
                     }
                 }
             }
@@ -314,9 +322,10 @@ window.App.Main = (function() {
         // Schedule SW notifications when app goes to background
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'hidden') {
-                if (window.App.Notifications && window.App.Notifications.isEnabled()) {
-                    if (window.App.Notifications.scheduleSWNotifications) {
-                        window.App.Notifications.scheduleSWNotifications();
+                if (window.App.Notifications) {
+                    var N = window.App.Notifications;
+                    if (N.isBeforeEnabled() || N.isAfterEnabled()) {
+                        N.scheduleSWNotifications();
                     }
                 }
             }
