@@ -215,7 +215,7 @@ window.App.Main = (function() {
             DataIO.migrateExistingData();
         }
 
-        // Load theme + language
+        // Load theme + language (always, even during splash)
         if (window.App.Themes && window.App.Themes.loadTheme) {
             window.App.Themes.loadTheme();
         }
@@ -223,15 +223,25 @@ window.App.Main = (function() {
             window.App.I18n.applyLang();
         }
 
-        // Main init
-        init();
-
-        // Init info tooltip buttons on static HTML cards
-        setTimeout(function() {
-            if (window.App.InfoTooltips && window.App.InfoTooltips.initStaticButtons) {
-                window.App.InfoTooltips.initStaticButtons();
-            }
-        }, 500);
+        // If splash is active, defer init + monitors until splash finishes
+        if (window._splashActive) {
+            window._onSplashDone = function() {
+                init();
+                startPostInitTasks();
+                // Fade in app content: add transition class, then remove hiding class
+                document.body.classList.add('app-revealing');
+                requestAnimationFrame(function() {
+                    document.body.classList.remove('splash-active');
+                    setTimeout(function() {
+                        document.body.classList.remove('app-revealing');
+                    }, 350);
+                });
+            };
+        } else {
+            // No splash (return visit) — init immediately
+            init();
+            startPostInitTasks();
+        }
 
         // Clamp year inputs to valid Hijri range (1400-1500)
         document.addEventListener('input', function(e) {
@@ -245,21 +255,6 @@ window.App.Main = (function() {
                 if (val < minVal && el.value.length >= 4) { el.value = minVal; }
             }
         });
-
-        // Start prayer times display + notification monitor
-        setTimeout(function() {
-            var activeProfile = window.App.Storage.getActiveProfile();
-            if (activeProfile) {
-                // Prayer times display monitor (30s render refresh)
-                if (window.App.PrayerTimes && window.App.PrayerTimes.startPrayerTimesMonitor) {
-                    window.App.PrayerTimes.startPrayerTimesMonitor();
-                }
-                // Notification monitor (60s check interval)
-                if (window.App.Notifications && window.App.Notifications.startMonitor) {
-                    window.App.Notifications.startMonitor();
-                }
-            }
-        }, 1500);
 
         // PWA Service Worker
         if ('serviceWorker' in navigator) {
@@ -345,11 +340,32 @@ window.App.Main = (function() {
             window.App.UI.initInstallBanner();
         }
 
-        // Splash V2 fade-out is handled by the inline script in index.html
-        // (sessionStorage-gated, with theme-color restore)
-
         // Onboarding is triggered from selectProfile() in profiles.js
         // AFTER profile is loaded and main UI is fully rendered.
+    }
+
+    // ==================== POST-INIT TASKS (deferred if splash active) ====================
+
+    function startPostInitTasks() {
+        // Info tooltip buttons on static HTML cards
+        setTimeout(function() {
+            if (window.App.InfoTooltips && window.App.InfoTooltips.initStaticButtons) {
+                window.App.InfoTooltips.initStaticButtons();
+            }
+        }, 500);
+
+        // Prayer times display + notification monitor
+        setTimeout(function() {
+            var activeProfile = window.App.Storage.getActiveProfile();
+            if (activeProfile) {
+                if (window.App.PrayerTimes && window.App.PrayerTimes.startPrayerTimesMonitor) {
+                    window.App.PrayerTimes.startPrayerTimesMonitor();
+                }
+                if (window.App.Notifications && window.App.Notifications.startMonitor) {
+                    window.App.Notifications.startMonitor();
+                }
+            }
+        }, 1500);
     }
 
     return {

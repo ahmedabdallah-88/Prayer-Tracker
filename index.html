@@ -142,13 +142,17 @@
         }
         sessionStorage.setItem('splashShown', '1');
 
+        // Signal app.js to defer init() until splash is done
+        window._splashActive = true;
+        document.body.classList.add('splash-active');
+
         // Set theme-color to splash background during animation
         if (meta) meta.setAttribute('content', '#1B3D2F');
         document.documentElement.style.backgroundColor = '#1B3D2F';
         document.body.style.backgroundColor = '#1B3D2F';
 
         // --- Build verse character spans ---
-        var verseText = '\uFD3F \u0625\u0650\u0646\u0651\u064E \u0671\u0644\u0635\u0651\u064E\u0644\u064E\u0648\u0670\u0629\u064E \u0643\u064E\u0627\u0646\u064E\u062A\u06E1 \u0639\u064E\u0644\u064E\u0649 \u0671\u0644\u06E1\u0645\u064F\u0624\u06E1\u0645\u0650\u0646\u0650\u064A\u0646\u064E \u0643\u0650\u062A\u064E\u0670\u0628\u0657\u0627 \u0645\u0651\u064E\u0648\u06E1\u0642\u064F\u0648\u062A\u0657\u0627 \uFD3E';
+        var verseText = '\u0625\u0650\u0646\u0651\u064E \u0671\u0644\u0635\u0651\u064E\u0644\u064E\u0648\u0670\u0629\u064E \u0643\u064E\u0627\u0646\u064E\u062A\u06E1 \u0639\u064E\u0644\u064E\u0649 \u0671\u0644\u06E1\u0645\u064F\u0624\u06E1\u0645\u0650\u0646\u0650\u064A\u0646\u064E \u0643\u0650\u062A\u064E\u0670\u0628\u0657\u0627 \u0645\u0651\u064E\u0648\u06E1\u0642\u064F\u0648\u062A\u0657\u0627';
         // Group base characters with their combining diacritics
         var graphemes = verseText.match(new RegExp('[^\\u0610-\\u061A\\u064B-\\u065F\\u0670\\u06D6-\\u06ED][\\u0610-\\u061A\\u064B-\\u065F\\u0670\\u06D6-\\u06ED]*', 'g')) || [];
 
@@ -255,12 +259,14 @@
             if (splash) splash.classList.add('splash-fade-out');
         }, 8400);
 
-        // Step 8 (10.4s): Remove splash, restore theme
+        // Step 8 (10.4s): Remove splash, restore theme, signal app
         setTimeout(function() {
             if (splash && splash.parentNode) splash.remove();
             if (meta) meta.setAttribute('content', originalThemeColor);
             document.documentElement.style.backgroundColor = '';
             document.body.style.backgroundColor = '';
+            window._splashActive = false;
+            if (typeof window._onSplashDone === 'function') window._onSplashDone();
         }, 10400);
     })();
     </script>
@@ -1018,30 +1024,30 @@
 
     <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImport(event)">
 
-    <script src="js/config.js?v=95"></script>
-    <script src="js/storage.js?v=95"></script>
-    <script src="js/hijri-calendar.js?v=95"></script>
-    <script src="js/ui-utils.js?v=95"></script>
-    <script src="js/i18n.js?v=95"></script>
-    <script src="js/themes.js?v=95"></script>
-    <script src="js/profiles.js?v=95"></script>
-    <script src="js/female-features.js?v=95"></script>
-    <script src="js/fard-tracker.js?v=95"></script>
-    <script src="js/sunnah-tracker.js?v=95"></script>
-    <script src="js/jamaah-tracker.js?v=95"></script>
-    <script src="js/weekly-view.js?v=95"></script>
-    <script src="js/fasting-tracker.js?v=95"></script>
-    <script src="js/prayer-times.js?v=95"></script>
-    <script src="js/notifications.js?v=95"></script>
-    <script src="js/azkar-tracker.js?v=95"></script>
-    <script src="js/svg-charts.js?v=95"></script>
-    <script src="js/qada-report.js?v=95"></script>
-    <script src="js/dashboard.js?v=95"></script>
-    <script src="js/year-overview.js?v=95"></script>
-    <script src="js/info-tooltips.js?v=95"></script>
-    <script src="js/data-io.js?v=95"></script>
-    <script src="js/onboarding.js?v=95"></script>
-    <script src="js/app.js?v=95"></script>
+    <script src="js/config.js?v=96"></script>
+    <script src="js/storage.js?v=96"></script>
+    <script src="js/hijri-calendar.js?v=96"></script>
+    <script src="js/ui-utils.js?v=96"></script>
+    <script src="js/i18n.js?v=96"></script>
+    <script src="js/themes.js?v=96"></script>
+    <script src="js/profiles.js?v=96"></script>
+    <script src="js/female-features.js?v=96"></script>
+    <script src="js/fard-tracker.js?v=96"></script>
+    <script src="js/sunnah-tracker.js?v=96"></script>
+    <script src="js/jamaah-tracker.js?v=96"></script>
+    <script src="js/weekly-view.js?v=96"></script>
+    <script src="js/fasting-tracker.js?v=96"></script>
+    <script src="js/prayer-times.js?v=96"></script>
+    <script src="js/notifications.js?v=96"></script>
+    <script src="js/azkar-tracker.js?v=96"></script>
+    <script src="js/svg-charts.js?v=96"></script>
+    <script src="js/qada-report.js?v=96"></script>
+    <script src="js/dashboard.js?v=96"></script>
+    <script src="js/year-overview.js?v=96"></script>
+    <script src="js/info-tooltips.js?v=96"></script>
+    <script src="js/data-io.js?v=96"></script>
+    <script src="js/onboarding.js?v=96"></script>
+    <script src="js/app.js?v=96"></script>
 
     <!-- Profile Settings Overlay -->
     <div class="profile-settings-overlay" id="profileSettingsOverlay">
