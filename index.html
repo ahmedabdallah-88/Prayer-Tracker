@@ -7,7 +7,7 @@
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f4c3a">
+    <meta name="theme-color" id="metaThemeColor" content="#0f4c3a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="متتبع الصلاة">
@@ -26,33 +26,40 @@
 </head>
 <body>
 
-    <!-- Splash Screen (removed after animation) -->
+    <!-- Splash Screen V2 (removed after animation) -->
     <div id="splashScreen">
-        <!-- Background geometric glow -->
-        <div class="splash-glow">
+        <!-- Moon SVG with animated crescent mask -->
+        <svg class="splash-moon-svg" width="120" height="120" viewBox="0 0 120 120">
+            <defs>
+                <linearGradient id="moonGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#D4A83C"/>
+                    <stop offset="50%" stop-color="#C8A84E"/>
+                    <stop offset="100%" stop-color="#B8922E"/>
+                </linearGradient>
+                <mask id="crescentMask">
+                    <rect width="120" height="120" fill="white"/>
+                    <circle class="moon-shadow" cx="45" cy="56" r="44" fill="black"/>
+                </mask>
+            </defs>
+            <!-- Full golden moon -->
+            <circle cx="60" cy="56" r="48" fill="url(#moonGrad)" mask="url(#crescentMask)"/>
+            <!-- Surface texture dots (faint) -->
+            <g class="moon-texture" mask="url(#crescentMask)">
+                <circle cx="50" cy="45" r="3" fill="rgba(184,146,46,0.25)"/>
+                <circle cx="68" cy="62" r="2.5" fill="rgba(184,146,46,0.2)"/>
+                <circle cx="55" cy="70" r="2" fill="rgba(184,146,46,0.18)"/>
+            </g>
+        </svg>
+
+        <!-- Geometric glow behind crescent -->
+        <div class="splash-glow" id="splashGlow">
             <div class="splash-glow-star"></div>
             <div class="splash-glow-square"></div>
             <div class="splash-glow-circle"></div>
         </div>
 
-        <!-- Crescent Moon SVG -->
-        <svg class="splash-crescent" width="140" height="140" viewBox="0 0 140 140">
-            <defs>
-                <linearGradient id="splashMoonGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#D4A83C" />
-                    <stop offset="100%" stop-color="#B8922E" />
-                </linearGradient>
-                <mask id="splashCrescentMask">
-                    <rect width="140" height="140" fill="white" />
-                    <circle cx="58" cy="62" r="44" fill="black" />
-                </mask>
-            </defs>
-            <circle cx="70" cy="65" r="48" fill="url(#splashMoonGrad)" mask="url(#splashCrescentMask)" />
-            <circle cx="70" cy="65" r="48" fill="none" stroke="#C8A84E" stroke-width="0.5" opacity="0.3" mask="url(#splashCrescentMask)" />
-        </svg>
-
         <!-- 5 Prayer circles with connecting line -->
-        <div class="splash-prayers-row">
+        <div class="splash-prayers-row" id="splashPrayersRow">
             <div class="splash-line"></div>
             <div class="splash-diamond"></div>
             <div class="splash-circles">
@@ -75,7 +82,7 @@
         </div>
 
         <!-- Prayer names -->
-        <div class="splash-names">
+        <div class="splash-names" id="splashNames">
             <div class="splash-name" id="splashN0">الفجر</div>
             <div class="splash-name" id="splashN1">الظهر</div>
             <div class="splash-name" id="splashN2">العصر</div>
@@ -83,46 +90,97 @@
             <div class="splash-name" id="splashN4">العشاء</div>
         </div>
 
-        <!-- Mini crescent decoration -->
-        <div class="splash-mini-moon">
-            <svg width="14" height="14" viewBox="0 0 14 14">
-                <defs>
-                    <mask id="splashMiniMoon">
-                        <rect width="14" height="14" fill="white" />
-                        <circle cx="5.5" cy="6.5" r="4.5" fill="black" />
-                    </mask>
-                </defs>
-                <circle cx="7" cy="7" r="5" fill="#C8A84E" mask="url(#splashMiniMoon)" opacity="0.4" />
-            </svg>
-        </div>
-
-        <!-- App name -->
-        <div class="splash-title">سجل الصلوات</div>
+        <!-- App title -->
+        <div class="splash-title" id="splashTitle">سجل الصلوات</div>
 
         <!-- Quran verse -->
-        <div class="splash-verse">﴿ إِنَّ ٱلصَّلَوٰةَ كَانَتۡ عَلَى ٱلۡمُؤۡمِنِينَ كِتَٰبٗا مَّوۡقُوتٗا ﴾</div>
-        <div class="splash-verse-ref">[النساء: ١٠٣]</div>
+        <div class="splash-verse" id="splashVerse">﴿ إِنَّ ٱلصَّلَوٰةَ كَانَتۡ عَلَى ٱلۡمُؤۡمِنِينَ كِتَٰبٗا مَّوۡقُوتٗا ﴾</div>
+        <div class="splash-verse-ref" id="splashVerseRef">[النساء: ١٠٣]</div>
     </div>
 
     <script>
-    // Skip splash on same-session revisits (tab switch, in-app navigation)
+    // Splash V2 — full moon → crescent animation sequence
     (function() {
+        var meta = document.getElementById('metaThemeColor');
+        var originalThemeColor = meta ? meta.getAttribute('content') : '#0f4c3a';
+
         if (sessionStorage.getItem('splashShown')) {
             var el = document.getElementById('splashScreen');
             if (el) el.remove();
-        } else {
-            sessionStorage.setItem('splashShown', '1');
-            // Animate checkmarks one by one
-            var delays = [2000, 2300, 2600, 2900, 3200];
-            delays.forEach(function(ms, i) {
-                setTimeout(function() {
-                    var c = document.getElementById('splashC' + i);
-                    var n = document.getElementById('splashN' + i);
-                    if (c) c.classList.add('checked');
-                    if (n) n.classList.add('lit');
-                }, ms);
-            });
+            return;
         }
+        sessionStorage.setItem('splashShown', '1');
+
+        // Set theme-color to splash background during animation
+        if (meta) meta.setAttribute('content', '#1B3D2F');
+        document.documentElement.style.backgroundColor = '#1B3D2F';
+        document.body.style.backgroundColor = '#1B3D2F';
+
+        var moonSvg = document.querySelector('.splash-moon-svg');
+        var glow = document.getElementById('splashGlow');
+        var prayersRow = document.getElementById('splashPrayersRow');
+        var names = document.getElementById('splashNames');
+        var title = document.getElementById('splashTitle');
+        var verse = document.getElementById('splashVerse');
+        var verseRef = document.getElementById('splashVerseRef');
+
+        // Step 1 (0.2s): Full moon appears with bounce scale
+        setTimeout(function() {
+            if (moonSvg) moonSvg.classList.add('visible');
+        }, 200);
+
+        // Step 2 (0.8s): Moon transforms into crescent — shadow circle slides
+        setTimeout(function() {
+            if (moonSvg) moonSvg.classList.add('crescent');
+        }, 800);
+
+        // Step 3 (1.8s): Geometric glow appears behind crescent
+        setTimeout(function() {
+            if (glow) glow.classList.add('visible');
+        }, 1800);
+
+        // Step 4 (2.2s): Prayer circles + line appear
+        setTimeout(function() {
+            if (prayersRow) prayersRow.classList.add('visible');
+            if (names) names.classList.add('visible');
+        }, 2200);
+
+        // Step 5 (2.5s → 3.5s): Checkmarks fill one by one every 250ms
+        var checkDelays = [2500, 2750, 3000, 3250, 3500];
+        checkDelays.forEach(function(ms, i) {
+            setTimeout(function() {
+                var c = document.getElementById('splashC' + i);
+                var n = document.getElementById('splashN' + i);
+                if (c) c.classList.add('checked');
+                if (n) n.classList.add('lit');
+            }, ms);
+        });
+
+        // Step 6 (3.9s): Title fades up
+        setTimeout(function() {
+            if (title) title.classList.add('visible');
+        }, 3900);
+
+        // Step 7 (4.4s): Verse fades up
+        setTimeout(function() {
+            if (verse) verse.classList.add('visible');
+            if (verseRef) verseRef.classList.add('visible');
+        }, 4400);
+
+        // Step 8 (5.2s): Everything fades out
+        setTimeout(function() {
+            var splash = document.getElementById('splashScreen');
+            if (splash) {
+                splash.classList.add('splash-hidden');
+                setTimeout(function() {
+                    splash.remove();
+                    // Restore theme-color and body backgrounds
+                    if (meta) meta.setAttribute('content', originalThemeColor);
+                    document.documentElement.style.backgroundColor = '';
+                    document.body.style.backgroundColor = '';
+                }, 600);
+            }
+        }, 5200);
     })();
     </script>
 
