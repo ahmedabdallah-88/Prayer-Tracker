@@ -435,6 +435,17 @@ window.App.Config = {
         'after_athan_subtitle': { ar: 'تذكير بعد دخول وقت الصلاة لمن لم يصلِّ', en: 'Reminder after prayer time for those who haven\'t prayed' },
         'minutes_short': { ar: 'د', en: 'min' },
 
+        // Athan Sound
+        'athan_sound': { ar: 'صوت الأذان', en: 'Athan Sound' },
+        'play_athan': { ar: 'تشغيل صوت الأذان', en: 'Play Athan Sound' },
+        'muezzin': { ar: 'المؤذن', en: 'Muezzin' },
+        'afasy': { ar: 'مشاري العفاسي', en: 'Mishary Al-Afasy' },
+        'makkah': { ar: 'الأذان المكي', en: 'Makkah Haram' },
+        'volume': { ar: 'مستوى الصوت', en: 'Volume' },
+        'preview': { ar: 'استمع', en: 'Preview' },
+        'stop_athan': { ar: 'إيقاف الأذان', en: 'Stop Athan' },
+        'athan_prayers': { ar: 'الصلوات', en: 'Prayers' },
+
         // Daily Insight
         'insight_label': { ar: 'ملخص يومي ذكي', en: 'Smart Daily Insight' },
         'insight_subtitle': { ar: 'إشعار بعد العشاء بملخص يومك', en: 'Post-Isha notification with your day summary' },

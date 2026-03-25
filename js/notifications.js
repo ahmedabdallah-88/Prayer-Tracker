@@ -23,6 +23,13 @@ window.App.Notifications = (function() {
     // Daily insight state
     var dailyInsightEnabled = localStorage.getItem('salah_insight_enabled') === 'true';
 
+    // Athan sound state
+    var athanSoundEnabled = localStorage.getItem('salah_athan_sound_enabled') === 'true';
+    var athanMuezzin = localStorage.getItem('salah_athan_muezzin') || 'afasy';
+    var athanVolume = parseInt(localStorage.getItem('salah_athan_volume')) || 80;
+    var athanPrayers = JSON.parse(localStorage.getItem('salah_athan_prayers') || '["fajr","dhuhr","asr","maghrib","isha"]');
+    var currentAthanAudio = null;
+
     // ==================== CROSS-MODULE HELPERS ====================
 
     function t(key) {
@@ -342,6 +349,9 @@ window.App.Notifications = (function() {
             c.checked = afterPrayers.indexOf(c.value) !== -1;
             c.addEventListener('change', saveAfterPrayers);
         });
+
+        // Athan sound panel
+        initAthanSettings();
 
         // Show reminder banner if needed
         updateReminderBanner();
@@ -692,6 +702,148 @@ window.App.Notifications = (function() {
         localStorage.setItem(sentKey, '1');
     }
 
+    // ==================== ATHAN SOUND ====================
+
+    function toggleAthanSound() {
+        var currentLang = getCurrentLang();
+        if (athanSoundEnabled) {
+            athanSoundEnabled = false;
+            localStorage.setItem('salah_athan_sound_enabled', 'false');
+            showToast(currentLang === 'ar' ? 'تم إيقاف صوت الأذان' : 'Athan sound disabled', 'info');
+            var panel = document.getElementById('athanSoundSettings');
+            if (panel) panel.style.display = 'none';
+        } else {
+            athanSoundEnabled = true;
+            localStorage.setItem('salah_athan_sound_enabled', 'true');
+            showToast(currentLang === 'ar' ? 'تم تفعيل صوت الأذان' : 'Athan sound enabled', 'success');
+            var panel = document.getElementById('athanSoundSettings');
+            if (panel) panel.style.display = 'block';
+        }
+    }
+
+    function setAthanMuezzin(value) {
+        athanMuezzin = value;
+        localStorage.setItem('salah_athan_muezzin', value);
+        document.querySelectorAll('#athanSoundSettings .notif-pill[data-muezzin]').forEach(function(p) {
+            p.classList.toggle('active', p.getAttribute('data-muezzin') === value);
+        });
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+    }
+
+    function setAthanVolume(value) {
+        athanVolume = parseInt(value);
+        localStorage.setItem('salah_athan_volume', String(athanVolume));
+    }
+
+    function saveAthanPrayers() {
+        var checks = document.querySelectorAll('#athanSoundPrayers input[type="checkbox"]');
+        athanPrayers = [];
+        checks.forEach(function(c) { if (c.checked) athanPrayers.push(c.value); });
+        localStorage.setItem('salah_athan_prayers', JSON.stringify(athanPrayers));
+    }
+
+    function previewAthan() {
+        stopAthan();
+        var audio = new Audio('audio/athan-' + athanMuezzin + '.mp3');
+        audio.volume = athanVolume / 100;
+        currentAthanAudio = audio;
+        audio.play().catch(function() {});
+        showStopPill();
+        setTimeout(function() {
+            if (currentAthanAudio === audio) {
+                stopAthan();
+            }
+        }, 5000);
+    }
+
+    function playAthan(prayerId) {
+        if (document.visibilityState !== 'visible') return;
+        stopAthan();
+        var audio = new Audio('audio/athan-' + athanMuezzin + '.mp3');
+        audio.volume = athanVolume / 100;
+        currentAthanAudio = audio;
+        audio.play().catch(function() {});
+        audio.addEventListener('ended', function() {
+            removeStopPill();
+            currentAthanAudio = null;
+        });
+        showStopPill();
+        console.log('[ATHAN] Playing for ' + prayerId + ', muezzin=' + athanMuezzin + ', vol=' + athanVolume);
+    }
+
+    function stopAthan() {
+        if (currentAthanAudio) {
+            currentAthanAudio.pause();
+            currentAthanAudio.currentTime = 0;
+            currentAthanAudio = null;
+        }
+        removeStopPill();
+    }
+
+    function showStopPill() {
+        removeStopPill();
+        var pill = document.createElement('button');
+        pill.id = 'athanStopPill';
+        pill.className = 'athan-stop-pill';
+        pill.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">stop</span><span>' + t('stop_athan') + '</span>';
+        pill.onclick = function() { stopAthan(); };
+        document.body.appendChild(pill);
+    }
+
+    function removeStopPill() {
+        var pill = document.getElementById('athanStopPill');
+        if (pill) pill.remove();
+    }
+
+    function checkAthanTime() {
+        if (!athanSoundEnabled) return;
+        if (document.visibilityState !== 'visible') return;
+        var ptData = getPrayerTimesData();
+        if (!ptData || !ptData.timings) return;
+
+        var now = new Date();
+        var nowMin = now.getHours() * 60 + now.getMinutes();
+        var todayStr = now.toISOString().split('T')[0];
+        var timings = ptData.timings;
+
+        var prayers = [
+            { id: 'fajr', time: parseTimeToMinutes(timings.fajr) },
+            { id: 'dhuhr', time: parseTimeToMinutes(timings.dhuhr) },
+            { id: 'asr', time: parseTimeToMinutes(timings.asr) },
+            { id: 'maghrib', time: parseTimeToMinutes(timings.maghrib) },
+            { id: 'isha', time: parseTimeToMinutes(timings.isha) }
+        ];
+
+        prayers.forEach(function(p) {
+            if (athanPrayers.indexOf(p.id) === -1) return;
+            var diff = nowMin - p.time;
+            if (diff >= 0 && diff <= 1) {
+                var playedKey = 'salah_athan_played_' + p.id + '_' + todayStr;
+                if (!localStorage.getItem(playedKey)) {
+                    playAthan(p.id);
+                    localStorage.setItem(playedKey, 'true');
+                }
+            }
+        });
+    }
+
+    function initAthanSettings() {
+        var panel = document.getElementById('athanSoundSettings');
+        if (panel && athanSoundEnabled) panel.style.display = 'block';
+
+        document.querySelectorAll('#athanSoundSettings .notif-pill[data-muezzin]').forEach(function(p) {
+            p.classList.toggle('active', p.getAttribute('data-muezzin') === athanMuezzin);
+        });
+
+        var slider = document.getElementById('athanVolumeSlider');
+        if (slider) slider.value = athanVolume;
+
+        document.querySelectorAll('#athanSoundPrayers input[type="checkbox"]').forEach(function(c) {
+            c.checked = athanPrayers.indexOf(c.value) !== -1;
+            c.addEventListener('change', saveAthanPrayers);
+        });
+    }
+
     // ==================== REMINDER BANNER (STEP 4) ====================
 
     function updateReminderBanner() {
@@ -859,6 +1011,7 @@ window.App.Notifications = (function() {
             // Check all notification types
             checkBeforeAthan();
             checkAfterAthan();
+            checkAthanTime();
             checkFastingNotifications();
             checkDailyInsight();
 
@@ -893,6 +1046,15 @@ window.App.Notifications = (function() {
         checkDailyInsight: checkDailyInsight,
         isDailyInsightEnabled: function() { return dailyInsightEnabled; },
 
+        // Athan sound
+        toggleAthanSound: toggleAthanSound,
+        setAthanMuezzin: setAthanMuezzin,
+        setAthanVolume: setAthanVolume,
+        previewAthan: previewAthan,
+        stopAthan: stopAthan,
+        checkAthanTime: checkAthanTime,
+        isAthanSoundEnabled: function() { return athanSoundEnabled; },
+
         // Reminder banner
         updateReminderBanner: updateReminderBanner,
 
@@ -919,6 +1081,11 @@ window.setBeforeMinutes = window.App.Notifications.setBeforeMinutes;
 window.setAfterMinutes = window.App.Notifications.setAfterMinutes;
 window.toggleFastingNotifications = window.App.Notifications.toggleFastingNotifications;
 window.toggleDailyInsight = window.App.Notifications.toggleDailyInsight;
+window.toggleAthanSound = window.App.Notifications.toggleAthanSound;
+window.setAthanMuezzin = window.App.Notifications.setAthanMuezzin;
+window.setAthanVolume = window.App.Notifications.setAthanVolume;
+window.previewAthan = window.App.Notifications.previewAthan;
+window.stopAthan = window.App.Notifications.stopAthan;
 window.scheduleSWNotifications = window.App.Notifications.scheduleSWNotifications;
 // Legacy compat — old code calls startPrayerTimesMonitor
 window.startPrayerTimesMonitor = window.App.Notifications.startMonitor;

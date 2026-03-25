@@ -1018,30 +1018,30 @@
 
     <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImport(event)">
 
-    <script src="js/config.js?v=94"></script>
-    <script src="js/storage.js?v=94"></script>
-    <script src="js/hijri-calendar.js?v=94"></script>
-    <script src="js/ui-utils.js?v=94"></script>
-    <script src="js/i18n.js?v=94"></script>
-    <script src="js/themes.js?v=94"></script>
-    <script src="js/profiles.js?v=94"></script>
-    <script src="js/female-features.js?v=94"></script>
-    <script src="js/fard-tracker.js?v=94"></script>
-    <script src="js/sunnah-tracker.js?v=94"></script>
-    <script src="js/jamaah-tracker.js?v=94"></script>
-    <script src="js/weekly-view.js?v=94"></script>
-    <script src="js/fasting-tracker.js?v=94"></script>
-    <script src="js/prayer-times.js?v=94"></script>
-    <script src="js/notifications.js?v=94"></script>
-    <script src="js/azkar-tracker.js?v=94"></script>
-    <script src="js/svg-charts.js?v=94"></script>
-    <script src="js/qada-report.js?v=94"></script>
-    <script src="js/dashboard.js?v=94"></script>
-    <script src="js/year-overview.js?v=94"></script>
-    <script src="js/info-tooltips.js?v=94"></script>
-    <script src="js/data-io.js?v=94"></script>
-    <script src="js/onboarding.js?v=94"></script>
-    <script src="js/app.js?v=94"></script>
+    <script src="js/config.js?v=95"></script>
+    <script src="js/storage.js?v=95"></script>
+    <script src="js/hijri-calendar.js?v=95"></script>
+    <script src="js/ui-utils.js?v=95"></script>
+    <script src="js/i18n.js?v=95"></script>
+    <script src="js/themes.js?v=95"></script>
+    <script src="js/profiles.js?v=95"></script>
+    <script src="js/female-features.js?v=95"></script>
+    <script src="js/fard-tracker.js?v=95"></script>
+    <script src="js/sunnah-tracker.js?v=95"></script>
+    <script src="js/jamaah-tracker.js?v=95"></script>
+    <script src="js/weekly-view.js?v=95"></script>
+    <script src="js/fasting-tracker.js?v=95"></script>
+    <script src="js/prayer-times.js?v=95"></script>
+    <script src="js/notifications.js?v=95"></script>
+    <script src="js/azkar-tracker.js?v=95"></script>
+    <script src="js/svg-charts.js?v=95"></script>
+    <script src="js/qada-report.js?v=95"></script>
+    <script src="js/dashboard.js?v=95"></script>
+    <script src="js/year-overview.js?v=95"></script>
+    <script src="js/info-tooltips.js?v=95"></script>
+    <script src="js/data-io.js?v=95"></script>
+    <script src="js/onboarding.js?v=95"></script>
+    <script src="js/app.js?v=95"></script>
 
     <!-- Profile Settings Overlay -->
     <div class="profile-settings-overlay" id="profileSettingsOverlay">
@@ -1154,6 +1154,42 @@
                         <button class="notif-pill" data-min="30" onclick="setAfterMinutes(30)">30 <span data-t="minutes_short">د</span></button>
                     </div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;" id="afterAthanPrayers">
+                        <label class="notif-check"><input type="checkbox" value="fajr" checked><span data-t="prayer_fajr">الفجر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="dhuhr" checked><span data-t="prayer_dhuhr">الظهر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="asr" checked><span data-t="prayer_asr">العصر</span></label>
+                        <label class="notif-check"><input type="checkbox" value="maghrib" checked><span data-t="prayer_maghrib">المغرب</span></label>
+                        <label class="notif-check"><input type="checkbox" value="isha" checked><span data-t="prayer_isha">العشاء</span></label>
+                    </div>
+                </div>
+
+                <!-- Athan Sound -->
+                <div class="ps-menu-item" onclick="toggleAthanSound()" id="athanSoundToggle">
+                    <div class="ps-icon"><span class="material-symbols-rounded">volume_up</span></div>
+                    <div class="ps-content">
+                        <div class="ps-title" data-t="athan_sound">صوت الأذان</div>
+                        <div class="ps-subtitle" data-t="play_athan">تشغيل صوت الأذان</div>
+                    </div>
+                </div>
+                <div id="athanSoundSettings" style="display:none;padding:0 16px 12px;">
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;" data-t="muezzin">المؤذن</div>
+                        <div style="display:flex;gap:6px;">
+                            <button class="notif-pill" data-muezzin="afasy" onclick="setAthanMuezzin('afasy')"><span data-t="afasy">مشاري العفاسي</span></button>
+                            <button class="notif-pill" data-muezzin="makkah" onclick="setAthanMuezzin('makkah')"><span data-t="makkah">الأذان المكي</span></button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;" data-t="volume">مستوى الصوت</div>
+                        <input type="range" min="0" max="100" value="80" id="athanVolumeSlider" oninput="setAthanVolume(this.value)" style="width:100%;accent-color:var(--primary);">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <button class="notif-pill" onclick="previewAthan()" style="display:flex;align-items:center;gap:4px;">
+                            <span class="material-symbols-rounded" style="font-size:16px;">play_arrow</span>
+                            <span data-t="preview">استمع</span>
+                        </button>
+                    </div>
+                    <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;" data-t="athan_prayers">الصلوات</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="athanSoundPrayers">
                         <label class="notif-check"><input type="checkbox" value="fajr" checked><span data-t="prayer_fajr">الفجر</span></label>
                         <label class="notif-check"><input type="checkbox" value="dhuhr" checked><span data-t="prayer_dhuhr">الظهر</span></label>
                         <label class="notif-check"><input type="checkbox" value="asr" checked><span data-t="prayer_asr">العصر</span></label>

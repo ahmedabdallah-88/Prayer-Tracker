@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v94
-const CACHE_NAME = 'salah-tracker-v94';
+// Prayer Tracker PWA — Service Worker v95
+const CACHE_NAME = 'salah-tracker-v95';
 const ASSETS = [
     './',
     './index.html',
@@ -10,29 +10,29 @@ const ASSETS = [
     './css/dashboard.css',
     './css/splash.css',
     // JS modules (dependency order)
-    './js/config.js?v=94',
-    './js/storage.js?v=94',
-    './js/hijri-calendar.js?v=94',
-    './js/ui-utils.js?v=94',
-    './js/i18n.js?v=94',
-    './js/themes.js?v=94',
-    './js/profiles.js?v=94',
-    './js/female-features.js?v=94',
-    './js/fard-tracker.js?v=94',
-    './js/sunnah-tracker.js?v=94',
-    './js/jamaah-tracker.js?v=94',
-    './js/weekly-view.js?v=94',
-    './js/fasting-tracker.js?v=94',
-    './js/prayer-times.js?v=94',
-    './js/notifications.js?v=94',
-    './js/azkar-tracker.js?v=94',
-    './js/svg-charts.js?v=94',
-    './js/qada-report.js?v=94',
-    './js/dashboard.js?v=94',
-    './js/year-overview.js?v=94',
-    './js/data-io.js?v=94',
-    './js/onboarding.js?v=94',
-    './js/app.js?v=94',
+    './js/config.js?v=95',
+    './js/storage.js?v=95',
+    './js/hijri-calendar.js?v=95',
+    './js/ui-utils.js?v=95',
+    './js/i18n.js?v=95',
+    './js/themes.js?v=95',
+    './js/profiles.js?v=95',
+    './js/female-features.js?v=95',
+    './js/fard-tracker.js?v=95',
+    './js/sunnah-tracker.js?v=95',
+    './js/jamaah-tracker.js?v=95',
+    './js/weekly-view.js?v=95',
+    './js/fasting-tracker.js?v=95',
+    './js/prayer-times.js?v=95',
+    './js/notifications.js?v=95',
+    './js/azkar-tracker.js?v=95',
+    './js/svg-charts.js?v=95',
+    './js/qada-report.js?v=95',
+    './js/dashboard.js?v=95',
+    './js/year-overview.js?v=95',
+    './js/data-io.js?v=95',
+    './js/onboarding.js?v=95',
+    './js/app.js?v=95',
     // Icons
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
@@ -44,6 +44,9 @@ const ASSETS = [
     './icons/icon-512x512.png',
     './icons/maskable-192x192.png',
     './icons/maskable-512x512.png',
+    // Audio
+    './audio/athan-afasy.mp3',
+    './audio/athan-makkah.mp3',
     // CDN (cached on first fetch)
     'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&family=Rubik:wght@400;500;700&display=swap',
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
@@ -81,7 +84,7 @@ button:active{transform:scale(0.97)}
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v94...');
+    console.log('[SW] Installing v95...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -91,7 +94,7 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v94...');
+    console.log('[SW] Activating v95...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
