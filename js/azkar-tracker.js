@@ -167,6 +167,16 @@ window.App.Azkar = (function() {
         else if (month < 1) { month = 12; year--; }
         if (mEl) mEl.value = month;
         if (yEl) yEl.value = year;
+
+        // Animate month label slide
+        var monthLabel = document.getElementById('azkarTrackerMonthLabel');
+        if (monthLabel) {
+            monthLabel.classList.remove('slide-from-left', 'slide-from-right');
+            void monthLabel.offsetWidth;
+            monthLabel.classList.add(delta > 0 ? 'slide-from-left' : 'slide-from-right');
+            setTimeout(function() { monthLabel.classList.remove('slide-from-left', 'slide-from-right'); }, 250);
+        }
+
         updateAzkarTracker();
     }
 
@@ -241,6 +251,7 @@ window.App.Azkar = (function() {
         document.querySelectorAll('#azkarSection .view').forEach(function(v) { v.classList.remove('active'); });
 
         var subTabs = document.getElementById('azkarSubTabs');
+        var pillPos = 0;
         if (subTabs) {
             subTabs.querySelectorAll('.sub-tab').forEach(function(tab) { tab.classList.remove('active'); });
         }
@@ -248,17 +259,35 @@ window.App.Azkar = (function() {
         if (view === 'tracker') {
             document.getElementById('azkarTrackerView').classList.add('active');
             if (subTabs) { var t = subTabs.querySelectorAll('.sub-tab'); if (t[0]) t[0].classList.add('active'); }
+            pillPos = 0;
             updateAzkarTracker();
         } else if (view === 'yearly') {
             var azYearlyView = document.getElementById('azkarYearlyView');
             if (azYearlyView) azYearlyView.classList.add('active');
             if (subTabs) { var t2 = subTabs.querySelectorAll('.sub-tab'); if (t2[1]) t2[1].classList.add('active'); }
+            pillPos = 1;
             updateAzkarYearly();
         } else if (view === 'dashboard') {
             var azDashView = document.getElementById('azkarDashboardView');
             if (azDashView) azDashView.classList.add('active');
             if (subTabs) { var t3 = subTabs.querySelectorAll('.sub-tab'); if (t3[2]) t3[2].classList.add('active'); }
+            pillPos = 2;
             updateAzkarDashboard();
+        }
+
+        // Sliding pill
+        if (subTabs) {
+            var pill = subTabs.querySelector('.sub-tabs-pill');
+            if (pill) pill.setAttribute('data-pos', pillPos);
+        }
+
+        // View slide-in animation
+        var activeView = document.querySelector('#azkarSection .view.active');
+        if (activeView) {
+            activeView.classList.remove('view-slide-in');
+            void activeView.offsetWidth;
+            activeView.classList.add('view-slide-in');
+            setTimeout(function() { activeView.classList.remove('view-slide-in'); }, 300);
         }
     }
 

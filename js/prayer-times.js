@@ -454,6 +454,24 @@ window.App.PrayerTimes = (function() {
 
         updateTimer();
         countdownInterval = setInterval(updateTimer, 1000);
+
+        // Start breathe pulse every 3 seconds
+        if (window._countdownBreatheInterval) clearInterval(window._countdownBreatheInterval);
+        window._countdownBreatheInterval = setInterval(function() {
+            var cdEl = document.getElementById('nextPrayerCountdown');
+            if (!cdEl || cdEl.style.display === 'none') return;
+            // Add breathe wave
+            var wave = document.createElement('div');
+            wave.className = 'breathe-wave';
+            cdEl.appendChild(wave);
+            setTimeout(function() { wave.remove(); }, 1000);
+            // Pulse the hourglass icon
+            var icon = cdEl.querySelector('.material-symbols-rounded');
+            if (icon) {
+                icon.classList.add('icon-pulse');
+                setTimeout(function() { icon.classList.remove('icon-pulse'); }, 1000);
+            }
+        }, 3000);
     }
 
     // ==================== REFRESH ====================

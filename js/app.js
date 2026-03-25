@@ -110,13 +110,15 @@ window.App.Main = (function() {
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-item').forEach(function(t) {
-            t.classList.remove('active');
+            t.classList.remove('active', 'tab-bounce');
             t.setAttribute('aria-selected', 'false');
         });
         var tabEl = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
         if (tabEl) {
-            tabEl.classList.add('active');
+            tabEl.classList.add('active', 'tab-bounce');
             tabEl.setAttribute('aria-selected', 'true');
+            // Remove bounce class after animation completes
+            setTimeout(function() { tabEl.classList.remove('tab-bounce'); }, 400);
         }
         if (typeof window.switchSection === 'function') {
             window.switchSection(tab);

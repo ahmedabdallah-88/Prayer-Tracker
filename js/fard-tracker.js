@@ -195,16 +195,30 @@ window.App.Tracker = (function() {
             }
         }
 
-        // Fiori: update sub-tab active state
+        // Fiori: update sub-tab active state + sliding pill
         var subTabs = document.getElementById(prefix + 'SubTabs');
         if (subTabs) {
             var tabs = subTabs.querySelectorAll('.sub-tab');
+            var pillPos = 0;
             for (var i = 0; i < tabs.length; i++) {
                 tabs[i].classList.remove('active');
                 if ((view === 'tracker' && i === 0) || (view === 'yearly' && i === 1) || (view === 'dashboard' && i === 2)) {
                     tabs[i].classList.add('active');
+                    pillPos = i;
                 }
             }
+            // Animate sliding pill
+            var pill = subTabs.querySelector('.sub-tabs-pill');
+            if (pill) pill.setAttribute('data-pos', pillPos);
+        }
+
+        // Add slide-in animation to the active view
+        var activeView = document.querySelector('#' + prefix + 'Section .view.active');
+        if (activeView) {
+            activeView.classList.remove('view-slide-in');
+            void activeView.offsetWidth;
+            activeView.classList.add('view-slide-in');
+            setTimeout(function() { activeView.classList.remove('view-slide-in'); }, 300);
         }
     }
 
@@ -521,6 +535,16 @@ window.App.Tracker = (function() {
             if (typeof window.updateWeekLabel === 'function') {
                 window.updateWeekLabel();
             }
+        }
+
+        // Animate month label slide
+        var monthLabel = document.getElementById(type + 'TrackerMonthLabel');
+        if (monthLabel) {
+            monthLabel.classList.remove('slide-from-left', 'slide-from-right');
+            void monthLabel.offsetWidth;
+            // RTL: ► (delta>0 = next) slides from left, ◄ (delta<0 = prev) slides from right
+            monthLabel.classList.add(delta > 0 ? 'slide-from-left' : 'slide-from-right');
+            setTimeout(function() { monthLabel.classList.remove('slide-from-left', 'slide-from-right'); }, 250);
         }
 
         var elMonth = document.getElementById(type + 'TrackerMonthSelect');

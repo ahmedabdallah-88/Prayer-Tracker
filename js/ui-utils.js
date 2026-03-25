@@ -288,10 +288,41 @@ window.App.UI = (function() {
     // ==================== DAY-BOX CLICK ANIMATION ====================
 
     function animateDayBox(element) {
-        element.classList.remove('pop', 'ripple');
+        // Determine ripple color based on next state
+        var rippleColor = 'ripple-green';
+        if (element.classList.contains('checked')) {
+            rippleColor = 'ripple-gold'; // going to congregation
+        } else if (element.classList.contains('congregation')) {
+            rippleColor = 'ripple-red'; // going to qada
+        }
+
+        // Remove old animation classes
+        element.classList.remove('pop', 'anim-click', 'congregation-pulse');
         void element.offsetWidth;
-        element.classList.add('pop', 'ripple');
-        setTimeout(function() { element.classList.remove('pop', 'ripple'); }, 500);
+
+        // Add pop + number bounce
+        element.classList.add('pop', 'anim-click');
+
+        // Create ripple element
+        var ripple = document.createElement('div');
+        ripple.className = 'day-ripple ' + rippleColor;
+        element.appendChild(ripple);
+
+        // Remove ripple from DOM after animation
+        setTimeout(function() { ripple.remove(); }, 500);
+
+        // Remove animation classes after they finish
+        setTimeout(function() {
+            element.classList.remove('pop', 'anim-click');
+        }, 400);
+
+        // Congregation gold pulse
+        setTimeout(function() {
+            if (element.classList.contains('congregation')) {
+                element.classList.add('congregation-pulse');
+                setTimeout(function() { element.classList.remove('congregation-pulse'); }, 600);
+            }
+        }, 50);
     }
 
     document.addEventListener('click', function(e) {
