@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v88
-const CACHE_NAME = 'salah-tracker-v88';
+// Prayer Tracker PWA — Service Worker v89
+const CACHE_NAME = 'salah-tracker-v89';
 const ASSETS = [
     './',
     './index.html',
@@ -30,6 +30,7 @@ const ASSETS = [
     './js/dashboard.js?v=85',
     './js/year-overview.js?v=85',
     './js/data-io.js?v=85',
+    './js/onboarding.js?v=85',
     './js/app.js?v=85',
     // Icons
     './icons/icon-72x72.png',
@@ -78,7 +79,7 @@ button:active{transform:scale(0.97)}
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v85...');
+    console.log('[SW] Installing v89...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -88,7 +89,7 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v85...');
+    console.log('[SW] Activating v89...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(

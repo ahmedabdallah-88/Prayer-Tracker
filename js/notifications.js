@@ -465,6 +465,303 @@ window.App.Notifications = (function() {
         });
     }
 
+    // ==================== PRE-ATHAN ALERT ====================
+
+    var preAthanEnabled = localStorage.getItem('salah_preathan_enabled') === 'true';
+    var preAthanMinutes = parseInt(localStorage.getItem('salah_preathan_minutes')) || 15;
+    var preAthanPrayers = JSON.parse(localStorage.getItem('salah_preathan_prayers') || '["fajr","dhuhr","asr","maghrib","isha"]');
+
+    function togglePreAthan() {
+        var currentLang = getCurrentLang();
+        if (preAthanEnabled) {
+            preAthanEnabled = false;
+            localStorage.setItem('salah_preathan_enabled', 'false');
+            showToast(currentLang === 'ar' ? 'تم إيقاف تنبيه ما قبل الأذان' : 'Pre-athan alert disabled', 'info');
+            var panel = document.getElementById('preAthanSettings');
+            if (panel) panel.style.display = 'none';
+        } else {
+            if (!('Notification' in window)) {
+                showToast(currentLang === 'ar' ? 'المتصفح لا يدعم التنبيهات' : 'Notifications not supported', 'error');
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                showToast(currentLang === 'ar' ? 'تم حظر التنبيهات — فعّلها من إعدادات المتصفح' : 'Notifications blocked', 'error');
+                return;
+            }
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission().then(function(p) {
+                    if (p === 'granted') {
+                        preAthanEnabled = true;
+                        localStorage.setItem('salah_preathan_enabled', 'true');
+                        showToast(currentLang === 'ar' ? 'تم تفعيل تنبيه ما قبل الأذان' : 'Pre-athan alert enabled', 'success');
+                        var panel = document.getElementById('preAthanSettings');
+                        if (panel) panel.style.display = 'block';
+                    }
+                });
+                return;
+            }
+            preAthanEnabled = true;
+            localStorage.setItem('salah_preathan_enabled', 'true');
+            showToast(currentLang === 'ar' ? 'تم تفعيل تنبيه ما قبل الأذان' : 'Pre-athan alert enabled', 'success');
+            var panel = document.getElementById('preAthanSettings');
+            if (panel) panel.style.display = 'block';
+        }
+    }
+
+    function setPreAthanMinutes(min) {
+        preAthanMinutes = min;
+        localStorage.setItem('salah_preathan_minutes', String(min));
+        document.querySelectorAll('.preathan-pill').forEach(function(p) {
+            p.classList.toggle('active', parseInt(p.getAttribute('data-min')) === min);
+        });
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+    }
+
+    function savePreAthanPrayers() {
+        var checks = document.querySelectorAll('#preAthanPrayers input[type="checkbox"]');
+        preAthanPrayers = [];
+        checks.forEach(function(c) { if (c.checked) preAthanPrayers.push(c.value); });
+        localStorage.setItem('salah_preathan_prayers', JSON.stringify(preAthanPrayers));
+    }
+
+    // Init pre-athan prayer checkboxes
+    setTimeout(function() {
+        var panel = document.getElementById('preAthanSettings');
+        if (panel && preAthanEnabled) panel.style.display = 'block';
+        // Set saved minutes pill
+        document.querySelectorAll('.preathan-pill').forEach(function(p) {
+            p.classList.toggle('active', parseInt(p.getAttribute('data-min')) === preAthanMinutes);
+        });
+        // Set saved prayer checkboxes
+        var checks = document.querySelectorAll('#preAthanPrayers input[type="checkbox"]');
+        checks.forEach(function(c) {
+            c.checked = preAthanPrayers.indexOf(c.value) !== -1;
+            c.addEventListener('change', savePreAthanPrayers);
+        });
+    }, 500);
+
+    function checkPreAthanAlert() {
+        if (!preAthanEnabled) return;
+        var prayerTimesData = getPrayerTimesData();
+        if (!prayerTimesData || !prayerTimesData.timings) return;
+        if (Notification.permission !== 'granted') return;
+
+        var now = new Date();
+        var nowMin = now.getHours() * 60 + now.getMinutes();
+        var todayStr = now.toISOString().split('T')[0];
+        var timings = prayerTimesData.timings;
+        var currentLang = getCurrentLang();
+
+        var prayers = [
+            { id: 'fajr', time: parseTimeToMinutes(timings.fajr) },
+            { id: 'dhuhr', time: parseTimeToMinutes(timings.dhuhr) },
+            { id: 'asr', time: parseTimeToMinutes(timings.asr) },
+            { id: 'maghrib', time: parseTimeToMinutes(timings.maghrib) },
+            { id: 'isha', time: parseTimeToMinutes(timings.isha) }
+        ];
+
+        prayers.forEach(function(p) {
+            if (preAthanPrayers.indexOf(p.id) === -1) return;
+            var alertMin = p.time - preAthanMinutes;
+            var key = todayStr + '_preathan_' + p.id;
+            if (nowMin >= alertMin && nowMin < p.time && !notifSentToday[key]) {
+                var prayerName = getPrayerName(p.id);
+                var title = currentLang === 'ar' ? 'استعد للصلاة' : 'Prepare for prayer';
+                var body = currentLang === 'ar'
+                    ? 'بقي ' + preAthanMinutes + ' دقيقة على صلاة ' + prayerName
+                    : prayerName + ' in ~' + preAthanMinutes + ' minutes';
+                playNotificationSound('before');
+                try {
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.ready.then(function(reg) {
+                            reg.showNotification(title, {
+                                body: body,
+                                icon: 'icons/icon-192x192.png',
+                                badge: 'icons/icon-72x72.png',
+                                tag: 'preathan-' + p.id,
+                                renotify: true,
+                                vibrate: [200, 100, 200],
+                                data: { url: './' }
+                            });
+                        });
+                    } else {
+                        new Notification(title, { body: body, icon: 'icons/icon-192x192.png', tag: 'preathan-' + p.id });
+                    }
+                } catch(e) {
+                    showToast(title + ': ' + body, 'info', 5000);
+                }
+                notifSentToday[key] = true;
+            }
+        });
+    }
+
+    // ==================== DAILY DATA INSIGHT ====================
+
+    var dailyInsightEnabled = localStorage.getItem('salah_insight_enabled') === 'true';
+
+    function toggleDailyInsight() {
+        var currentLang = getCurrentLang();
+        if (dailyInsightEnabled) {
+            dailyInsightEnabled = false;
+            localStorage.setItem('salah_insight_enabled', 'false');
+            showToast(currentLang === 'ar' ? 'تم إيقاف الملخص اليومي' : 'Daily insight disabled', 'info');
+        } else {
+            if (!('Notification' in window)) {
+                showToast(currentLang === 'ar' ? 'المتصفح لا يدعم التنبيهات' : 'Notifications not supported', 'error');
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                showToast(currentLang === 'ar' ? 'تم حظر التنبيهات' : 'Notifications blocked', 'error');
+                return;
+            }
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission().then(function(p) {
+                    if (p === 'granted') {
+                        dailyInsightEnabled = true;
+                        localStorage.setItem('salah_insight_enabled', 'true');
+                        showToast(currentLang === 'ar' ? 'تم تفعيل الملخص اليومي' : 'Daily insight enabled', 'success');
+                    }
+                });
+                return;
+            }
+            dailyInsightEnabled = true;
+            localStorage.setItem('salah_insight_enabled', 'true');
+            showToast(currentLang === 'ar' ? 'تم تفعيل الملخص اليومي' : 'Daily insight enabled', 'success');
+        }
+    }
+
+    function generateDailyInsight() {
+        var currentLang = getCurrentLang();
+        var todayH = gregorianToHijri(new Date());
+        if (!todayH) return null;
+        var dataObj = getDataObject('fard');
+        var fardPrayers = window.App.Config ? window.App.Config.fardPrayers : [];
+        var congData = {};
+        if (window.App.Storage && window.App.Storage.getCongData) {
+            congData = window.App.Storage.getCongData();
+        }
+
+        var prayed = 0;
+        var congCount = 0;
+        var missed = [];
+        for (var i = 0; i < fardPrayers.length; i++) {
+            var pid = fardPrayers[i].id;
+            var val = dataObj[todayH.month] && dataObj[todayH.month][pid] && dataObj[todayH.month][pid][todayH.day];
+            if (val) {
+                prayed++;
+                if (congData[pid] && congData[pid][todayH.day]) congCount++;
+            } else {
+                missed.push(getPrayerName(pid));
+            }
+        }
+
+        var title, body;
+        var now = new Date();
+        var weekday = now.getDay();
+
+        // Scenario 1: All 5 in congregation
+        if (congCount === 5) {
+            title = currentLang === 'ar' ? 'ما شاء الله!' : 'Masha\'Allah!';
+            body = currentLang === 'ar'
+                ? 'صليت الخمس جماعة اليوم — بارك الله في يومك'
+                : 'All 5 prayers in congregation today — blessed day!';
+        }
+        // Scenario 2: All 5 prayed (some alone)
+        else if (prayed === 5) {
+            title = currentLang === 'ar' ? 'أحسنت!' : 'Well done!';
+            body = currentLang === 'ar'
+                ? 'أتممت الصلوات الخمس اليوم' + (congCount > 0 ? ' — منها ' + congCount + ' جماعة' : '')
+                : 'All 5 prayers completed' + (congCount > 0 ? ' — ' + congCount + ' in congregation' : '');
+        }
+        // Scenario 3: Some missed
+        else if (prayed > 0 && prayed < 5) {
+            title = currentLang === 'ar' ? 'ملخص يومك' : 'Your daily summary';
+            body = currentLang === 'ar'
+                ? 'صليت ' + prayed + ' من 5 — لم تسجّل: ' + missed.join('، ')
+                : prayed + ' of 5 prayed — missed: ' + missed.join(', ');
+        }
+        // Scenario 4: None prayed
+        else if (prayed === 0) {
+            title = currentLang === 'ar' ? 'لا تنسَ صلاتك' : 'Don\'t forget your prayers';
+            body = currentLang === 'ar'
+                ? 'لم تسجّل أي صلاة اليوم — هل نسيت؟'
+                : 'No prayers logged today — did you forget?';
+        }
+        // Scenario 5: Friday
+        if (weekday === 5 && prayed >= 3) {
+            var fridayMsg = currentLang === 'ar'
+                ? ' — أكثروا من الصلاة على النبي ﷺ'
+                : ' — Send salawat on the Prophet ﷺ';
+            if (body) body += fridayMsg;
+        }
+
+        if (!title) return null;
+
+        // Streak check
+        var streak = 0;
+        for (var d = todayH.day; d >= 1; d--) {
+            var dayPrayed = 0;
+            for (var j = 0; j < fardPrayers.length; j++) {
+                if (dataObj[todayH.month] && dataObj[todayH.month][fardPrayers[j].id] && dataObj[todayH.month][fardPrayers[j].id][d]) {
+                    dayPrayed++;
+                }
+            }
+            if (dayPrayed === 5) streak++;
+            else break;
+        }
+        if (streak >= 7) {
+            var streakMsg = currentLang === 'ar'
+                ? ' 🔥 سلسلة ' + streak + ' يوم متتالي!'
+                : ' 🔥 ' + streak + '-day streak!';
+            body += streakMsg;
+        }
+
+        return { title: title, body: body };
+    }
+
+    function checkDailyInsight() {
+        if (!dailyInsightEnabled) return;
+        var prayerTimesData = getPrayerTimesData();
+        if (!prayerTimesData || !prayerTimesData.timings) return;
+        if (Notification.permission !== 'granted') return;
+
+        var now = new Date();
+        var nowMin = now.getHours() * 60 + now.getMinutes();
+        var todayStr = now.toISOString().split('T')[0];
+
+        // Send 45 min after Isha
+        var ishaMin = parseTimeToMinutes(prayerTimesData.timings.isha);
+        var insightMin = ishaMin + 45;
+        if (nowMin < insightMin || nowMin > insightMin + 30) return;
+
+        var sentKey = 'salah_insight_sent_' + todayStr;
+        if (localStorage.getItem(sentKey)) return;
+
+        var insight = generateDailyInsight();
+        if (!insight) return;
+
+        playNotificationSound('before');
+        try {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(function(reg) {
+                    reg.showNotification(insight.title, {
+                        body: insight.body,
+                        icon: 'icons/icon-192x192.png',
+                        badge: 'icons/icon-72x72.png',
+                        tag: 'daily-insight',
+                        vibrate: [200, 100, 200],
+                        data: { url: './' }
+                    });
+                });
+            } else {
+                new Notification(insight.title, { body: insight.body, icon: 'icons/icon-192x192.png' });
+            }
+        } catch(e) {
+            showToast(insight.title + ': ' + insight.body, 'info', 5000);
+        }
+        localStorage.setItem(sentKey, '1');
+    }
+
     // ==================== PRAYER TIMES MONITOR ====================
 
     function startPrayerTimesMonitor() {
@@ -480,6 +777,8 @@ window.App.Notifications = (function() {
             // Check notifications
             checkPrayerTimeNotifications();
             checkFastingNotifications();
+            checkPreAthanAlert();
+            checkDailyInsight();
 
             // At midnight, reset and refetch
             var now = new Date();
@@ -607,11 +906,19 @@ window.App.Notifications = (function() {
         playTone: playTone,
         checkPrayerTimeNotifications: checkPrayerTimeNotifications,
         checkFastingNotifications: checkFastingNotifications,
+        checkPreAthanAlert: checkPreAthanAlert,
+        checkDailyInsight: checkDailyInsight,
+        togglePreAthan: togglePreAthan,
+        setPreAthanMinutes: setPreAthanMinutes,
+        toggleDailyInsight: toggleDailyInsight,
+        generateDailyInsight: generateDailyInsight,
         startPrayerTimesMonitor: startPrayerTimesMonitor,
         scheduleSWNotifications: scheduleSWNotifications,
         showOnboardingCard: showOnboardingCard,
         isEnabled: function() { return notificationsEnabled; },
         isFastingNotifEnabled: function() { return fastingNotifEnabled; },
+        isPreAthanEnabled: function() { return preAthanEnabled; },
+        isDailyInsightEnabled: function() { return dailyInsightEnabled; },
         setEnabled: function(v) { notificationsEnabled = v; },
         resetNotifSentToday: function() { notifSentToday = {}; }
     };
@@ -622,6 +929,9 @@ window.App.Notifications = (function() {
 
 window.togglePrayerNotifications = window.App.Notifications.togglePrayerNotifications;
 window.toggleFastingNotifications = window.App.Notifications.toggleFastingNotifications;
+window.togglePreAthan = window.App.Notifications.togglePreAthan;
+window.setPreAthanMinutes = window.App.Notifications.setPreAthanMinutes;
+window.toggleDailyInsight = window.App.Notifications.toggleDailyInsight;
 window.startPrayerTimesMonitor = window.App.Notifications.startPrayerTimesMonitor;
 window.scheduleSWNotifications = window.App.Notifications.scheduleSWNotifications;
 window.updateNotifButton = window.App.Notifications.updateNotifButton;

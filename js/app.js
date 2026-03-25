@@ -109,6 +109,7 @@ window.App.Main = (function() {
     // ==================== FIORI: switchTab ====================
 
     function switchTab(tab) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         document.querySelectorAll('.tab-item').forEach(function(t) {
             t.classList.remove('active', 'tab-bounce');
             t.setAttribute('aria-selected', 'false');
@@ -328,6 +329,19 @@ window.App.Main = (function() {
 
         // Splash V2 fade-out is handled by the inline script in index.html
         // (sessionStorage-gated, with theme-color restore)
+
+        // Onboarding tutorial (first launch only)
+        setTimeout(function() {
+            if (window.App.Onboarding && window.App.Onboarding.shouldShow()) {
+                // Wait for splash to finish (5.8s) before starting onboarding
+                var delay = sessionStorage.getItem('splashShown') ? 500 : 6000;
+                setTimeout(function() {
+                    if (window.App.Onboarding.shouldShow()) {
+                        window.App.Onboarding.start();
+                    }
+                }, delay);
+            }
+        }, 500);
     }
 
     return {

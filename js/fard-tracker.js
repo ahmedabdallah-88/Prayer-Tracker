@@ -145,6 +145,7 @@ window.App.Tracker = (function() {
     // ==================== switchView (merged: base + Fiori sub-tabs) ====================
 
     function switchView(type, view) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         var Storage = _getStorage();
         var Hijri = _getHijri();
         var prefix = type;
@@ -506,6 +507,7 @@ window.App.Tracker = (function() {
     // ==================== changeTrackerMonth ====================
 
     function changeTrackerMonth(type, delta) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         var Hijri   = _getHijri();
         var Storage = _getStorage();
 

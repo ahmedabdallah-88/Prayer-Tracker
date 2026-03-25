@@ -2218,6 +2218,132 @@ body {
     color: var(--text-secondary);
 }
 
+/* ==================== PRE-ATHAN SETTINGS ==================== */
+.preathan-pill {
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.02);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Rubik', 'Noto Kufi Arabic', sans-serif;
+    transition: all 0.15s;
+}
+.preathan-pill.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+.preathan-check {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+.preathan-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* ==================== ONBOARDING SPOTLIGHT ==================== */
+.onboard-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+.onboard-overlay.active { pointer-events: auto; }
+.onboard-spotlight {
+    position: absolute;
+    border-radius: 16px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.6);
+    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+    z-index: 100000;
+}
+.onboard-tooltip {
+    position: absolute;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    max-width: 280px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    z-index: 100001;
+    pointer-events: auto;
+    font-family: 'Noto Kufi Arabic', 'Rubik', sans-serif;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(8px);
+}
+.onboard-tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.onboard-tooltip-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #2B2D42;
+    margin-bottom: 6px;
+}
+.onboard-tooltip-body {
+    font-size: 12px;
+    color: #8D99AE;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+.onboard-tooltip-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.onboard-btn-next {
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #2D6A4F;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+.onboard-btn-skip {
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    color: #8D99AE;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+.onboard-step-dots {
+    display: flex;
+    gap: 4px;
+}
+.onboard-step-dots .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.15);
+    transition: background 0.2s;
+}
+.onboard-step-dots .dot.active {
+    background: #2D6A4F;
+    width: 16px;
+    border-radius: 3px;
+}
+
 /* ==================== TOUCH DEVICE OVERRIDES ==================== */
 @media (hover: none) {
     .day-box:hover { transform: none; box-shadow: none; z-index: auto; }

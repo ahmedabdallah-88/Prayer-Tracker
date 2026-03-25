@@ -158,6 +158,7 @@ window.App.Azkar = (function() {
     }
 
     function changeAzkarMonth(delta) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         var mEl = document.getElementById('azkarTrackerMonth');
         var yEl = document.getElementById('azkarTrackerYear');
         var month = mEl ? parseInt(mEl.value) : Hijri.getCurrentHijriMonth();
@@ -248,6 +249,7 @@ window.App.Azkar = (function() {
     // ==================== AZKAR VIEW SWITCH ====================
 
     function switchAzkarView(view) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         document.querySelectorAll('#azkarSection .view').forEach(function(v) { v.classList.remove('active'); });
 
         var subTabs = document.getElementById('azkarSubTabs');

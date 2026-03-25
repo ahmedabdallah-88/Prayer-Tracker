@@ -292,8 +292,12 @@ window.App.UI = (function() {
         var rippleColor = 'ripple-green';
         if (element.classList.contains('checked')) {
             rippleColor = 'ripple-gold'; // going to congregation
+            haptic('double');
         } else if (element.classList.contains('congregation')) {
             rippleColor = 'ripple-red'; // going to qada
+            haptic('heavy');
+        } else {
+            haptic('tap');
         }
 
         // Remove old animation classes
@@ -371,6 +375,18 @@ window.App.UI = (function() {
                 osc.stop(ctx.currentTime + 0.1);
                 setTimeout(function() { ctx.close(); }, 200);
             }
+        } catch(e) {}
+    }
+
+    // State-specific haptic patterns
+    function haptic(pattern) {
+        try {
+            if (!navigator.vibrate) return;
+            if (pattern === 'tap') navigator.vibrate(10);
+            else if (pattern === 'double') navigator.vibrate([10, 50, 10]);
+            else if (pattern === 'heavy') navigator.vibrate(30);
+            else if (pattern === 'soft') navigator.vibrate(5);
+            else navigator.vibrate(10);
         } catch(e) {}
     }
 
@@ -646,6 +662,7 @@ window.App.UI = (function() {
         updateOnlineStatus: updateOnlineStatus,
         animateDayBox: animateDayBox,
         hapticFeedback: hapticFeedback,
+        haptic: haptic,
         initInstallBanner: initInstallBanner,
         promptInstall: promptInstall,
         showMonthYearPicker: showMonthYearPicker,
@@ -659,4 +676,5 @@ window.showConfirm = window.App.UI.showConfirm;
 window.scrollToUnmarkedPrayer = window.App.UI.scrollToUnmarkedPrayer;
 window.dismissReminder = window.App.UI.dismissReminder;
 window.hapticFeedback = window.App.UI.hapticFeedback;
+window.haptic = window.App.UI.haptic;
 window.showMonthYearPicker = window.App.UI.showMonthYearPicker;

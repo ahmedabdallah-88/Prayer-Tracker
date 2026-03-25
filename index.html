@@ -965,6 +965,7 @@
     <script src="js/year-overview.js?v=85"></script>
     <script src="js/info-tooltips.js?v=85"></script>
     <script src="js/data-io.js?v=85"></script>
+    <script src="js/onboarding.js?v=85"></script>
     <script src="js/app.js?v=85"></script>
 
     <!-- Profile Settings Overlay -->
@@ -1052,6 +1053,36 @@
                         <div class="ps-subtitle" data-t="fasting_notif_subtitle">تذكير بأيام الصيام المسنونة</div>
                     </div>
                 </div>
+                <div class="ps-menu-item" onclick="togglePreAthan()" id="preAthanToggle">
+                    <div class="ps-icon"><span class="material-symbols-rounded">alarm</span></div>
+                    <div class="ps-content">
+                        <div class="ps-title" data-t="preathan_label">تنبيه قبل الأذان</div>
+                        <div class="ps-subtitle" data-t="preathan_subtitle">تذكير قبل دخول وقت الصلاة</div>
+                    </div>
+                </div>
+                <div id="preAthanSettings" style="display:none;padding:0 16px 12px;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                        <button class="preathan-pill" data-min="5" onclick="setPreAthanMinutes(5)">5 <span data-t="minutes_short">د</span></button>
+                        <button class="preathan-pill" data-min="10" onclick="setPreAthanMinutes(10)">10 <span data-t="minutes_short">د</span></button>
+                        <button class="preathan-pill active" data-min="15" onclick="setPreAthanMinutes(15)">15 <span data-t="minutes_short">د</span></button>
+                        <button class="preathan-pill" data-min="20" onclick="setPreAthanMinutes(20)">20 <span data-t="minutes_short">د</span></button>
+                        <button class="preathan-pill" data-min="30" onclick="setPreAthanMinutes(30)">30 <span data-t="minutes_short">د</span></button>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="preAthanPrayers">
+                        <label class="preathan-check"><input type="checkbox" value="fajr" checked><span>الفجر</span></label>
+                        <label class="preathan-check"><input type="checkbox" value="dhuhr" checked><span>الظهر</span></label>
+                        <label class="preathan-check"><input type="checkbox" value="asr" checked><span>العصر</span></label>
+                        <label class="preathan-check"><input type="checkbox" value="maghrib" checked><span>المغرب</span></label>
+                        <label class="preathan-check"><input type="checkbox" value="isha" checked><span>العشاء</span></label>
+                    </div>
+                </div>
+                <div class="ps-menu-item" onclick="toggleDailyInsight()" id="dailyInsightToggle">
+                    <div class="ps-icon"><span class="material-symbols-rounded">auto_awesome</span></div>
+                    <div class="ps-content">
+                        <div class="ps-title" data-t="insight_label">ملخص يومي ذكي</div>
+                        <div class="ps-subtitle" data-t="insight_subtitle">إشعار بعد العشاء بملخص يومك</div>
+                    </div>
+                </div>
             </div>
 
             <div class="ps-section">
@@ -1059,6 +1090,13 @@
                     <div class="ps-icon"><span class="material-symbols-rounded">print</span></div>
                     <div class="ps-content">
                         <div class="ps-title" data-t="print">طباعة</div>
+                    </div>
+                </div>
+                <div class="ps-menu-item" onclick="closeProfileSettings();setTimeout(function(){if(window.App.Onboarding)window.App.Onboarding.start();},300);">
+                    <div class="ps-icon"><span class="material-symbols-rounded">school</span></div>
+                    <div class="ps-content">
+                        <div class="ps-title" data-t="usage_guide">دليل الاستخدام</div>
+                        <div class="ps-subtitle" data-t="usage_guide_subtitle">جولة تعريفية بالتطبيق</div>
                     </div>
                 </div>
             </div>

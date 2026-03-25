@@ -112,6 +112,7 @@ window.App.Fasting = (function() {
     // ==================== FASTING VIEW SWITCH (MERGED with Fiori override) ====================
 
     function switchFastingView(view) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         document.querySelectorAll('#fastingSection .view').forEach(function(v) { v.classList.remove('active'); });
         document.querySelectorAll('#fastingSection .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
 
@@ -257,6 +258,7 @@ window.App.Fasting = (function() {
     }
 
     function changeFastingMonth(delta) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
         var mEl = document.getElementById('fastingMonthSelect');
         var yEl = document.getElementById('fastingYearVoluntary');
         if (mEl) fastingMonth = parseInt(mEl.value);

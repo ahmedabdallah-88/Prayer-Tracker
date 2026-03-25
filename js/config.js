@@ -436,7 +436,20 @@ window.App.Config = {
         'sunnah_monday_thursday': { ar: 'يوم الاثنين أو الخميس', en: 'Monday or Thursday' },
         'sunnah_white_days': { ar: 'الأيام البيض', en: 'White Days' },
         'sunnah_dhul_hijjah': { ar: 'أيام العشر من ذي الحجة', en: 'First 10 of Dhul Hijjah' },
-        'sunnah_ashura': { ar: 'تاسوعاء / عاشوراء', en: "Tasu'a / Ashura" }
+        'sunnah_ashura': { ar: 'تاسوعاء / عاشوراء', en: "Tasu'a / Ashura" },
+
+        // Pre-Athan Alert (Feature: pre-athan)
+        'preathan_label': { ar: 'تنبيه قبل الأذان', en: 'Pre-Athan Alert' },
+        'preathan_subtitle': { ar: 'تذكير قبل دخول وقت الصلاة', en: 'Reminder before prayer time' },
+        'minutes_short': { ar: 'د', en: 'min' },
+
+        // Daily Insight (Feature: daily-insight)
+        'insight_label': { ar: 'ملخص يومي ذكي', en: 'Smart Daily Insight' },
+        'insight_subtitle': { ar: 'إشعار بعد العشاء بملخص يومك', en: 'Post-Isha notification with your day summary' },
+
+        // Onboarding (Feature: onboarding)
+        'usage_guide': { ar: 'دليل الاستخدام', en: 'Usage Guide' },
+        'usage_guide_subtitle': { ar: 'جولة تعريفية بالتطبيق', en: 'Guided app walkthrough' }
     }
 
 };
