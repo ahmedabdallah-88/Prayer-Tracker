@@ -472,10 +472,15 @@ window.App.SVGCharts = (function() {
 
         // Header
         var hdr = document.createElement('div');
-        hdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:16px;';
+        hdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:16px;position:relative;';
         hdr.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;color:var(--primary);">compare_arrows</span>' +
             '<span style="font-size:14px;font-weight:700;color:var(--text-primary);font-family:\'Noto Kufi Arabic\',sans-serif;">\u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0635\u0644\u0648\u0627\u062a</span>';
         card.appendChild(hdr);
+        // Info button: report 5 (fard) or 10 (sunnah)
+        if (window.App.InfoTooltips) {
+            var dualReportId = showCong ? 5 : 10;
+            window.App.InfoTooltips.attachToHeader(dualReportId, hdr);
+        }
 
         prayers.forEach(function(p, idx) {
             var block = document.createElement('div');
@@ -575,11 +580,15 @@ window.App.SVGCharts = (function() {
 
         // Header
         var hdr = document.createElement('div');
-        hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
+        hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative;';
         var hdrLeft = document.createElement('div');
-        hdrLeft.style.cssText = 'display:flex;align-items:center;gap:6px;';
+        hdrLeft.style.cssText = 'display:flex;align-items:center;gap:6px;position:relative;';
         hdrLeft.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;color:var(--primary);">date_range</span>' +
             '<span style="font-size:14px;font-weight:700;color:var(--text-primary);font-family:\'Noto Kufi Arabic\',sans-serif;">\u0646\u0645\u0637 \u0627\u0644\u062c\u0645\u0627\u0639\u0629 \u0627\u0644\u0623\u0633\u0628\u0648\u0639\u064a</span>';
+        // Info button: report 6
+        if (window.App.InfoTooltips) {
+            window.App.InfoTooltips.attachToHeader(6, hdrLeft);
+        }
         hdr.appendChild(hdrLeft);
         var badge = document.createElement('div');
         badge.style.cssText = 'padding:3px 10px;border-radius:8px;background:rgba(var(--primary-rgb),0.08);';

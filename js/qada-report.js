@@ -38,10 +38,14 @@ window.App.QadaReport = (function() {
         header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
 
         var titleDiv = document.createElement('div');
-        titleDiv.style.cssText = 'font-size:14px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:6px;';
+        titleDiv.style.cssText = 'font-size:14px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:6px;position:relative;';
         titleDiv.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;color:var(--danger);font-variation-settings:\'FILL\' 0,\'wght\' 500;">assignment_late</span>' +
             (currentLang === 'ar' ? '\u062A\u0642\u0631\u064A\u0631 \u0627\u0644\u0642\u0636\u0627\u0621' : 'Qada Report');
         header.appendChild(titleDiv);
+        // Info button: report 7
+        if (window.App.InfoTooltips) {
+            window.App.InfoTooltips.attachToHeader(7, titleDiv);
+        }
 
         var badge = document.createElement('div');
         badge.style.cssText = 'padding:4px 10px;border-radius:8px;background:rgba(var(--danger-rgb),0.08);font-size:13px;font-weight:800;color:var(--danger);font-family:Rubik,sans-serif;';

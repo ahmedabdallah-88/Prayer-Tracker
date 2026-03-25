@@ -214,6 +214,13 @@ window.App.Main = (function() {
         // Main init
         init();
 
+        // Init info tooltip buttons on static HTML cards
+        setTimeout(function() {
+            if (window.App.InfoTooltips && window.App.InfoTooltips.initStaticButtons) {
+                window.App.InfoTooltips.initStaticButtons();
+            }
+        }, 500);
+
         // Clamp year inputs to valid Hijri range (1400-1500)
         document.addEventListener('input', function(e) {
             var el = e.target;

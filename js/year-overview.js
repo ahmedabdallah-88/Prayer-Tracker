@@ -62,6 +62,16 @@ window.App.YearOverview = (function() {
             html += '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">emoji_events</span> ' + (currentLang === 'ar' ? 'أفضل شهر' : 'Best Month') + '</div><div class="value" style="font-size:1.2em;">' + bestName + '</div><div class="sublabel">' + bestPct + '%</div></div>';
             html += '</div>';
             summaryEl.innerHTML = html;
+            // Info button for year overview (report 15) — add after grid title
+            if (window.App.InfoTooltips) {
+                var infoWrap = document.createElement('div');
+                infoWrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:12px;position:relative;';
+                infoWrap.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;color:var(--primary);">calendar_view_month</span>' +
+                    '<span style="font-size:14px;font-weight:700;color:var(--text-primary);font-family:\'Noto Kufi Arabic\',sans-serif;">' +
+                    (currentLang === 'ar' ? 'نظرة سنوية' : 'Year Overview') + '</span>';
+                window.App.InfoTooltips.attachToHeader(15, infoWrap);
+                summaryEl.appendChild(infoWrap);
+            }
         }
 
         // Month cards

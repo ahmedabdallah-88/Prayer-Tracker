@@ -1971,6 +1971,12 @@ body {
     100% { transform: scale(1); }
 }
 
+/* ==================== INFO TOOLTIP ANIMATION ==================== */
+@keyframes tooltipIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ==================== OFFLINE INDICATOR ==================== */
 .offline-bar {
     display: none;
