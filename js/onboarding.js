@@ -59,6 +59,7 @@ window.App.Onboarding = (function() {
         },
         {
             target: '#fardTrackerMonthLabel',
+            spotlightTarget: '#fardTrackerView .month-nav-compact',
             titleAr: 'تقويم الشهور',
             titleEn: 'Month Picker',
             bodyAr: 'اضغط على اسم الشهر لفتح تقويم يتيح اختيار أي شهر وسنة هجرية لتسجيل صلوات القضاء.',
@@ -140,22 +141,49 @@ window.App.Onboarding = (function() {
         // Hide tooltip while repositioning
         tooltip.classList.remove('show');
 
-        // Scroll target into view
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Measure distance to viewport center BEFORE scrolling
+        var rectBefore = targetEl.getBoundingClientRect();
+        var viewH = window.innerHeight;
+        var distFromCenter = Math.abs(rectBefore.top + rectBefore.height / 2 - viewH / 2);
 
-        // Wait for scroll to settle, then position
+        // Use instant scroll — smooth scroll timing is unreliable across devices
+        targetEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+
+        // Short delay for layout to settle after instant scroll
+        var delay = 80;
+        // If element was very far away, add a bit more buffer for reflow
+        if (distFromCenter > viewH) delay = 150;
+
         setTimeout(function() {
-            // Re-query after scroll — element reference is still valid but rect changes
             var freshRect = targetEl.getBoundingClientRect();
-            console.log('[ONBOARD] Step ' + idx + ' after scroll: top=' +
-                Math.round(freshRect.top) + ', left=' + Math.round(freshRect.left) +
-                ', size=' + Math.round(freshRect.width) + 'x' + Math.round(freshRect.height));
+            console.log('[ONBOARD] Step ' + idx + ' (' + step.target + ') after scroll: ' +
+                'top=' + Math.round(freshRect.top) + ', left=' + Math.round(freshRect.left) +
+                ', size=' + Math.round(freshRect.width) + 'x' + Math.round(freshRect.height) +
+                ', viewport=' + window.innerWidth + 'x' + viewH);
+
+            // Safety: if element is still off-screen, force another scroll
+            if (freshRect.bottom < 0 || freshRect.top > viewH) {
+                console.log('[ONBOARD] Step ' + idx + ' still off-screen, retrying scroll');
+                targetEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+                setTimeout(function() {
+                    positionSpotlightAndTooltip(targetEl, step, idx, isAr);
+                }, 80);
+                return;
+            }
+
             positionSpotlightAndTooltip(targetEl, step, idx, isAr);
-        }, 450);
+        }, delay);
     }
 
     function positionSpotlightAndTooltip(targetEl, step, idx, isAr) {
-        var rect = targetEl.getBoundingClientRect();
+        // Use spotlightTarget (larger parent) for spotlight area if specified
+        var spotlightEl = targetEl;
+        if (step.spotlightTarget) {
+            var altEl = document.querySelector(step.spotlightTarget);
+            if (altEl) spotlightEl = altEl;
+        }
+
+        var rect = spotlightEl.getBoundingClientRect();
         var pad = 8;
         var viewW = window.innerWidth;
         var viewH = window.innerHeight;
@@ -166,6 +194,10 @@ window.App.Onboarding = (function() {
             showStep(idx + 1);
             return;
         }
+
+        console.log('[ONBOARD] Step ' + idx + ' spotlight rect: ' +
+            'top=' + Math.round(rect.top) + ', left=' + Math.round(rect.left) +
+            ', w=' + Math.round(rect.width) + ', h=' + Math.round(rect.height));
 
         // Position spotlight (fixed positioning — uses viewport coords)
         spotlight.style.top = (rect.top - pad) + 'px';
