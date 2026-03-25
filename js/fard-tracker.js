@@ -1,0 +1,926 @@
+/**
+ * fard-tracker.js - Prayer Tracker Module
+ * Handles tracker view rendering, day clicking (4-state cycle),
+ * section/view switching, stats, batch marking, and year overview.
+ *
+ * Part of window.App.Tracker IIFE.
+ */
+window.App = window.App || {};
+window.App.Tracker = (function() {
+    'use strict';
+
+    // ==================== HELPER REFERENCES ====================
+
+    function _getStorage()  { return window.App.Storage; }
+    function _getHijri()    { return window.App.Hijri; }
+    function _getFemale()   { return window.App.Female; }
+    function _getUI()       { return window.App.UI; }
+    function _getI18n()     { return window.App.I18n; }
+
+    // ==================== PRIVATE HELPERS ====================
+
+    function createDualDayNum(hijriDay, hYear, hMonth) {
+        var frag = document.createDocumentFragment();
+        var dayNum = document.createElement('span');
+        dayNum.className = 'day-number';
+        dayNum.textContent = hijriDay;
+        frag.appendChild(dayNum);
+
+        try {
+            var gDate = _getHijri().hijriToGregorian(hYear, hMonth, hijriDay);
+            var gregSpan = document.createElement('span');
+            gregSpan.className = 'day-greg';
+            gregSpan.textContent = gDate.getDate();
+            frag.appendChild(gregSpan);
+        } catch(e) {}
+
+        // Hidden Material icon (shown by CSS for congregation/qada)
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'day-icon material-symbols-rounded';
+        iconSpan.style.display = 'none';
+        iconSpan.style.fontSize = '13px';
+        iconSpan.textContent = 'mosque';
+        frag.appendChild(iconSpan);
+
+        return frag;
+    }
+
+    function isCongregation(congData, prayerId, day) {
+        return congData[prayerId] && congData[prayerId][day];
+    }
+
+    // ==================== switchSection (merged: base + fasting + Fiori) ====================
+
+    function switchSection(section) {
+        var Storage = _getStorage();
+        var Hijri = _getHijri();
+
+        Storage.setCurrentSection(section);
+
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+        document.querySelectorAll('.main-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+
+        if (section === 'azkar') {
+            // Azkar section
+            var azkarSec = document.getElementById('azkarSection');
+            if (azkarSec) azkarSec.classList.add('active');
+            var azkarBtn = document.getElementById('azkarToggleBtn');
+            if (azkarBtn) azkarBtn.classList.add('active');
+
+            var todayHA = Hijri.getTodayHijri();
+            var azMonthEl = document.getElementById('azkarTrackerMonth');
+            var azYearEl = document.getElementById('azkarTrackerYear');
+            if (azMonthEl) azMonthEl.value = todayHA.month;
+            if (azYearEl) azYearEl.value = todayHA.year;
+            var azDashYear = document.getElementById('azkarDashboardYear');
+            if (azDashYear) azDashYear.value = todayHA.year;
+            var azYearlyYear = document.getElementById('azkarYearlyYear');
+            if (azYearlyYear) azYearlyYear.value = todayHA.year;
+
+            if (typeof window.switchAzkarView === 'function') {
+                window.switchAzkarView('tracker');
+            }
+        } else if (section === 'fasting') {
+            // Fasting override branch
+            var fastSec = document.getElementById('fastingSection');
+            var fastBtn = document.getElementById('fastingToggleBtn');
+            if (fastSec) fastSec.classList.add('active');
+            if (fastBtn) fastBtn.classList.add('active');
+
+            var todayH = Hijri.getTodayHijri();
+            var fYearInput = document.getElementById('fastingYearInput');
+            var fMonthSel = document.getElementById('fastingMonthSelect');
+            var fYearVol = document.getElementById('fastingYearVoluntary');
+            if (fYearInput) fYearInput.value = Hijri.getCurrentHijriYear();
+            if (fMonthSel) fMonthSel.value = todayH.month;
+            if (fYearVol) fYearVol.value = Hijri.getCurrentHijriYear();
+
+            if (typeof window.switchFastingView === 'function') {
+                window.switchFastingView('voluntary');
+            }
+        } else if (section === 'fard') {
+            var fardSec = document.getElementById('fardSection');
+            if (fardSec) fardSec.classList.add('active');
+            try { document.querySelector('.main-toggle-btn:nth-child(1)').classList.add('active'); } catch(e) {}
+            var todayHF = Hijri.getTodayHijri();
+            var fardMonthEl = document.getElementById('fardTrackerMonthSelect');
+            var fardYearEl = document.getElementById('fardTrackerYearInput');
+            var hMonth = (fardMonthEl ? parseInt(fardMonthEl.value) : 0) || todayHF.month;
+            var hYear  = (fardYearEl ? parseInt(fardYearEl.value) : 0) || todayHF.year;
+            Hijri.setCurrentHijriMonth(hMonth);
+            Hijri.setCurrentHijriYear(hYear);
+            Storage.setCurrentMonth(hMonth);
+            Storage.setCurrentYear(hYear);
+            Storage.loadAllData('fard');
+            updateTrackerView('fard');
+        } else {
+            // sunnah
+            var sunSec = document.getElementById('sunnahSection');
+            if (sunSec) sunSec.classList.add('active');
+            try { document.querySelector('.main-toggle-btn:nth-child(2)').classList.add('active'); } catch(e) {}
+            var todayHS = Hijri.getTodayHijri();
+            var sunMonthEl = document.getElementById('sunnahTrackerMonthSelect');
+            var sunYearEl = document.getElementById('sunnahTrackerYearInput');
+            var hMonthS = (sunMonthEl ? parseInt(sunMonthEl.value) : 0) || todayHS.month;
+            var hYearS  = (sunYearEl ? parseInt(sunYearEl.value) : 0) || todayHS.year;
+            Hijri.setCurrentHijriMonth(hMonthS);
+            Hijri.setCurrentHijriYear(hYearS);
+            Storage.setCurrentMonth(hMonthS);
+            Storage.setCurrentYear(hYearS);
+            Storage.loadAllData('sunnah');
+            updateTrackerView('sunnah');
+        }
+
+        // Fard-specific: delayed reminder check
+        if (section === 'fard') {
+            setTimeout(function() { _getUI().checkPrayerReminders(); }, 300);
+        }
+
+        // Fiori: update shell bar
+        if (typeof window.updateShellBar === 'function') {
+            window.updateShellBar();
+        }
+    }
+
+    // ==================== switchView (merged: base + Fiori sub-tabs) ====================
+
+    function switchView(type, view) {
+        var Storage = _getStorage();
+        var Hijri = _getHijri();
+        var prefix = type;
+
+        document.querySelectorAll('#' + prefix + 'Section .view').forEach(function(v) { v.classList.remove('active'); });
+        document.querySelectorAll('#' + prefix + 'Section .toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+
+        if (view === 'tracker') {
+            var trkView = document.getElementById(prefix + 'TrackerView');
+            if (trkView) trkView.classList.add('active');
+            try { document.querySelector('#' + prefix + 'Section .toggle-btn:nth-child(1)').classList.add('active'); } catch(e) {}
+            var todayH = Hijri.getTodayHijri();
+            var mSelEl = document.getElementById(prefix + 'TrackerMonthSelect');
+            var yInpEl = document.getElementById(prefix + 'TrackerYearInput');
+            var hMonth = (mSelEl ? parseInt(mSelEl.value) : 0) || todayH.month;
+            var hYear  = (yInpEl ? parseInt(yInpEl.value) : 0) || todayH.year;
+            Hijri.setCurrentHijriMonth(hMonth);
+            Hijri.setCurrentHijriYear(hYear);
+            Storage.setCurrentMonth(hMonth);
+            Storage.setCurrentYear(hYear);
+            if (mSelEl) mSelEl.value = hMonth;
+            if (yInpEl) yInpEl.value = hYear;
+            Storage.loadAllData(type);
+            updateTrackerView(type);
+        } else if (view === 'yearly') {
+            var yrlyView = document.getElementById(prefix + 'YearlyView');
+            if (yrlyView) yrlyView.classList.add('active');
+            try { document.querySelector('#' + prefix + 'Section .toggle-btn:nth-child(2)').classList.add('active'); } catch(e) {}
+            var yrlyEl = document.getElementById(prefix + 'YearlyYear');
+            var yearlyYear = yrlyEl ? parseInt(yrlyEl.value) : Hijri.getCurrentHijriYear();
+            Hijri.setCurrentHijriYear(yearlyYear);
+            Storage.setCurrentYear(yearlyYear);
+            Storage.loadAllData(type);
+            if (typeof window.updateYearlyView === 'function') {
+                window.updateYearlyView(type);
+            }
+        } else if (view === 'dashboard') {
+            var dshView = document.getElementById(prefix + 'DashboardView');
+            if (dshView) dshView.classList.add('active');
+            try { document.querySelector('#' + prefix + 'Section .toggle-btn:nth-child(3)').classList.add('active'); } catch(e) {}
+            var dshEl = document.getElementById(prefix + 'DashboardYear');
+            var dashYear = dshEl ? parseInt(dshEl.value) : Hijri.getCurrentHijriYear();
+            Hijri.setCurrentHijriYear(dashYear);
+            Storage.setCurrentYear(dashYear);
+            Storage.loadAllData(type);
+            if (typeof window.updateDashboard === 'function') {
+                window.updateDashboard(type);
+            }
+        }
+
+        // Fiori: update sub-tab active state
+        var subTabs = document.getElementById(prefix + 'SubTabs');
+        if (subTabs) {
+            var tabs = subTabs.querySelectorAll('.sub-tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+                if ((view === 'tracker' && i === 0) || (view === 'yearly' && i === 1) || (view === 'dashboard' && i === 2)) {
+                    tabs[i].classList.add('active');
+                }
+            }
+        }
+    }
+
+    // ==================== updateTrackerView ====================
+
+    function updateTrackerView(type) {
+        var Hijri = _getHijri();
+        var Storage = _getStorage();
+
+        var utMonthEl = document.getElementById(type + 'TrackerMonthSelect');
+        var utYearEl = document.getElementById(type + 'TrackerYearInput');
+        var hMonth = utMonthEl ? parseInt(utMonthEl.value) : Hijri.getCurrentHijriMonth();
+        var hYear  = utYearEl ? parseInt(utYearEl.value) : Hijri.getCurrentHijriYear();
+        Hijri.setCurrentHijriMonth(hMonth);
+        Hijri.setCurrentHijriYear(hYear);
+        Storage.setCurrentMonth(hMonth);
+        Storage.setCurrentYear(hYear);
+
+        // Update header with Hijri display
+        var headerEl = document.getElementById(type + 'TrackerHijriHeader');
+        if (headerEl) {
+            var textEl = document.getElementById(type + 'TrackerHijriHeaderText');
+            if (textEl) {
+                textEl.textContent = Hijri.formatHijriMonthHeader(hYear, hMonth);
+            } else {
+                headerEl.textContent = Hijri.formatHijriMonthHeader(hYear, hMonth);
+            }
+        }
+
+        // Update month days button
+        if (typeof window.updateMonthDaysButton === 'function') {
+            window.updateMonthDaysButton();
+        }
+
+        Storage.loadAllData(type);
+        renderTrackerMonth(type);
+        updateTrackerStats(type);
+        if (typeof window.renderStreaks === 'function') {
+            window.renderStreaks(type);
+        }
+    }
+
+    // ==================== renderTrackerMonth (final override version with all features) ====================
+
+    function renderTrackerMonth(type) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+        var Female  = _getFemale();
+        var I18n    = _getI18n();
+
+        var container = document.getElementById(type + 'TrackerPrayersContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        var prayers     = Storage.getPrayersArray(type);
+        var dataObj     = Storage.getDataObject(type);
+        var hYear       = Hijri.getCurrentHijriYear();
+        var hMonth      = Hijri.getCurrentHijriMonth();
+        var daysInMonth = Hijri.getHijriDaysInMonth(hYear, hMonth);
+        var profile     = Storage.getActiveProfile();
+        var isFemale    = profile && profile.gender === 'female' && profile.age >= 12;
+        var isFemaleUser = isFemale;
+        var exemptData  = isFemale ? Female.getExemptDays(hYear, hMonth) : {};
+        var currentLang = I18n.getCurrentLang();
+        var todayH = Hijri.getTodayHijri();
+        var isCurrentMonth = (todayH.year === hYear && todayH.month === hMonth);
+
+        // Update compact month nav label
+        var monthLabel = document.getElementById(type + 'TrackerMonthLabel');
+        if (monthLabel) {
+            monthLabel.textContent = Hijri.getHijriMonthName(hMonth - 1) + ' ' + hYear;
+        }
+        var daysPill = document.getElementById(type === 'fard' ? 'monthDaysToggleBtn' : type + 'MonthDaysPill');
+        if (daysPill) daysPill.textContent = daysInMonth;
+
+        // Sky-time gradient map for prayer icon backgrounds
+        var skyGradients = {
+            'fajr': 'linear-gradient(135deg, #E8B4B8, #D4A0A7)',
+            'dhuhr': 'linear-gradient(135deg, #F0C75E, #E8B84A)',
+            'asr': 'linear-gradient(135deg, #E8A849, #D4943A)',
+            'maghrib': 'linear-gradient(135deg, #C47A5A, #B0664A)',
+            'isha': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)',
+            'tahajjud': 'linear-gradient(135deg, #2e4482, #1e3a8a)',
+            'sunnah-fajr': 'linear-gradient(135deg, #E8B4B8, #D4A0A7)',
+            'duha': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+            'sunnah-dhuhr': 'linear-gradient(135deg, #F0C75E, #E8B84A)',
+            'sunnah-asr': 'linear-gradient(135deg, #E8A849, #D4943A)',
+            'sunnah-maghrib': 'linear-gradient(135deg, #C47A5A, #B0664A)',
+            'sunnah-isha': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)',
+            'witr': 'linear-gradient(135deg, #a855f7, #8b4789)'
+        };
+
+        prayers.forEach(function(prayer) {
+            var section = document.createElement('div');
+            section.className = 'prayer-section ' + prayer.class;
+
+            var completed = 0;
+            var exemptCount = isFemale ? Female.getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
+            if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
+                completed = Object.values(dataObj[hMonth][prayer.id]).filter(function(v) { return v; }).length;
+            }
+            var adjustedTotal = daysInMonth - exemptCount;
+            var pct = adjustedTotal > 0 ? Math.round((completed / adjustedTotal) * 100) : 0;
+
+            // Congregation count for fard
+            var congCount = 0;
+            if (type === 'fard') {
+                var congDataH = Storage.getCongregationData(hYear, hMonth);
+                if (congDataH[prayer.id]) {
+                    congCount = Object.values(congDataH[prayer.id]).filter(Boolean).length;
+                }
+            }
+
+            // Prayer header with sky-time icon, name, congregation pill, % pill
+            var header = document.createElement('div');
+            header.className = 'prayer-header';
+
+            var iconBg = skyGradients[prayer.id] || 'linear-gradient(135deg, #888, #666)';
+            var nameDiv = document.createElement('div');
+            nameDiv.className = 'prayer-name';
+            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + iconBg + '"><span class="material-symbols-rounded" style="font-size:18px;color:white;">' + prayer.icon + '</span></span><span>' + I18n.getPrayerName(prayer.id) + '</span>';
+
+            var headerEnd = document.createElement('div');
+            headerEnd.className = 'prayer-header-end';
+            if (type === 'fard' && congCount > 0) {
+                headerEnd.innerHTML += '<span class="cong-pill"><span class="material-symbols-rounded" style="font-size:12px;">mosque</span> ' + congCount + '</span>';
+            }
+            var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
+            headerEnd.innerHTML += '<span class="pct-pill" style="background:' + pctColor + '">' + pct + '%</span>';
+            headerEnd.innerHTML += '<span class="prayer-counter">' + completed + '/' + adjustedTotal + '</span>';
+
+            header.appendChild(nameDiv);
+            header.appendChild(headerEnd);
+
+            // Flowing sequential grid (NO weekday headers, NO offsets)
+            var grid = document.createElement('div');
+            grid.className = 'days-grid flow-grid';
+
+            for (var day = 1; day <= daysInMonth; day++) {
+                var dayBox = document.createElement('div');
+                dayBox.className = 'day-box';
+                dayBox.setAttribute('role', 'button');
+                dayBox.setAttribute('tabindex', '0');
+                dayBox.setAttribute('aria-label', I18n.getPrayerName(prayer.id) + ' - ' + day);
+
+                dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+
+                try {
+                    var gDate = Hijri.hijriToGregorian(hYear, hMonth, day);
+                    dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
+                } catch(e) {}
+
+                var isDayToday = isCurrentMonth && todayH.day === day;
+                if (isDayToday) dayBox.classList.add('today-box');
+
+                if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
+                    dayBox.classList.add('disabled');
+                } else {
+                    // Check current state and apply visual classes
+                    var isExempt = Female.isPrayerExempt(exemptData, prayer.id, day);
+                    if (isExempt) {
+                        dayBox.classList.add('exempt');
+                    } else if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
+                        dayBox.classList.add('checked');
+                        if (type === 'fard') {
+                            var congData = Storage.getCongregationData(hYear, hMonth);
+                            if (isCongregation(congData, prayer.id, day)) {
+                                dayBox.classList.add('congregation');
+                                dayBox.classList.remove('checked');
+                            }
+                        }
+                        var qadaData = Storage.getQadaData(hYear, hMonth);
+                        if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
+                            dayBox.classList.remove('checked', 'congregation');
+                            dayBox.classList.add('qada');
+                        }
+                    }
+                    dayBox.onclick = (function(t, pId, d) {
+                        return function() { handleDayClick(t, pId, d); };
+                    })(type, prayer.id, day);
+                }
+
+                grid.appendChild(dayBox);
+            }
+
+            section.appendChild(header);
+            section.appendChild(grid);
+            container.appendChild(section);
+        });
+
+        // ONE legend at bottom of all prayers (Bug 1.11)
+        var legend = document.createElement('div');
+        legend.className = 'prayer-legend';
+        if (type === 'fard') {
+            legend.innerHTML =
+                '<div class="legend-item"><div class="legend-dot checked-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'منفرد' : 'Alone') + '</span></div>' +
+                '<div class="legend-item"><div class="legend-dot cong-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">mosque</span></div><span>' + (currentLang === 'ar' ? 'جماعة' : 'Congregation') + '</span></div>' +
+                '<div class="legend-item"><div class="legend-dot qada-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">schedule</span></div><span>' + (currentLang === 'ar' ? 'قضاء' : 'Qada') + '</span></div>';
+            if (isFemaleUser) {
+                legend.innerHTML +=
+                    '<div class="legend-item"><div class="legend-dot exempt-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">do_not_disturb</span></div><span>' + (currentLang === 'ar' ? 'إعفاء' : 'Exemption') + '</span></div>';
+            }
+        } else {
+            legend.innerHTML =
+                '<div class="legend-item"><div class="legend-dot checked-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'مؤداة' : 'Done') + '</span></div>';
+            if (isFemaleUser) {
+                legend.innerHTML +=
+                    '<div class="legend-item"><div class="legend-dot exempt-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">do_not_disturb</span></div><span>' + (currentLang === 'ar' ? 'إعفاء' : 'Exemption') + '</span></div>';
+            }
+        }
+        container.appendChild(legend);
+    }
+
+    // ==================== toggleTrackerDay ====================
+
+    function toggleTrackerDay(type, prayerId, day) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+
+        if (Storage.isFutureDate(day, Storage.getCurrentMonth(), Storage.getCurrentYear())) {
+            _getUI().showToast(_getI18n().t('future_date'), 'warning');
+            return;
+        }
+
+        var dataObj = Storage.getDataObject(type);
+        var currentMonth = Storage.getCurrentMonth();
+
+        if (!dataObj[currentMonth][prayerId]) {
+            dataObj[currentMonth][prayerId] = {};
+        }
+
+        dataObj[currentMonth][prayerId][day] = !dataObj[currentMonth][prayerId][day];
+        Storage.saveMonthData(type, currentMonth);
+        renderTrackerMonth(type);
+        updateTrackerStats(type);
+        if (typeof window.renderStreaks === 'function') {
+            window.renderStreaks(type);
+        }
+        if (type === 'fard') {
+            if (typeof window.updateCongregationStats === 'function') window.updateCongregationStats();
+            _getUI().checkPrayerReminders();
+        }
+    }
+
+    // ==================== updateTrackerStats (final override with exempt adjustment) ====================
+
+    function updateTrackerStats(type) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+        var Female  = _getFemale();
+
+        var prayers     = Storage.getPrayersArray(type);
+        var dataObj     = Storage.getDataObject(type);
+        var hYear       = Hijri.getCurrentHijriYear();
+        var hMonth      = Hijri.getCurrentHijriMonth();
+        var daysInMonth = Hijri.getHijriDaysInMonth(hYear, hMonth);
+        var profile     = Storage.getActiveProfile();
+        var isFemale    = profile && profile.gender === 'female' && profile.age >= 12;
+
+        var totalCompleted = 0;
+        var totalPossible  = 0;
+
+        prayers.forEach(function(prayer) {
+            var exemptCount  = isFemale ? Female.getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
+            var adjustedDays = daysInMonth - exemptCount;
+            totalPossible += adjustedDays;
+
+            var completed = 0;
+            if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
+                completed = Object.values(dataObj[hMonth][prayer.id]).filter(function(v) { return v; }).length;
+            }
+            totalCompleted += completed;
+        });
+
+        var elCompleted = document.getElementById(type + 'TrackerTotalCompleted');
+        var elRemaining = document.getElementById(type + 'TrackerTotalRemaining');
+        var elRate = document.getElementById(type + 'TrackerCompletionRate');
+        if (elCompleted) elCompleted.textContent = totalCompleted;
+        if (elRemaining) elRemaining.textContent = Math.max(0, totalPossible - totalCompleted);
+
+        var rate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+        if (elRate) elRate.textContent = rate + '%';
+    }
+
+    // ==================== changeTrackerMonth ====================
+
+    function changeTrackerMonth(type, delta) {
+        var Hijri   = _getHijri();
+        var Storage = _getStorage();
+
+        var hMonth = Hijri.getCurrentHijriMonth() + delta;
+        var hYear  = Hijri.getCurrentHijriYear();
+
+        if (hMonth > 12) {
+            hMonth = 1;
+            hYear++;
+        } else if (hMonth < 1) {
+            hMonth = 12;
+            hYear--;
+        }
+
+        Hijri.setCurrentHijriMonth(hMonth);
+        Hijri.setCurrentHijriYear(hYear);
+        Storage.setCurrentMonth(hMonth);
+        Storage.setCurrentYear(hYear);
+
+        // Reset week start for weekly view
+        if (window.trackerViewMode === 'week') {
+            if (delta > 0) {
+                window.currentWeekStart = 1;
+            } else {
+                window.currentWeekStart = Math.max(1, Hijri.getHijriDaysInMonth(hYear, hMonth) - 6);
+            }
+            if (typeof window.updateWeekLabel === 'function') {
+                window.updateWeekLabel();
+            }
+        }
+
+        var elMonth = document.getElementById(type + 'TrackerMonthSelect');
+        var elYear = document.getElementById(type + 'TrackerYearInput');
+        if (elMonth) elMonth.value = hMonth;
+        if (elYear) elYear.value = hYear;
+        Storage.loadAllData(type);
+        updateTrackerView(type);
+    }
+
+    // ==================== resetTrackerMonth ====================
+
+    function resetTrackerMonth(type) {
+        var Storage = _getStorage();
+        var currentMonth = Storage.getCurrentMonth();
+
+        _getUI().showConfirm(_getI18n().t('confirm_clear')).then(function(confirmed) {
+            if (confirmed) {
+                var dataObj = Storage.getDataObject(type);
+                var prayers = Storage.getPrayersArray(type);
+
+                dataObj[currentMonth] = {};
+                prayers.forEach(function(prayer) {
+                    dataObj[currentMonth][prayer.id] = {};
+                });
+                Storage.saveMonthData(type, currentMonth);
+                renderTrackerMonth(type);
+                updateTrackerStats(type);
+                if (typeof window.renderStreaks === 'function') {
+                    window.renderStreaks(type);
+                }
+            }
+        });
+    }
+
+    // ==================== handleDayClick (4-state cycle) ====================
+
+    function handleDayClick(type, prayerId, day) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+        var UI      = _getUI();
+        var I18n    = _getI18n();
+        var Female  = _getFemale();
+
+        var currentMonth = Storage.getCurrentMonth();
+        var currentYear  = Storage.getCurrentYear();
+
+        if (Storage.isFutureDate(day, currentMonth, currentYear)) {
+            UI.showToast(I18n.t('future_date'), 'warning');
+            return;
+        }
+
+        var dataObj = Storage.getDataObject(type);
+        if (!dataObj[currentMonth]) dataObj[currentMonth] = {};
+        if (!dataObj[currentMonth][prayerId]) dataObj[currentMonth][prayerId] = {};
+
+        var isChecked = dataObj[currentMonth][prayerId][day];
+        var congData  = (type === 'fard') ? Storage.getCongregationData(currentYear, currentMonth) : null;
+        var isCong    = congData && congData[prayerId] && congData[prayerId][day];
+        var qadaData  = Storage.getQadaData(currentYear, currentMonth);
+        var isQada    = qadaData[prayerId] && qadaData[prayerId][day];
+
+        // Check if female user for 5-state cycle
+        var profile = Storage.getActiveProfile();
+        var isFemale = profile && profile.gender === 'female' && profile.age >= 12;
+        var exemptData = isFemale ? Female.getExemptDays(currentYear, currentMonth) : {};
+        var isExempt = isFemale && exemptData[day] && exemptData[day][prayerId];
+
+        if (isFemale) {
+            // 5-state cycle: empty → alone → exempt → qada → congregation → empty
+            // (sunnah skips congregation: empty → alone → exempt → qada → empty)
+            if (!isChecked && !isExempt) {
+                // State 0 -> State 1: Mark as prayed (alone)
+                dataObj[currentMonth][prayerId][day] = true;
+                UI.hapticFeedback('success');
+            } else if (isChecked && !isCong && !isQada && !isExempt) {
+                // State 1 -> State 2: Mark as exempt
+                UI.hapticFeedback('medium');
+                dataObj[currentMonth][prayerId][day] = false;
+                if (!exemptData[day]) exemptData[day] = {};
+                exemptData[day][prayerId] = true;
+                Female.saveExemptDays(currentYear, currentMonth, exemptData);
+                Female.savePeriodHistory();
+            } else if (isExempt) {
+                // State 2 -> State 3: Mark as qada (remove exempt)
+                UI.hapticFeedback('light');
+                if (exemptData[day]) {
+                    delete exemptData[day][prayerId];
+                    if (Object.keys(exemptData[day]).length === 0) delete exemptData[day];
+                }
+                Female.saveExemptDays(currentYear, currentMonth, exemptData);
+                Female.savePeriodHistory();
+                dataObj[currentMonth][prayerId][day] = true;
+                if (!qadaData[prayerId]) qadaData[prayerId] = {};
+                qadaData[prayerId][day] = true;
+            } else if (isQada) {
+                if (type === 'fard') {
+                    // State 3 -> State 4: Mark as congregation
+                    UI.hapticFeedback('medium');
+                    if (qadaData[prayerId]) {
+                        delete qadaData[prayerId][day];
+                        if (Object.keys(qadaData[prayerId]).length === 0) delete qadaData[prayerId];
+                    }
+                    if (!congData[prayerId]) congData[prayerId] = {};
+                    congData[prayerId][day] = true;
+                } else {
+                    // Sunnah: State 3 -> State 0: Remove everything
+                    UI.hapticFeedback('light');
+                    dataObj[currentMonth][prayerId][day] = false;
+                    if (qadaData[prayerId]) {
+                        delete qadaData[prayerId][day];
+                        if (Object.keys(qadaData[prayerId]).length === 0) delete qadaData[prayerId];
+                    }
+                }
+            } else if (isCong) {
+                // State 4 -> State 0: Remove everything
+                UI.hapticFeedback('light');
+                dataObj[currentMonth][prayerId][day] = false;
+                if (congData[prayerId]) {
+                    delete congData[prayerId][day];
+                    if (Object.keys(congData[prayerId]).length === 0) delete congData[prayerId];
+                }
+            }
+        } else {
+            // Original 4-state cycle: empty → alone → congregation → qada → empty
+            if (!isChecked) {
+                // State 0 -> State 1: Mark as prayed (alone)
+                dataObj[currentMonth][prayerId][day] = true;
+                UI.hapticFeedback('success');
+            } else if (isChecked && !isCong && !isQada) {
+                // State 1 -> State 2: Mark as congregation
+                UI.hapticFeedback('medium');
+                if (type === 'fard' && congData) {
+                    if (!congData[prayerId]) congData[prayerId] = {};
+                    congData[prayerId][day] = true;
+                } else {
+                    // For sunnah: skip congregation, go to qada
+                    if (!qadaData[prayerId]) qadaData[prayerId] = {};
+                    qadaData[prayerId][day] = true;
+                }
+            } else if (isCong) {
+                // State 2 -> State 3: Mark as qada
+                UI.hapticFeedback('light');
+                if (congData[prayerId]) {
+                    delete congData[prayerId][day];
+                    if (Object.keys(congData[prayerId]).length === 0) delete congData[prayerId];
+                }
+                if (!qadaData[prayerId]) qadaData[prayerId] = {};
+                qadaData[prayerId][day] = true;
+            } else if (isQada) {
+                // State 3 -> State 0: Remove everything
+                UI.hapticFeedback('light');
+                dataObj[currentMonth][prayerId][day] = false;
+                if (qadaData[prayerId]) {
+                    delete qadaData[prayerId][day];
+                    if (Object.keys(qadaData[prayerId]).length === 0) delete qadaData[prayerId];
+                }
+                if (congData && congData[prayerId]) { delete congData[prayerId][day]; }
+            }
+        }
+
+        Storage.saveMonthData(type, currentMonth);
+        if (type === 'fard' && congData) Storage.saveCongregationData(currentYear, currentMonth, congData);
+        Storage.saveQadaData(currentYear, currentMonth, qadaData);
+        renderTrackerMonth(type);
+        updateTrackerStats(type);
+        if (typeof window.renderStreaks === 'function') {
+            window.renderStreaks(type);
+        }
+        if (type === 'fard') {
+            if (typeof window.updateCongregationStats === 'function') window.updateCongregationStats();
+            UI.checkPrayerReminders();
+        }
+    }
+
+    // ==================== batchMarkPrayer ====================
+
+    function batchMarkPrayer(type, prayerId) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+        var Female  = _getFemale();
+        var UI      = _getUI();
+        var I18n    = _getI18n();
+
+        var dataObj     = Storage.getDataObject(type);
+        var hYear       = Hijri.getCurrentHijriYear();
+        var hMonth      = Hijri.getCurrentHijriMonth();
+        var daysInMonth = Hijri.getHijriDaysInMonth(hYear, hMonth);
+        var profile     = Storage.getActiveProfile();
+        var isFemaleUser = profile && profile.gender === 'female' && profile.age >= 12;
+        var exemptData  = isFemaleUser ? Female.getExemptDays(hYear, hMonth) : {};
+
+        if (!dataObj[hMonth][prayerId]) dataObj[hMonth][prayerId] = {};
+
+        // Count current state
+        var markedCount = 0;
+        for (var day = 1; day <= daysInMonth; day++) {
+            if (Hijri.isFutureDateHijri(day, hMonth, hYear)) continue;
+            if (Female.isPrayerExempt(exemptData, prayerId, day)) continue;
+            if (dataObj[hMonth][prayerId][day]) markedCount++;
+        }
+
+        // Count available days
+        var availableDays = 0;
+        for (var day2 = 1; day2 <= daysInMonth; day2++) {
+            if (Hijri.isFutureDateHijri(day2, hMonth, hYear)) continue;
+            if (Female.isPrayerExempt(exemptData, prayerId, day2)) continue;
+            availableDays++;
+        }
+
+        // Toggle: if most are marked, unmark all. Otherwise mark all.
+        var shouldMark = markedCount < availableDays / 2;
+        var confirmKey = shouldMark ? 'confirm_batch_mark' : 'confirm_batch_unmark';
+
+        UI.showConfirm(I18n.t(confirmKey)).then(function(confirmed) {
+            if (!confirmed) return;
+
+            for (var day3 = 1; day3 <= daysInMonth; day3++) {
+                if (Hijri.isFutureDateHijri(day3, hMonth, hYear)) continue;
+                if (Female.isPrayerExempt(exemptData, prayerId, day3)) continue;
+                dataObj[hMonth][prayerId][day3] = shouldMark;
+            }
+
+            Storage.saveMonthData(type, hMonth);
+            renderTrackerMonth(type);
+            updateTrackerStats(type);
+            if (typeof window.renderStreaks === 'function') {
+                window.renderStreaks(type);
+            }
+            if (type === 'fard') {
+                if (typeof window.updateCongregationStats === 'function') window.updateCongregationStats();
+            }
+
+            var pName = I18n.getPrayerName(prayerId);
+            UI.showToast(pName + ': ' + availableDays, 'success', 1500);
+        });
+    }
+
+    // ==================== toggleDay (year overview variant) ====================
+
+    function toggleDay(type, prayerId, day) {
+        var Storage = _getStorage();
+        var UI      = _getUI();
+        var I18n    = _getI18n();
+
+        if (Storage.isFutureDate(day, Storage.getCurrentMonth(), Storage.getCurrentYear())) {
+            UI.showToast(I18n.t('future_date'), 'warning');
+            return;
+        }
+
+        var dataObj = Storage.getDataObject(type);
+        var currentMonth = Storage.getCurrentMonth();
+
+        if (!dataObj[currentMonth][prayerId]) {
+            dataObj[currentMonth][prayerId] = {};
+        }
+
+        dataObj[currentMonth][prayerId][day] = !dataObj[currentMonth][prayerId][day];
+        Storage.saveMonthData(type, currentMonth);
+        renderMonthDetail(type);
+    }
+
+    // ==================== resetMonth (year overview variant) ====================
+
+    function resetMonth(type) {
+        var Storage = _getStorage();
+        var UI      = _getUI();
+        var I18n    = _getI18n();
+        var currentMonth = Storage.getCurrentMonth();
+
+        UI.showConfirm(I18n.t('confirm_clear')).then(function(confirmed) {
+            if (confirmed) {
+                var dataObj = Storage.getDataObject(type);
+                var prayers = Storage.getPrayersArray(type);
+
+                dataObj[currentMonth] = {};
+                prayers.forEach(function(prayer) {
+                    dataObj[currentMonth][prayer.id] = {};
+                });
+                Storage.saveMonthData(type, currentMonth);
+                renderMonthDetail(type);
+            }
+        });
+    }
+
+    // ==================== renderMonthDetail (year overview month detail) ====================
+
+    function renderMonthDetail(type) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+        var Female  = _getFemale();
+        var I18n    = _getI18n();
+
+        var container = document.getElementById(type + 'PrayersContainer');
+        container.innerHTML = '';
+
+        var prayers     = Storage.getPrayersArray(type);
+        var dataObj     = Storage.getDataObject(type);
+        var hYear       = Hijri.getCurrentHijriYear();
+        var hMonth      = Hijri.getCurrentHijriMonth();
+        var daysInMonth = Hijri.getHijriDaysInMonth(hYear, hMonth);
+        var profile     = Storage.getActiveProfile();
+        var isFemale    = profile && profile.gender === 'female' && profile.age >= 12;
+        var exemptData  = isFemale ? Female.getExemptDays(hYear, hMonth) : {};
+
+        prayers.forEach(function(prayer) {
+            var section = document.createElement('div');
+            section.className = 'prayer-section ' + prayer.class;
+
+            var completed = 0;
+            var exemptCount = isFemale ? Female.getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
+            if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
+                completed = Object.values(dataObj[hMonth][prayer.id]).filter(function(v) { return v; }).length;
+            }
+            var adjustedTotal = daysInMonth - exemptCount;
+
+            section.innerHTML =
+                '<div class="prayer-header">' +
+                    '<div class="prayer-name">' +
+                        '<span class="material-symbols-rounded" style="font-size:18px;">' + prayer.icon + '</span>' +
+                        '<span>' + I18n.getPrayerName(prayer.id) + '</span>' +
+                    '</div>' +
+                    '<div class="prayer-counter">' + completed + ' / ' + adjustedTotal + '</div>' +
+                '</div>' +
+                '<div class="days-grid" id="' + type + '-grid-' + prayer.id + '"></div>';
+
+            container.appendChild(section);
+
+            var grid = document.getElementById(type + '-grid-' + prayer.id);
+            for (var day = 1; day <= daysInMonth; day++) {
+                var dayBox = document.createElement('div');
+                dayBox.className = 'day-box';
+
+                if (Female.isPrayerExempt(exemptData, prayer.id, day)) {
+                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                    dayBox.classList.add('exempt');
+                } else if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
+                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                    dayBox.classList.add('disabled');
+                    dayBox.style.opacity = '0.3';
+                } else {
+                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+
+                    if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
+                        dayBox.classList.add('checked');
+                        // Show congregation for fard
+                        if (type === 'fard') {
+                            var congData = Storage.getCongregationData(hYear, hMonth);
+                            if (isCongregation(congData, prayer.id, day)) {
+                                dayBox.classList.add('congregation');
+                                dayBox.classList.remove('checked');
+                            }
+                        }
+                        // Show qada
+                        var qadaData = Storage.getQadaData(hYear, hMonth);
+                        if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
+                            dayBox.classList.remove('checked', 'congregation');
+                            dayBox.classList.add('qada');
+                        }
+                    }
+
+                    dayBox.onclick = (function(t, pId, d) {
+                        return function() { handleDayClick(t, pId, d); };
+                    })(type, prayer.id, day);
+                }
+
+                grid.appendChild(dayBox);
+            }
+        });
+    }
+
+    // ==================== PUBLIC API ====================
+
+    return {
+        switchSection:      switchSection,
+        switchView:         switchView,
+        updateTrackerView:  updateTrackerView,
+        renderTrackerMonth: renderTrackerMonth,
+        toggleTrackerDay:   toggleTrackerDay,
+        updateTrackerStats: updateTrackerStats,
+        changeTrackerMonth: changeTrackerMonth,
+        resetTrackerMonth:  resetTrackerMonth,
+        handleDayClick:     handleDayClick,
+        batchMarkPrayer:    batchMarkPrayer,
+        toggleDay:          toggleDay,
+        resetMonth:         resetMonth,
+        renderMonthDetail:  renderMonthDetail
+    };
+})();
+
+// ==================== BACKWARD COMPAT GLOBALS ====================
+window.switchSection      = window.App.Tracker.switchSection;
+window.switchView         = window.App.Tracker.switchView;
+window.renderTrackerMonth = window.App.Tracker.renderTrackerMonth;
+window.updateTrackerStats = window.App.Tracker.updateTrackerStats;
+window.updateTrackerView  = window.App.Tracker.updateTrackerView;
+window.changeTrackerMonth = window.App.Tracker.changeTrackerMonth;
+window.resetTrackerMonth  = window.App.Tracker.resetTrackerMonth;
+window.handleDayClick     = window.App.Tracker.handleDayClick;
+window.batchMarkPrayer    = window.App.Tracker.batchMarkPrayer;
+window.toggleDay          = window.App.Tracker.toggleDay;
+window.resetMonth         = window.App.Tracker.resetMonth;
+window.renderMonthDetail  = window.App.Tracker.renderMonthDetail;

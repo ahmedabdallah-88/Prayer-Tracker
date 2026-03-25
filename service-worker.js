@@ -1,9 +1,37 @@
-// Prayer Tracker PWA — Service Worker v47
-const CACHE_NAME = 'prayer-tracker-v47';
+// Prayer Tracker PWA — Service Worker v85
+const CACHE_NAME = 'salah-tracker-v85';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
+    // CSS
+    './css/main.css',
+    './css/themes.css',
+    './css/dashboard.css',
+    // JS modules (dependency order)
+    './js/config.js?v=85',
+    './js/storage.js?v=85',
+    './js/hijri-calendar.js?v=85',
+    './js/ui-utils.js?v=85',
+    './js/i18n.js?v=85',
+    './js/themes.js?v=85',
+    './js/profiles.js?v=85',
+    './js/female-features.js?v=85',
+    './js/fard-tracker.js?v=85',
+    './js/sunnah-tracker.js?v=85',
+    './js/jamaah-tracker.js?v=85',
+    './js/weekly-view.js?v=85',
+    './js/fasting-tracker.js?v=85',
+    './js/prayer-times.js?v=85',
+    './js/notifications.js?v=85',
+    './js/azkar-tracker.js?v=85',
+    './js/svg-charts.js?v=85',
+    './js/qada-report.js?v=85',
+    './js/dashboard.js?v=85',
+    './js/year-overview.js?v=85',
+    './js/data-io.js?v=85',
+    './js/app.js?v=85',
+    // Icons
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
     './icons/icon-128x128.png',
@@ -11,12 +39,46 @@ const ASSETS = [
     './icons/icon-152x152.png',
     './icons/icon-192x192.png',
     './icons/icon-384x384.png',
-    './icons/icon-512x512.png'
+    './icons/icon-512x512.png',
+    './icons/maskable-192x192.png',
+    './icons/maskable-512x512.png',
+    // CDN (cached on first fetch)
+    'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&family=Rubik:wght@400;500;700&display=swap',
+    'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200'
 ];
+
+// ==================== OFFLINE FALLBACK HTML ====================
+const OFFLINE_HTML = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>غير متصل - متتبع الصلاة</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;
+min-height:100vh;padding:20px;text-align:center;
+font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#F5F3EF;color:#2B2D42}
+.icon{font-size:64px;margin-bottom:16px;opacity:0.7}
+h2{font-size:1.4em;margin-bottom:8px;color:#2D6A4F}
+p{color:#8D99AE;max-width:320px;line-height:1.6;margin-bottom:24px}
+button{background:#2D6A4F;color:white;border:none;padding:12px 32px;border-radius:12px;
+font-size:1em;font-weight:700;cursor:pointer;font-family:inherit}
+button:active{transform:scale(0.97)}
+</style>
+</head>
+<body>
+<div class="icon">&#x1F54C;</div>
+<h2>أنت غير متصل</h2>
+<p>لا يوجد اتصال بالإنترنت ولم يتم تحميل التطبيق بعد.<br>أعد المحاولة عند الاتصال.</p>
+<p style="font-size:0.9em;">No internet connection and the app hasn't been cached yet.<br>Please try again when connected.</p>
+<button onclick="location.reload()">إعادة المحاولة / Retry</button>
+</body>
+</html>`;
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v47...');
+    console.log('[SW] Installing v85...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -26,7 +88,7 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v47...');
+    console.log('[SW] Activating v85...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
@@ -54,9 +116,8 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // CDN resources (Chart.js, fonts) — cache first
-    if (url.hostname === 'cdn.jsdelivr.net' || 
-        url.hostname === 'fonts.googleapis.com' || 
+    // CDN resources (fonts) — cache first
+    if (url.hostname === 'fonts.googleapis.com' ||
         url.hostname === 'fonts.gstatic.com') {
         event.respondWith(
             caches.match(event.request).then(cached => {
@@ -73,7 +134,7 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // App resources — network first, fallback to cache
+    // App resources — network first, fallback to cache, then offline page
     event.respondWith(
         fetch(event.request)
             .then(response => {
@@ -83,7 +144,18 @@ self.addEventListener('fetch', event => {
                 }
                 return response;
             })
-            .catch(() => caches.match(event.request))
+            .catch(() => {
+                return caches.match(event.request).then(cached => {
+                    if (cached) return cached;
+                    // For navigation requests, serve offline fallback
+                    if (event.request.mode === 'navigate') {
+                        return new Response(OFFLINE_HTML, {
+                            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                        });
+                    }
+                    return new Response('', { status: 408 });
+                });
+            })
     );
 });
 
