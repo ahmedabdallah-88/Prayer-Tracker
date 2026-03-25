@@ -67,6 +67,20 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* ==================== iOS OVERSCROLL FIX ==================== */
+html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* ==================== BODY ==================== */
@@ -77,9 +91,10 @@ body {
     padding: 20px;
     padding-top: calc(56px + env(safe-area-inset-top, 0px) + 12px) !important;
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px) + 12px) !important;
+    padding-left: env(safe-area-inset-left, 20px);
+    padding-right: env(safe-area-inset-right, 20px);
     direction: rtl;
     position: relative;
-    -webkit-touch-callout: none;
     touch-action: manipulation;
     color: var(--text-primary);
 }
@@ -158,8 +173,8 @@ body {
 .shell-bar {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 56px;
-    padding-top: env(safe-area-inset-top, 0px);
+    min-height: calc(56px + env(safe-area-inset-top, 0px));
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
     background: rgba(255,255,255,0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -331,8 +346,8 @@ body {
 .tab-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 64px;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    min-height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     background: var(--tab-bg, rgba(245,243,239,0.92));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
