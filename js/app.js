@@ -104,6 +104,15 @@ window.App.Main = (function() {
                 window.App.Notifications.updateReminderBanner();
             }
         }, 2000);
+
+        // Onboarding for returning users (profile already loaded via init)
+        // Wait for splash (if first visit) + render to finish
+        var splashDelay = sessionStorage.getItem('splashShown') ? 800 : 6500;
+        setTimeout(function() {
+            if (window.App.Onboarding && window.App.Onboarding.shouldShow()) {
+                window.App.Onboarding.start();
+            }
+        }, splashDelay);
     }
 
     // ==================== FIORI: switchTab ====================
@@ -339,18 +348,8 @@ window.App.Main = (function() {
         // Splash V2 fade-out is handled by the inline script in index.html
         // (sessionStorage-gated, with theme-color restore)
 
-        // Onboarding tutorial (first launch only)
-        setTimeout(function() {
-            if (window.App.Onboarding && window.App.Onboarding.shouldShow()) {
-                // Wait for splash to finish (5.8s) before starting onboarding
-                var delay = sessionStorage.getItem('splashShown') ? 500 : 6000;
-                setTimeout(function() {
-                    if (window.App.Onboarding.shouldShow()) {
-                        window.App.Onboarding.start();
-                    }
-                }, delay);
-            }
-        }, 500);
+        // Onboarding is triggered from selectProfile() in profiles.js
+        // AFTER profile is loaded and main UI is fully rendered.
     }
 
     return {

@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v91
-const CACHE_NAME = 'salah-tracker-v91';
+// Prayer Tracker PWA — Service Worker v92
+const CACHE_NAME = 'salah-tracker-v92';
 const ASSETS = [
     './',
     './index.html',
@@ -9,29 +9,29 @@ const ASSETS = [
     './css/themes.css',
     './css/dashboard.css',
     // JS modules (dependency order)
-    './js/config.js?v=91',
-    './js/storage.js?v=91',
-    './js/hijri-calendar.js?v=91',
-    './js/ui-utils.js?v=91',
-    './js/i18n.js?v=91',
-    './js/themes.js?v=91',
-    './js/profiles.js?v=91',
-    './js/female-features.js?v=91',
-    './js/fard-tracker.js?v=91',
-    './js/sunnah-tracker.js?v=91',
-    './js/jamaah-tracker.js?v=91',
-    './js/weekly-view.js?v=91',
-    './js/fasting-tracker.js?v=91',
-    './js/prayer-times.js?v=91',
-    './js/notifications.js?v=91',
-    './js/azkar-tracker.js?v=91',
-    './js/svg-charts.js?v=91',
-    './js/qada-report.js?v=91',
-    './js/dashboard.js?v=91',
-    './js/year-overview.js?v=91',
-    './js/data-io.js?v=91',
-    './js/onboarding.js?v=91',
-    './js/app.js?v=91',
+    './js/config.js?v=92',
+    './js/storage.js?v=92',
+    './js/hijri-calendar.js?v=92',
+    './js/ui-utils.js?v=92',
+    './js/i18n.js?v=92',
+    './js/themes.js?v=92',
+    './js/profiles.js?v=92',
+    './js/female-features.js?v=92',
+    './js/fard-tracker.js?v=92',
+    './js/sunnah-tracker.js?v=92',
+    './js/jamaah-tracker.js?v=92',
+    './js/weekly-view.js?v=92',
+    './js/fasting-tracker.js?v=92',
+    './js/prayer-times.js?v=92',
+    './js/notifications.js?v=92',
+    './js/azkar-tracker.js?v=92',
+    './js/svg-charts.js?v=92',
+    './js/qada-report.js?v=92',
+    './js/dashboard.js?v=92',
+    './js/year-overview.js?v=92',
+    './js/data-io.js?v=92',
+    './js/onboarding.js?v=92',
+    './js/app.js?v=92',
     // Icons
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
@@ -79,7 +79,7 @@ button:active{transform:scale(0.97)}
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v91...');
+    console.log('[SW] Installing v92...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -89,7 +89,7 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v91...');
+    console.log('[SW] Activating v92...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(

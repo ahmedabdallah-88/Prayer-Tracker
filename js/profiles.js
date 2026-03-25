@@ -355,6 +355,13 @@ window.App.Profiles = (function() {
         }
         if (window.switchSection) window.switchSection('fard');
         if (window.startPrayerTimesMonitor) setTimeout(window.startPrayerTimesMonitor, 500);
+
+        // Trigger onboarding AFTER profile loaded and UI rendered (500ms for render)
+        setTimeout(function() {
+            if (window.App.Onboarding && window.App.Onboarding.shouldShow()) {
+                window.App.Onboarding.start();
+            }
+        }, 800);
     }
 
     // --------------- MERGED applyProfileUI ---------------
