@@ -74,6 +74,14 @@ window.App.Jamaah = (function() {
 
         function isDayChecked(hYear, hMonth, hDay) {
             if (hDay < 1) return false;
+            if (type === 'sunnah') {
+                // Sunnah: check prayer data directly (no congregation)
+                Storage.setCurrentYear(hYear);
+                Storage.loadAllData('sunnah');
+                var dataObj = Storage.getDataObject('sunnah');
+                return dataObj && dataObj[hMonth] && dataObj[hMonth][prayerId] && dataObj[hMonth][prayerId][hDay];
+            }
+            // Fard: check congregation data
             var congData = Storage.getCongregationData(hYear, hMonth);
             return congData && congData[prayerId] && (congData[prayerId][String(hDay)] === true || congData[prayerId][hDay] === true);
         }

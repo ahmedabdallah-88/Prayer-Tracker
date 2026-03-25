@@ -18,8 +18,12 @@ window.App.InfoTooltips = (function() {
               en: 'Best month = month with highest completion rate. Most consistent = prayer you perform most regularly. Congregation rate = congregation prayers out of total prayed.' },
         3:  { ar: 'كل عداد بيوضح أطول فترة صليت فيها صلاة معينة جماعة بشكل متتالي. الحالية = السلسلة الجارية دلوقتي. الأفضل = أطول سلسلة حققتها من قبل.',
               en: 'Each gauge shows your longest consecutive streak of praying a specific prayer in congregation. Current = ongoing streak. Best = longest streak ever achieved.' },
+        '3s': { ar: 'كل عداد بيوضح أطول فترة واظبت فيها على صلاة سنة معينة بشكل متتالي. الحالية = السلسلة الجارية دلوقتي. الأفضل = أطول سلسلة حققتها من قبل.',
+              en: 'Each gauge shows your longest consecutive streak of praying a specific sunnah prayer. Current = ongoing streak. Best = longest streak ever achieved.' },
         4:  { ar: 'كل شهر هجري ليه نقطة. الخط المتصل = نسبة الإنجاز الكلي. الخط المقطع = نسبة الجماعة. كل ما الخط يعلى يبقى الشهر أحسن.',
               en: 'Each Hijri month has a data point. Solid line = overall completion. Dashed line = congregation rate. Higher lines mean better months.' },
+        '4s': { ar: 'الخط المتصل = نسبة إنجاز صلوات السنن لكل شهر. كل ما الخط يعلى يبقى أداؤك أفضل.',
+              en: 'The line shows your sunnah prayer completion rate per month. Higher means better performance.' },
         5:  { ar: 'بيقارن أداء كل صلاة من الخمس. الشريط العلوي = نسبة الإنجاز. الشريط السفلي = نسبة الجماعة. تقدر تعرف أنهي صلاة محتاج تحسنها.',
               en: 'Compares each of the 5 prayers. Top bar = completion rate. Bottom bar = congregation rate. Identify which prayer needs improvement.' },
         6:  { ar: 'بيوضح أي يوم في الأسبوع بتصلي فيه جماعة أكتر. مرتب من الأعلى للأقل. اللون الأغمق = ممتاز (٩٠٪+)، المتوسط = جيد، الأفتح = ضعيف.',
@@ -30,8 +34,8 @@ window.App.InfoTooltips = (function() {
               en: 'The ring shows your sunnah prayer completion rate for the year. Includes sunnah al-Fajr, Duha, Rawatib, and Tahajjud.' },
         9:  { ar: 'أفضل شهر = أعلى نسبة سنن. الأكثر انتظاماً = صلاة السنة اللي بتحافظ عليها أكتر. نسبة الإنجاز = إجمالي السنن اللي صليتها.',
               en: 'Best month = highest sunnah rate. Most consistent = sunnah prayer you maintain most. Completion rate = total sunnah prayers performed.' },
-        10: { ar: 'بيقارن أداء كل صلاة سنة. تقدر تعرف أنهي سنة بتحافظ عليها وأنهي محتاج تزودها.',
-              en: 'Compares each sunnah prayer performance. See which ones you maintain and which need more attention.' },
+        10: { ar: 'بيقارن أداء كل صلاة سنة. الشريط بيوضح نسبة المحافظة على كل صلاة. تقدر تعرف أنهي سنة محتاج تزودها.',
+              en: 'Compares each sunnah prayer. The bar shows your consistency rate. See which sunnah prayers need more attention.' },
         11: { ar: 'عدد صلوات السنن اللي فاتتك. السنن مش واجبة لكن المحافظة عليها من أحب الأعمال.',
               en: 'Missed sunnah prayers count. Sunnah prayers are not obligatory but maintaining them is highly rewarded.' },
         12: { ar: 'بيوضح عدد أيام الصيام في رمضان. الأيام الملونة = صمت. الأيام المميزة = فاتت. أيام الإعفاء = للنساء. المتبقي = أيام لسه ما جاتش.',
@@ -347,10 +351,10 @@ window.App.InfoTooltips = (function() {
         addToChartCard('sunnahOrbitalProgress', 8);
         // 9. Sunnah stats card
         addToStatsCard('sunnahBestMonth', 9);
-        // 3. Sunnah Streak Flame (same description as fard streak)
-        addToChartCard('sunnahStreakFlame', 3);
-        // 4. Sunnah Mountain Chart
-        addToChartCard('sunnahMountainChart', 4);
+        // 3s. Sunnah Streak Flame (sunnah-specific: no congregation)
+        addToChartCard('sunnahStreakFlame', '3s');
+        // 4s. Sunnah Mountain Chart (sunnah-specific: no congregation line)
+        addToChartCard('sunnahMountainChart', '4s');
         // 10: sunnahDualBars — handled dynamically
 
         // === FASTING DASHBOARD ===

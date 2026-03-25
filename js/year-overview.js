@@ -19,7 +19,8 @@ window.App.YearOverview = (function() {
         grid.innerHTML = '';
 
         var todayH = Hijri.getTodayHijri();
-        var totalPct = 0, totalCong = 0, bestMonthIdx = 0, bestPct = 0;
+        var totalPct = 0, totalCong = 0;
+        var totalCompleted = 0, totalPossible = 0;
 
         // First pass: gather summary data
         var monthStats = [];
@@ -44,25 +45,85 @@ window.App.YearOverview = (function() {
                 totalCong += congRate;
             }
             totalPct += stats.percentage;
-            if (stats.percentage > bestPct) { bestPct = stats.percentage; bestMonthIdx = m; }
+            totalCompleted += stats.completed;
+            totalPossible += stats.total;
             monthStats.push({ stats: stats, congRate: congRate });
         }
 
-        // Summary cards
+        // Best month: sort by completion %, then congregation % as tiebreaker, then most recent
+        var bestMonthIdx = 0, bestPct = 0, bestCong = 0;
+        for (var bm = 1; bm <= 12; bm++) {
+            var bmStats = monthStats[bm - 1];
+            var bmPct = bmStats.stats.percentage;
+            var bmCong = bmStats.congRate;
+            if (bmPct > bestPct || (bmPct === bestPct && bmCong > bestCong) || (bmPct === bestPct && bmCong === bestCong && bm > bestMonthIdx)) {
+                bestPct = bmPct;
+                bestCong = bmCong;
+                bestMonthIdx = bm;
+            }
+        }
+
+        // Summary cards — 2+1 layout matching dashboard style
         var summaryEl = document.getElementById(type + 'YearlySummary');
         if (summaryEl) {
             var avgPct = Math.round(totalPct / 12);
             var avgCong = type === 'fard' ? Math.round(totalCong / 12) : 0;
             var bestName = bestMonthIdx > 0 ? Hijri.getHijriMonthName(bestMonthIdx - 1) : '-';
-            var html = '<div class="dashboard-grid" style="margin-bottom:16px;">' +
-                '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">verified</span> ' + (currentLang === 'ar' ? 'متوسط الإنجاز' : 'Avg Completion') + '</div><div class="value">' + avgPct + '%</div></div>';
+
+            var html = '<div style="background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;border:1px solid rgba(0,0,0,0.04);margin-bottom:14px;">';
+
+            // ROW 1: two cards side by side
+            html += '<div style="display:flex;gap:10px;">';
+
+            // Card 1: أفضل شهر (best month)
+            html += '<div style="flex:1;padding:14px 12px;border-radius:14px;background:rgba(var(--primary-rgb),0.05);border:1px solid rgba(var(--primary-rgb),0.08);display:flex;align-items:center;gap:10px;">' +
+                '<div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 3px 8px rgba(var(--accent-rgb),0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                '<span class="material-symbols-rounded" style="font-size:20px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">emoji_events</span></div>' +
+                '<div><div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (currentLang === 'ar' ? 'أفضل شهر' : 'Best Month') + '</div>' +
+                '<div style="font-size:15px;font-weight:800;color:var(--text-primary);font-family:\'Noto Kufi Arabic\',sans-serif;">' + bestName + '</div>' +
+                '<div style="font-size:10px;color:var(--primary-mid);font-weight:700;">' + bestPct + '%</div></div></div>';
+
             if (type === 'fard') {
-                html += '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">mosque</span> ' + (currentLang === 'ar' ? 'متوسط الجماعة' : 'Avg Congregation') + '</div><div class="value">' + avgCong + '%</div></div>';
+                // Card 2 (fard): متوسط الجماعة
+                html += '<div style="flex:1;padding:14px 12px;border-radius:14px;background:rgba(var(--accent-rgb),0.05);border:1px solid rgba(var(--accent-rgb),0.08);display:flex;align-items:center;gap:10px;">' +
+                    '<div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-light));box-shadow:0 3px 8px rgba(var(--accent-rgb),0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                    '<span class="material-symbols-rounded" style="font-size:20px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">mosque</span></div>' +
+                    '<div><div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (currentLang === 'ar' ? 'متوسط الجماعة' : 'Avg Congregation') + '</div>' +
+                    '<div style="font-size:15px;font-weight:800;color:var(--text-primary);font-family:\'Rubik\',sans-serif;">' + avgCong + '%</div></div></div>';
+            } else {
+                // Card 2 (sunnah): متوسط الإنجاز
+                html += '<div style="flex:1;padding:14px 12px;border-radius:14px;background:rgba(var(--primary-rgb),0.05);border:1px solid rgba(var(--primary-rgb),0.08);display:flex;align-items:center;gap:10px;">' +
+                    '<div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--primary),var(--primary-mid));box-shadow:0 3px 8px rgba(var(--primary-rgb),0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                    '<span class="material-symbols-rounded" style="font-size:20px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">verified</span></div>' +
+                    '<div><div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (currentLang === 'ar' ? 'متوسط الإنجاز' : 'Avg Completion') + '</div>' +
+                    '<div style="font-size:15px;font-weight:800;color:var(--text-primary);font-family:\'Rubik\',sans-serif;">' + avgPct + '%</div></div></div>';
             }
-            html += '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">emoji_events</span> ' + (currentLang === 'ar' ? 'أفضل شهر' : 'Best Month') + '</div><div class="value" style="font-size:1.2em;">' + bestName + '</div><div class="sublabel">' + bestPct + '%</div></div>';
             html += '</div>';
+
+            // ROW 2: full-width bar
+            html += '<div style="margin-top:10px;padding:14px 16px;border-radius:14px;background:rgba(var(--primary-rgb),0.05);border:1px solid rgba(var(--primary-rgb),0.08);display:flex;align-items:center;justify-content:space-between;">';
+            html += '<div style="display:flex;align-items:center;gap:10px;">';
+            html += '<div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--primary),var(--primary-mid));box-shadow:0 3px 8px rgba(var(--primary-rgb),0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+
+            if (type === 'fard') {
+                html += '<span class="material-symbols-rounded" style="font-size:20px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">verified</span></div>';
+                html += '<div><div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (currentLang === 'ar' ? 'متوسط الإنجاز' : 'Avg Completion') + '</div>';
+                var subText = currentLang === 'ar' ? totalCompleted + ' صلاة من ' + totalPossible : totalCompleted + ' of ' + totalPossible + ' prayers';
+                html += '<div style="font-size:12px;color:var(--text-muted);font-weight:500;">' + subText + '</div></div></div>';
+                html += '<div style="font-size:28px;font-weight:800;color:var(--primary);font-family:\'Rubik\',sans-serif;font-variant-numeric:tabular-nums;">' + avgPct + '%</div>';
+            } else {
+                html += '<span class="material-symbols-rounded" style="font-size:20px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">star</span></div>';
+                html += '<div><div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (currentLang === 'ar' ? 'نسبة الإنجاز الكلي' : 'Total Completion Rate') + '</div>';
+                var subText2 = currentLang === 'ar' ? totalCompleted + ' صلاة من ' + totalPossible : totalCompleted + ' of ' + totalPossible + ' prayers';
+                html += '<div style="font-size:12px;color:var(--text-muted);font-weight:500;">' + subText2 + '</div></div></div>';
+                var yearPct = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+                html += '<div style="font-size:28px;font-weight:800;color:var(--primary);font-family:\'Rubik\',sans-serif;font-variant-numeric:tabular-nums;">' + yearPct + '%</div>';
+            }
+
+            html += '</div></div>';
             summaryEl.innerHTML = html;
-            // Info button for year overview (report 15) — add after grid title
+
+            // Info button for year overview (report 15)
             if (window.App.InfoTooltips) {
                 var infoWrap = document.createElement('div');
                 infoWrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:12px;position:relative;';
