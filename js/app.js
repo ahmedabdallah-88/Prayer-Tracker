@@ -107,7 +107,7 @@ window.App.Main = (function() {
 
         // Onboarding for returning users (profile already loaded via init)
         // Wait for splash (if first visit) + render to finish
-        var splashDelay = sessionStorage.getItem('splashShown') ? 800 : 6500;
+        var splashDelay = document.getElementById('splashScreen') ? 11000 : 800;
         setTimeout(function() {
             if (window.App.Onboarding && window.App.Onboarding.shouldShow()) {
                 window.App.Onboarding.start();

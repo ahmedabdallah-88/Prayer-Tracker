@@ -285,54 +285,41 @@ window.App.UI = (function() {
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 
-    // ==================== DAY-BOX CLICK ANIMATION ====================
+    // ==================== DAY-BOX CLICK GLOW ====================
 
     function animateDayBox(element) {
-        // Determine ripple color based on next state
-        var rippleColor = 'ripple-green';
+        // Haptic only — no visual animation
         if (element.classList.contains('checked')) {
-            rippleColor = 'ripple-gold'; // going to congregation
             haptic('double');
         } else if (element.classList.contains('congregation')) {
-            rippleColor = 'ripple-red'; // going to qada
             haptic('heavy');
         } else {
             haptic('tap');
         }
+    }
 
-        // Remove old animation classes
-        element.classList.remove('pop', 'anim-click', 'congregation-pulse');
-        void element.offsetWidth;
-
-        // Add pop + number bounce
-        element.classList.add('pop', 'anim-click');
-
-        // Create ripple element
-        var ripple = document.createElement('div');
-        ripple.className = 'day-ripple ' + rippleColor;
-        element.appendChild(ripple);
-
-        // Remove ripple from DOM after animation
-        setTimeout(function() { ripple.remove(); }, 500);
-
-        // Remove animation classes after they finish
-        setTimeout(function() {
-            element.classList.remove('pop', 'anim-click');
-        }, 400);
-
-        // Congregation gold pulse
-        setTimeout(function() {
-            if (element.classList.contains('congregation')) {
-                element.classList.add('congregation-pulse');
-                setTimeout(function() { element.classList.remove('congregation-pulse'); }, 600);
-            }
-        }, 50);
+    // Border glow after state change — color matches NEW state
+    function applyGlow(el) {
+        var glow;
+        if (el.classList.contains('congregation')) {
+            glow = '0 0 0 3px rgba(212,160,60,0.35)';
+        } else if (el.classList.contains('qada')) {
+            glow = '0 0 0 3px rgba(193,87,78,0.35)';
+        } else if (el.classList.contains('checked') || el.classList.contains('fasted')) {
+            glow = '0 0 0 3px rgba(45,106,79,0.35)';
+        } else {
+            glow = '0 0 0 3px rgba(0,0,0,0.08)';
+        }
+        el.style.boxShadow = glow;
+        setTimeout(function() { el.style.boxShadow = ''; }, 300);
     }
 
     document.addEventListener('click', function(e) {
-        var dayBox = e.target.closest('.day-box:not(.disabled)');
+        var dayBox = e.target.closest('.day-box:not(.disabled), .fasting-day-box:not(.disabled)');
         if (dayBox) {
             animateDayBox(dayBox);
+            // Defer glow to next frame so state classes are applied first
+            requestAnimationFrame(function() { applyGlow(dayBox); });
         }
     });
 
@@ -661,6 +648,7 @@ window.App.UI = (function() {
         animateSwipe: animateSwipe,
         updateOnlineStatus: updateOnlineStatus,
         animateDayBox: animateDayBox,
+        applyGlow: applyGlow,
         hapticFeedback: hapticFeedback,
         haptic: haptic,
         initInstallBanner: initInstallBanner,
