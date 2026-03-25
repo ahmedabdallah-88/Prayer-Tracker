@@ -343,6 +343,225 @@ window.App.UI = (function() {
         } catch(e) {}
     }
 
+    // ==================== MONTH/YEAR PICKER ====================
+
+    function showMonthYearPicker() {
+        var Hijri = window.App.Hijri;
+        var Storage = window.App.Storage;
+        var I18n = window.App.I18n;
+        var Config = window.App.Config;
+        if (!Hijri || !Storage || !I18n) return;
+
+        // Remove any existing picker
+        var existing = document.getElementById('monthYearPickerOverlay');
+        if (existing) existing.remove();
+
+        var todayH = Hijri.getTodayHijri();
+        var currentSection = Storage.getCurrentSection();
+        var lang = I18n.getCurrentLang();
+        var isAr = lang === 'ar';
+
+        // Start with currently displayed month/year
+        var selectedYear = Hijri.getCurrentHijriYear();
+        var selectedMonth = Hijri.getCurrentHijriMonth();
+        var pickerYear = selectedYear;
+
+        var monthNamesAr = [
+            '\u0645\u062d\u0631\u0645', '\u0635\u0641\u0631', '\u0631\u0628\u064a\u0639 \u0627\u0644\u0623\u0648\u0644', '\u0631\u0628\u064a\u0639 \u0627\u0644\u0622\u062e\u0631',
+            '\u062c\u0645\u0627\u062f\u0649 \u0627\u0644\u0623\u0648\u0644\u0649', '\u062c\u0645\u0627\u062f\u0649 \u0627\u0644\u0622\u062e\u0631\u0629',
+            '\u0631\u062c\u0628', '\u0634\u0639\u0628\u0627\u0646', '\u0631\u0645\u0636\u0627\u0646', '\u0634\u0648\u0627\u0644',
+            '\u0630\u0648 \u0627\u0644\u0642\u0639\u062f\u0629', '\u0630\u0648 \u0627\u0644\u062d\u062c\u0629'
+        ];
+        var monthNamesEn = Config.hijriMonthNamesEn;
+
+        // Build overlay
+        var overlay = document.createElement('div');
+        overlay.id = 'monthYearPickerOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+        var popup = document.createElement('div');
+        popup.style.cssText = 'width:320px;background:#FFFFFF;border-radius:24px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.15);font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;direction:' + (isAr ? 'rtl' : 'ltr') + ';transform:scale(0.9);opacity:0;transition:transform 0.25s ease,opacity 0.25s ease;';
+        overlay.appendChild(popup);
+
+        // Animate in
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                popup.style.transform = 'scale(1)';
+                popup.style.opacity = '1';
+            });
+        });
+
+        function hasDataForMonth(year, month) {
+            var prefix = Storage.getProfilePrefix();
+            // Check fard data
+            var fardKey = 'salah_tracker_' + prefix + 'fard_h' + year + '_' + month;
+            if (localStorage.getItem(fardKey)) return true;
+            // Check sunnah data
+            var sunnahKey = 'salah_tracker_' + prefix + 'sunnah_h' + year + '_' + month;
+            if (localStorage.getItem(sunnahKey)) return true;
+            // Check azkar data
+            var azkarKey = 'salah_azkar_' + prefix + 'h' + year + '_' + month;
+            if (localStorage.getItem(azkarKey)) return true;
+            // Check voluntary fasting
+            var volKey = 'salah_volfasting_' + prefix + 'h' + year + '_' + month;
+            if (localStorage.getItem(volKey)) return true;
+            return false;
+        }
+
+        function renderPicker() {
+            var monthNames = isAr ? monthNamesAr : monthNamesEn;
+            var html = '';
+
+            // Section 1: Year selector
+            html += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;">';
+            html += '<button id="myp_prevYear" style="width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,0.05);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
+                '<span class="material-symbols-rounded" style="font-size:18px;color:#2B2D42;">' + (isAr ? 'chevron_right' : 'chevron_left') + '</span></button>';
+            html += '<span id="myp_yearLabel" style="font-size:24px;font-weight:800;color:#2B2D42;font-family:Rubik,sans-serif;min-width:60px;text-align:center;">' + pickerYear + '</span>';
+            html += '<button id="myp_nextYear" style="width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,0.05);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
+                '<span class="material-symbols-rounded" style="font-size:18px;color:#2B2D42;">' + (isAr ? 'chevron_left' : 'chevron_right') + '</span></button>';
+            html += '</div>';
+
+            // Section 2: Month grid
+            html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">';
+            for (var m = 1; m <= 12; m++) {
+                var isCurrent = (pickerYear === todayH.year && m === todayH.month);
+                var isSelected = (pickerYear === selectedYear && m === selectedMonth);
+                var isFuture = (pickerYear === todayH.year && m > todayH.month) || (pickerYear > todayH.year);
+                var hasData = hasDataForMonth(pickerYear, m);
+
+                var bg = 'rgba(0,0,0,0.03)';
+                var color = '#2B2D42';
+                var fontW = '600';
+                var border = 'none';
+                var opacity = '1';
+                var cursor = 'pointer';
+
+                if (isCurrent) {
+                    bg = '#2D6A4F';
+                    color = '#fff';
+                    fontW = '800';
+                } else if (isSelected && !isCurrent) {
+                    bg = 'rgba(45,106,79,0.125)';
+                    border = '2px solid #2D6A4F';
+                    color = '#2D6A4F';
+                }
+                if (isFuture) {
+                    opacity = '0.3';
+                    cursor = 'default';
+                }
+
+                html += '<div class="myp-month-cell" data-month="' + m + '" style="' +
+                    'padding:10px 6px;border-radius:12px;text-align:center;font-size:13px;font-weight:' + fontW + ';' +
+                    'background:' + bg + ';color:' + color + ';border:' + border + ';opacity:' + opacity + ';' +
+                    'cursor:' + cursor + ';position:relative;user-select:none;transition:background 0.15s;' +
+                    (isFuture ? 'pointer-events:none;' : '') + '">';
+                html += monthNames[m - 1];
+                if (hasData && !isCurrent) {
+                    html += '<div style="width:4px;height:4px;border-radius:50%;background:#2D6A4F;margin:4px auto 0;"></div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Section 3: Quick actions
+            html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px;">';
+            html += '<button id="myp_today" style="font-size:13px;font-weight:700;color:#2D6A4F;background:rgba(45,106,79,0.08);border:none;border-radius:10px;padding:8px 20px;cursor:pointer;font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;">' +
+                (isAr ? '\u0627\u0644\u064a\u0648\u0645' : 'Today') + '</button>';
+            html += '<button id="myp_cancel" style="font-size:13px;font-weight:600;color:#8D99AE;background:none;border:none;cursor:pointer;padding:8px 12px;font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;">' +
+                (isAr ? '\u0625\u0644\u063a\u0627\u0621' : 'Cancel') + '</button>';
+            html += '</div>';
+
+            // Section 4: Info text
+            html += '<p style="font-size:10px;color:#8D99AE;text-align:center;margin:8px 0 0;">' +
+                (isAr ? '\u064a\u0645\u0643\u0646\u0643 \u0627\u062e\u062a\u064a\u0627\u0631 \u0623\u064a \u0634\u0647\u0631 \u0648\u0633\u0646\u0629 \u0644\u062a\u0633\u062c\u064a\u0644 \u0635\u0644\u0648\u0627\u062a \u0627\u0644\u0642\u0636\u0627\u0621'
+                     : 'Select any month and year to log Qada prayers') + '</p>';
+
+            popup.innerHTML = html;
+
+            // Attach events
+            popup.querySelector('#myp_prevYear').onclick = function(e) {
+                e.stopPropagation();
+                if (pickerYear > 1400) { pickerYear--; renderPicker(); }
+            };
+            popup.querySelector('#myp_nextYear').onclick = function(e) {
+                e.stopPropagation();
+                if (pickerYear < 1500) { pickerYear++; renderPicker(); }
+            };
+            popup.querySelector('#myp_today').onclick = function(e) {
+                e.stopPropagation();
+                navigateToMonth(todayH.year, todayH.month);
+                closePopup();
+            };
+            popup.querySelector('#myp_cancel').onclick = function(e) {
+                e.stopPropagation();
+                closePopup();
+            };
+
+            // Month cell clicks
+            var cells = popup.querySelectorAll('.myp-month-cell');
+            cells.forEach(function(cell) {
+                cell.onclick = function(e) {
+                    e.stopPropagation();
+                    var m = parseInt(cell.getAttribute('data-month'));
+                    navigateToMonth(pickerYear, m);
+                    closePopup();
+                };
+            });
+        }
+
+        function navigateToMonth(year, month) {
+            var section = Storage.getCurrentSection();
+
+            if (section === 'fard' || section === 'sunnah') {
+                Hijri.setCurrentHijriMonth(month);
+                Hijri.setCurrentHijriYear(year);
+                Storage.setCurrentMonth(month);
+                Storage.setCurrentYear(year);
+                var elMonth = document.getElementById(section + 'TrackerMonthSelect');
+                var elYear = document.getElementById(section + 'TrackerYearInput');
+                if (elMonth) elMonth.value = month;
+                if (elYear) elYear.value = year;
+                Storage.loadAllData(section);
+                if (typeof window.updateTrackerView === 'function') window.updateTrackerView(section);
+            } else if (section === 'fasting') {
+                var fmEl = document.getElementById('fastingMonthSelect');
+                var fyEl = document.getElementById('fastingYearVoluntary');
+                if (fmEl) fmEl.value = month;
+                if (fyEl) fyEl.value = year;
+                if (typeof window.updateVoluntaryFasting === 'function') window.updateVoluntaryFasting();
+            } else if (section === 'azkar') {
+                var amEl = document.getElementById('azkarTrackerMonth');
+                var ayEl = document.getElementById('azkarTrackerYear');
+                if (amEl) amEl.value = month;
+                if (ayEl) ayEl.value = year;
+                if (typeof window.updateAzkarTracker === 'function') window.updateAzkarTracker();
+            }
+        }
+
+        function closePopup() {
+            popup.style.transform = 'scale(0.9)';
+            popup.style.opacity = '0';
+            setTimeout(function() { overlay.remove(); }, 200);
+        }
+
+        // Close on outside click
+        overlay.onclick = function(e) {
+            if (e.target === overlay) closePopup();
+        };
+
+        // Close on Escape
+        var escHandler = function(e) {
+            if (e.key === 'Escape') {
+                closePopup();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+
+        document.body.appendChild(overlay);
+        renderPicker();
+    }
+
     // ==================== PWA INSTALL BANNER ====================
 
     var deferredPrompt = null;
@@ -398,6 +617,7 @@ window.App.UI = (function() {
         hapticFeedback: hapticFeedback,
         initInstallBanner: initInstallBanner,
         promptInstall: promptInstall,
+        showMonthYearPicker: showMonthYearPicker,
         getDeferredPrompt: function() { return deferredPrompt; }
     };
 })();
@@ -408,3 +628,4 @@ window.showConfirm = window.App.UI.showConfirm;
 window.scrollToUnmarkedPrayer = window.App.UI.scrollToUnmarkedPrayer;
 window.dismissReminder = window.App.UI.dismissReminder;
 window.hapticFeedback = window.App.UI.hapticFeedback;
+window.showMonthYearPicker = window.App.UI.showMonthYearPicker;
