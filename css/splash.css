@@ -12,11 +12,10 @@
     font-family: 'Noto Kufi Arabic', sans-serif;
     direction: rtl;
     overflow: hidden;
-    pointer-events: none; /* Safe default — animation enables it */
-}
-
-#splashScreen.splash-animating {
-    pointer-events: auto; /* Only interactive during active animation */
+    /* Splash blocks touches by being on top (z-index:9999).
+       pointer-events:auto so it naturally intercepts touches.
+       When removed from DOM, touches pass to content below. */
+    pointer-events: auto;
 }
 
 #splashScreen.splash-fade-out {
@@ -357,7 +356,10 @@
 /* ========== Hide app content during splash ========== */
 body.splash-active > *:not(#splashScreen) {
     opacity: 0 !important;
-    pointer-events: none !important;
+    /* NEVER use pointer-events:none here — if splash-active persists due to
+       any JS error, it permanently blocks ALL touch/scroll on the entire app.
+       The splash screen itself (z-index:9999) blocks touches naturally by
+       being on top. Content is only visually hidden, not touch-disabled. */
 }
 
 /* Transition class added just before splash-active is removed */

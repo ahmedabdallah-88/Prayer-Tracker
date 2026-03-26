@@ -459,47 +459,68 @@ window.closeProfileSettings = window.App.Main.closeProfileSettings;
 window.applyUpdate = window.App.Main.applyUpdate;
 window.checkForUpdates = window.App.Main.checkForUpdates;
 
-// ==================== NUCLEAR OVERLAY CLEANUP ====================
-// Runs independently of app init — finds and neutralizes any invisible blockers
+// ==================== NUCLEAR SCROLL FIX ====================
+// Ensures the app is ALWAYS scrollable. Runs at multiple intervals
+// to catch any edge case that could block touch/scroll.
+function _nuclearScrollFix() {
+    // 1. Remove splash-active if splash is gone or faded
+    var splash = document.getElementById('splashScreen');
+    if (!splash || getComputedStyle(splash).opacity < 0.1) {
+        document.body.classList.remove('splash-active');
+        document.body.classList.remove('app-revealing');
+        if (splash && splash.parentNode) splash.remove();
+    }
+
+    // 2. Clear body scroll locks if no overlay is legitimately open
+    var profileOverlay = document.getElementById('profileOverlay');
+    var profileOpen = profileOverlay && !profileOverlay.classList.contains('hidden');
+    var confirmOverlay = document.querySelector('.confirm-overlay.show');
+    var profileSettings = document.getElementById('profileSettingsOverlay');
+    var profileSettingsOpen = profileSettings && profileSettings.classList.contains('show');
+    if (!profileOpen && !confirmOverlay && !profileSettingsOpen) {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+    }
+
+    // 3. Kill any orphaned onboarding overlays (force-remove if idle for too long)
+    var onboard = document.getElementById('onboardOverlay');
+    if (onboard && !onboard.classList.contains('active')) {
+        onboard.remove();
+    }
+
+    // 4. Neutralize any invisible fixed elements blocking touches
+    // Check all position:fixed elements and ensure invisible ones can't block
+    var allEls = document.querySelectorAll('body > *');
+    for (var i = 0; i < allEls.length; i++) {
+        var el = allEls[i];
+        // Skip known safe elements
+        if (el.id === 'shellBar' || el.id === 'tabBar' || el.id === 'mainContent' ||
+            el.id === 'toastContainer' || el.id === 'offlineBar' || el.tagName === 'NOSCRIPT' ||
+            el.tagName === 'A' || el.tagName === 'SCRIPT' || el.tagName === 'LINK') continue;
+        var style = getComputedStyle(el);
+        // If element is invisible (hidden or transparent) but could block touches
+        if (style.display === 'none' || style.visibility === 'hidden') continue;
+        if (parseFloat(style.opacity) < 0.01 && style.pointerEvents !== 'none' && style.position === 'fixed') {
+            el.style.pointerEvents = 'none';
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Immediate: remove stale splash if sessionStorage says it already played
     if (sessionStorage.getItem('splashShown')) {
         var stale = document.getElementById('splashScreen');
         if (stale) stale.remove();
+        document.body.classList.remove('splash-active');
     }
 
-    // After 3s: clean up any invisible full-screen blockers
-    setTimeout(function() {
-        // 1. Force-remove splash screen if still present
-        var splash = document.getElementById('splashScreen');
-        if (splash && (splash.classList.contains('splash-fade-out') || getComputedStyle(splash).opacity === '0')) {
-            splash.remove();
-        }
-
-        // 2. Clear body scroll locks if no overlay is legitimately open
-        var profileOverlay = document.getElementById('profileOverlay');
-        var confirmOverlay = document.querySelector('.confirm-overlay.show');
-        var profileSettings = document.getElementById('profileSettingsOverlay');
-        var profileSettingsOpen = profileSettings && profileSettings.classList.contains('show');
-        if ((!profileOverlay || profileOverlay.classList.contains('hidden')) && !confirmOverlay && !profileSettingsOpen) {
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            document.body.style.top = '';
-        }
-
-        // 3. Remove splash-active class if splash is gone
-        if (!document.getElementById('splashScreen')) {
-            document.body.classList.remove('splash-active');
-            document.body.classList.remove('app-revealing');
-        }
-
-        // 4. Kill any orphaned onboarding overlays
-        var onboard = document.getElementById('onboardOverlay');
-        if (onboard && !onboard.classList.contains('active')) {
-            onboard.remove();
-        }
-    }, 3000);
+    // Run scroll fix at multiple intervals to catch any timing edge case
+    var fixTimes = [1000, 3000, 5000, 8000, 12000, 16000];
+    fixTimes.forEach(function(ms) {
+        setTimeout(_nuclearScrollFix, ms);
+    });
 });
 
 // ==================== RUN STARTUP ====================

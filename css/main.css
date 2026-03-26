@@ -67,6 +67,14 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* Apply user-select:none only to interactive/UI elements, NOT globally.
+   Global user-select:none + touch-callout:none can break touch scrolling
+   on some mobile browsers/devices. */
+.day-box, .tab-item, .sub-tab, .nav-circle, .shell-btn, .theme-option,
+.gender-option, .profile-card, .main-toggle-btn, .toggle-btn, .notif-pill,
+.fasting-day-box, .month-card, .notif-check, .onboard-overlay {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
