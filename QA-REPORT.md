@@ -315,4 +315,45 @@
 
 ---
 
+## SUPPLEMENTARY: DEEP AUDIT FINDINGS
+
+The following items were identified by deep analysis agents and are logged here for future reference. None are blocking bugs — they are improvement opportunities.
+
+### Hardcoded Arabic Strings (~78 instances)
+Many JS files use inline `currentLang === 'ar' ? 'عربي' : 'English'` ternaries instead of the T dictionary. Major offenders:
+- `notifications.js` — ~20 inline ternaries for notification titles/bodies
+- `ui-utils.js` — ~15 inline ternaries for toast messages and date formatting
+- `fard-tracker.js` — ~12 inline ternaries for prayer state labels
+- `fasting-tracker.js` — ~10 inline ternaries for fasting status text
+- `data-io.js` — ~8 inline ternaries for export/import messages
+- `profiles.js` — ~5 inline ternaries for profile management strings
+- `azkar-tracker.js` — ~5 inline ternaries for azkar labels
+
+**Recommendation:** Migrate these to config.js T dictionary keys for consistency and easier future localization.
+
+### Notification Listener Stacking
+`notifications.js` adds event listeners to settings UI elements (volume slider, muezzin select, toggle switches) each time the notification settings panel is rendered. If the settings panel is opened/closed multiple times, listeners can stack.
+
+**Recommendation:** Use `{ once: true }`, `removeEventListener` before adding, or guard with a flag to prevent duplicates.
+
+### Hardcoded Colors in JS
+- `ui-utils.js` — Date picker uses hardcoded `#2D6A4F` (green theme primary) for selected-date highlight
+- `svg-charts.js` — Sky gradient colors are hardcoded (acceptable — they represent real sky colors)
+- `info-tooltips.js` — Tooltip arrow/border colors are hardcoded
+
+**Recommendation:** Date picker highlight should use `getComputedStyle` to read `--primary` at render time.
+
+### Hardcoded Colors in CSS (~15 instances in main.css)
+Approximately 15 rules in main.css use literal color values where CSS variables would be more theme-consistent. These are mostly in older sections (scrollbar styling, focus rings, box-shadows).
+
+### Accessibility
+- No `prefers-reduced-motion` media query — breathe animation and splash animation run regardless of user motion preferences
+- Some interactive elements rely on `onclick` attributes without corresponding `role` or `aria-*` attributes
+
+### Onboarding
+- Re-trigger works via Settings → "Usage Guide" (calls `start()` directly)
+- No `reset()` function to clear `salah_onboarding_done` from localStorage independently — re-trigger always replays from step 1
+
+---
+
 OVERNIGHT SESSION COMPLETE
