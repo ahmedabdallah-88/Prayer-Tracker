@@ -1,9 +1,12 @@
 node_modules/
 .DS_Store
+Thumbs.db
 *.bak
 *.log
 .env
 *.swp
 *~
+*.py
 Ahmed_*.json
 screenshots/
+STATUS-REPORT.md

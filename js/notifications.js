@@ -192,7 +192,6 @@ window.App.Notifications = (function() {
     // ==================== SEND NOTIFICATION ====================
 
     function sendNotification(title, body, tag, soundType) {
-        console.log('[NOTIF] SENDING notification: ' + tag + ' — ' + title + ': ' + body);
         if (Notification.permission !== 'granted') {
             console.error('[NOTIF] Permission not granted, cannot send');
             return;
@@ -213,7 +212,6 @@ window.App.Notifications = (function() {
                         requireInteraction: true,
                         data: { url: './' }
                     });
-                    console.log('[NOTIF] Notification sent via SW successfully');
                 }).catch(function(e) {
                     console.error('[NOTIF] SW notification FAILED:', e);
                 });
@@ -223,7 +221,6 @@ window.App.Notifications = (function() {
                     icon: 'icons/icon-192x192.png',
                     tag: tag
                 });
-                console.log('[NOTIF] Notification sent via Notification API');
             }
         } catch(e) {
             console.error('[NOTIF] Notification FAILED:', e);
@@ -365,11 +362,9 @@ window.App.Notifications = (function() {
         if (!beforeEnabled) return;
         var ptData = getPrayerTimesData();
         if (!ptData || !ptData.timings) {
-            console.log('[NOTIF] Before-athan: no prayer times data');
             return;
         }
         if (Notification.permission !== 'granted') {
-            console.log('[NOTIF] Before-athan: permission=' + Notification.permission);
             return;
         }
 
@@ -404,7 +399,6 @@ window.App.Notifications = (function() {
                     title = prayerName + ' in ' + diff + ' minutes';
                     body = 'Prepare for prayer';
                 }
-                console.log('[NOTIF] Before-athan firing for ' + p.id + ', diff=' + diff + 'min');
                 sendNotification(title, body, 'before-' + p.id, 'before');
                 notifSentToday[key] = true;
             }
@@ -417,7 +411,6 @@ window.App.Notifications = (function() {
         if (!afterEnabled) return;
         var ptData = getPrayerTimesData();
         if (!ptData || !ptData.timings) {
-            console.log('[NOTIF] After-athan: no prayer times data');
             return;
         }
         if (Notification.permission !== 'granted') return;
@@ -461,7 +454,6 @@ window.App.Notifications = (function() {
                         title = 'Did you pray ' + prayerName + '?';
                         body = afterMinutes + ' minutes since Athan';
                     }
-                    console.log('[NOTIF] After-athan firing for ' + p.id + ', marked=' + isMarked);
                     sendNotification(title, body, 'after-' + p.id, 'after');
                 }
                 notifSentToday[key] = true;
@@ -742,33 +734,112 @@ window.App.Notifications = (function() {
         localStorage.setItem('salah_athan_prayers', JSON.stringify(athanPrayers));
     }
 
+    // Fallback beep via AudioContext when mp3 files are missing
+    function playPlaceholderBeep(vol, durationSec) {
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var gain = ctx.createGain();
+            gain.gain.value = (vol || 80) / 100;
+            gain.connect(ctx.destination);
+
+            // Two-tone athan-like beep pattern
+            var freqs = [523.25, 659.25, 783.99, 659.25]; // C5 E5 G5 E5
+            var noteLen = (durationSec || 3) / freqs.length;
+            freqs.forEach(function(freq, i) {
+                var osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                osc.connect(gain);
+                osc.start(ctx.currentTime + i * noteLen);
+                osc.stop(ctx.currentTime + (i + 1) * noteLen - 0.05);
+            });
+            console.error('[ATHAN] Using placeholder beep — replace audio files in audio/ folder');
+            // Return a mock audio object so stopAthan can work
+            return {
+                _ctx: ctx,
+                pause: function() { try { ctx.close(); } catch(e) {} },
+                currentTime: 0
+            };
+        } catch(e) {
+            console.error('[ATHAN] AudioContext fallback failed:', e);
+            return null;
+        }
+    }
+
     function previewAthan() {
+        console.error('[ATHAN] Preview clicked, muezzin=' + athanMuezzin + ', vol=' + athanVolume);
         stopAthan();
-        var audio = new Audio('audio/athan-' + athanMuezzin + '.mp3');
+
+        // Build absolute path from page location to avoid relative-path issues
+        var base = location.href.substring(0, location.href.lastIndexOf('/') + 1);
+        var filePath = base + 'audio/athan-' + athanMuezzin + '.mp3';
+        console.error('[ATHAN] Full audio URL: ' + filePath);
+
+        var audio = new Audio(filePath);
         audio.volume = athanVolume / 100;
         currentAthanAudio = audio;
-        audio.play().catch(function() {});
+
+        // Must call play() synchronously within user gesture
+        var playPromise = audio.play();
         showStopPill();
-        setTimeout(function() {
-            if (currentAthanAudio === audio) {
+
+        if (playPromise && playPromise.then) {
+            playPromise.then(function() {
+                console.error('[ATHAN] Preview playing OK');
+            }).catch(function(e) {
+                console.error('[ATHAN] Preview play() FAILED:', e.message || e);
+                // Fallback to AudioContext beep (still within gesture chain on most browsers)
                 stopAthan();
-            }
+                var mock = playPlaceholderBeep(athanVolume, 3);
+                if (mock) {
+                    currentAthanAudio = mock;
+                    showStopPill();
+                    setTimeout(function() {
+                        if (currentAthanAudio === mock) stopAthan();
+                    }, 3000);
+                }
+            });
+        }
+
+        // Auto-stop preview after 5s
+        var ref = audio;
+        setTimeout(function() {
+            if (currentAthanAudio === ref) stopAthan();
         }, 5000);
     }
 
     function playAthan(prayerId) {
         if (document.visibilityState !== 'visible') return;
+        console.error('[ATHAN] Playing for ' + prayerId + ', muezzin=' + athanMuezzin + ', vol=' + athanVolume);
         stopAthan();
-        var audio = new Audio('audio/athan-' + athanMuezzin + '.mp3');
+
+        var base = location.href.substring(0, location.href.lastIndexOf('/') + 1);
+        var filePath = base + 'audio/athan-' + athanMuezzin + '.mp3';
+
+        var audio = new Audio(filePath);
         audio.volume = athanVolume / 100;
         currentAthanAudio = audio;
-        audio.play().catch(function() {});
+
+        audio.play().then(function() {
+            console.error('[ATHAN] Athan playing OK for ' + prayerId);
+        }).catch(function(e) {
+            console.error('[ATHAN] Athan play() FAILED for ' + prayerId + ':', e.message || e);
+            stopAthan();
+            var mock = playPlaceholderBeep(athanVolume, 3);
+            if (mock) {
+                currentAthanAudio = mock;
+                showStopPill();
+                setTimeout(function() {
+                    if (currentAthanAudio === mock) stopAthan();
+                }, 3000);
+            }
+        });
+
         audio.addEventListener('ended', function() {
             removeStopPill();
             currentAthanAudio = null;
         });
         showStopPill();
-        console.log('[ATHAN] Playing for ' + prayerId + ', muezzin=' + athanMuezzin + ', vol=' + athanVolume);
     }
 
     function stopAthan() {
@@ -974,23 +1045,17 @@ window.App.Notifications = (function() {
             }
         });
 
-        console.log('[NOTIF] Scheduled SW notifications for background');
     }
 
     // ==================== MONITOR (60-second interval) ====================
 
     function startMonitor() {
-        console.log('[NOTIF] Starting notification monitor (60s interval)');
         fetchPrayerTimes(false);
 
         if (monitorInterval) clearInterval(monitorInterval);
         monitorInterval = setInterval(function() {
-            console.log('[NOTIF] Monitor tick — checking notifications...');
-            console.log('[NOTIF] Permission: ' + (('Notification' in window) ? Notification.permission : 'N/A'));
-            console.log('[NOTIF] Before enabled: ' + beforeEnabled + ', After enabled: ' + afterEnabled);
 
             var ptData = getPrayerTimesData();
-            console.log('[NOTIF] Prayer times loaded: ' + (ptData ? 'yes' : 'NO'));
             if (ptData && ptData.timings) {
                 var now = new Date();
                 var nowMin = now.getHours() * 60 + now.getMinutes();
@@ -1000,7 +1065,6 @@ window.App.Notifications = (function() {
                     var pMin = parseTimeToMinutes(timings[id]);
                     var diff = pMin - nowMin;
                     if (Math.abs(diff) < 60) {
-                        console.log('[NOTIF] ' + id + ': time=' + timings[id] + ', diff=' + diff + 'min');
                     }
                 });
             }

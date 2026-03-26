@@ -75,12 +75,10 @@ window.App.Onboarding = (function() {
     ];
 
     function start() {
-        console.log('[ONBOARD] Starting onboarding tutorial...');
 
         // Verify main UI is actually visible
         var prayersContainer = document.getElementById('fardTrackerPrayersContainer');
         if (!prayersContainer || prayersContainer.offsetParent === null) {
-            console.log('[ONBOARD] Main UI not visible yet, aborting');
             return;
         }
 
@@ -89,11 +87,6 @@ window.App.Onboarding = (function() {
             var el = document.querySelector(steps[i].target);
             if (el) {
                 var r = el.getBoundingClientRect();
-                console.log('[ONBOARD] Step ' + i + ' (' + steps[i].target + '): found, rect=' +
-                    Math.round(r.top) + ',' + Math.round(r.left) + ' ' +
-                    Math.round(r.width) + 'x' + Math.round(r.height));
-            } else {
-                console.log('[ONBOARD] Step ' + i + ' (' + steps[i].target + '): NOT FOUND');
             }
         }
 
@@ -133,7 +126,6 @@ window.App.Onboarding = (function() {
 
         var targetEl = document.querySelector(step.target);
         if (!targetEl) {
-            console.log('[ONBOARD] Step ' + idx + ' target not found: ' + step.target + ', skipping');
             showStep(idx + 1);
             return;
         }
@@ -156,14 +148,9 @@ window.App.Onboarding = (function() {
 
         setTimeout(function() {
             var freshRect = targetEl.getBoundingClientRect();
-            console.log('[ONBOARD] Step ' + idx + ' (' + step.target + ') after scroll: ' +
-                'top=' + Math.round(freshRect.top) + ', left=' + Math.round(freshRect.left) +
-                ', size=' + Math.round(freshRect.width) + 'x' + Math.round(freshRect.height) +
-                ', viewport=' + window.innerWidth + 'x' + viewH);
 
             // Safety: if element is still off-screen, force another scroll
             if (freshRect.bottom < 0 || freshRect.top > viewH) {
-                console.log('[ONBOARD] Step ' + idx + ' still off-screen, retrying scroll');
                 targetEl.scrollIntoView({ behavior: 'instant', block: 'center' });
                 setTimeout(function() {
                     positionSpotlightAndTooltip(targetEl, step, idx, isAr);
@@ -190,14 +177,9 @@ window.App.Onboarding = (function() {
 
         // Skip if element is zero-size (hidden/collapsed)
         if (rect.width === 0 && rect.height === 0) {
-            console.log('[ONBOARD] Step ' + idx + ' has zero size, skipping');
             showStep(idx + 1);
             return;
         }
-
-        console.log('[ONBOARD] Step ' + idx + ' spotlight rect: ' +
-            'top=' + Math.round(rect.top) + ', left=' + Math.round(rect.left) +
-            ', w=' + Math.round(rect.width) + ', h=' + Math.round(rect.height));
 
         // Position spotlight (fixed positioning — uses viewport coords)
         spotlight.style.top = (rect.top - pad) + 'px';

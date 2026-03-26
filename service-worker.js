@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v96
-const CACHE_NAME = 'salah-tracker-v96';
+// Prayer Tracker PWA — Service Worker v100
+const CACHE_NAME = 'salah-tracker-v100';
 const ASSETS = [
     './',
     './index.html',
@@ -10,29 +10,30 @@ const ASSETS = [
     './css/dashboard.css',
     './css/splash.css',
     // JS modules (dependency order)
-    './js/config.js?v=96',
-    './js/storage.js?v=96',
-    './js/hijri-calendar.js?v=96',
-    './js/ui-utils.js?v=96',
-    './js/i18n.js?v=96',
-    './js/themes.js?v=96',
-    './js/profiles.js?v=96',
-    './js/female-features.js?v=96',
-    './js/fard-tracker.js?v=96',
-    './js/sunnah-tracker.js?v=96',
-    './js/jamaah-tracker.js?v=96',
-    './js/weekly-view.js?v=96',
-    './js/fasting-tracker.js?v=96',
-    './js/prayer-times.js?v=96',
-    './js/notifications.js?v=96',
-    './js/azkar-tracker.js?v=96',
-    './js/svg-charts.js?v=96',
-    './js/qada-report.js?v=96',
-    './js/dashboard.js?v=96',
-    './js/year-overview.js?v=96',
-    './js/data-io.js?v=96',
-    './js/onboarding.js?v=96',
-    './js/app.js?v=96',
+    './js/config.js?v=100',
+    './js/storage.js?v=100',
+    './js/hijri-calendar.js?v=100',
+    './js/ui-utils.js?v=100',
+    './js/i18n.js?v=100',
+    './js/themes.js?v=100',
+    './js/profiles.js?v=100',
+    './js/female-features.js?v=100',
+    './js/fard-tracker.js?v=100',
+    './js/sunnah-tracker.js?v=100',
+    './js/jamaah-tracker.js?v=100',
+    './js/weekly-view.js?v=100',
+    './js/fasting-tracker.js?v=100',
+    './js/prayer-times.js?v=100',
+    './js/notifications.js?v=100',
+    './js/azkar-tracker.js?v=100',
+    './js/svg-charts.js?v=100',
+    './js/info-tooltips.js?v=100',
+    './js/qada-report.js?v=100',
+    './js/dashboard.js?v=100',
+    './js/year-overview.js?v=100',
+    './js/data-io.js?v=100',
+    './js/onboarding.js?v=100',
+    './js/app.js?v=100',
     // Icons
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
@@ -84,7 +85,6 @@ button:active{transform:scale(0.97)}
 
 // ==================== INSTALL ====================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v96...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
@@ -94,13 +94,11 @@ self.addEventListener('install', event => {
 
 // ==================== ACTIVATE ====================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v96...');
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
                 keys.filter(key => key !== CACHE_NAME)
                     .map(key => {
-                        console.log('[SW] Deleting old cache:', key);
                         return caches.delete(key);
                     })
             );
@@ -167,7 +165,6 @@ self.addEventListener('fetch', event => {
 
 // ==================== NOTIFICATION CLICK ====================
 self.addEventListener('notificationclick', event => {
-    console.log('[SW] Notification clicked:', event.notification.tag);
     event.notification.close();
     
     // Focus existing window or open new one
@@ -193,7 +190,6 @@ self.addEventListener('notificationclick', event => {
 
 // ==================== NOTIFICATION CLOSE ====================
 self.addEventListener('notificationclose', event => {
-    console.log('[SW] Notification dismissed:', event.notification.tag);
 });
 
 // ==================== BACKGROUND PERIODIC SYNC ====================
@@ -238,9 +234,7 @@ async function checkAndNotify() {
             // Read cached prayer times from the app
             // (The main app stores this in localStorage which SW can't access directly,
             //  but the main app sends scheduled notifications via message)
-            console.log('[SW] Background check — app is hidden, relying on scheduled notifications');
         }
     } catch(e) {
-        console.log('[SW] Background check error:', e);
     }
 }

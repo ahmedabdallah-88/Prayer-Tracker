@@ -81,6 +81,7 @@ input, textarea {
 html, body {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
 }
 
 /* ==================== BODY ==================== */
@@ -270,6 +271,37 @@ body {
 
 .shell-btn:hover {
     background: rgba(255,255,255,0.8);
+}
+
+/* Theme icon: two overlapping circles showing current primary + accent */
+.theme-icon-swatch {
+    position: relative;
+    width: 22px;
+    height: 16px;
+}
+
+.theme-icon-c1,
+.theme-icon-c2 {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    top: 50%;
+    transform: translateY(-50%);
+    transition: background 0.3s ease;
+}
+
+.theme-icon-c1 {
+    left: 0;
+    background: var(--primary);
+    z-index: 2;
+}
+
+.theme-icon-c2 {
+    right: 0;
+    background: var(--accent);
+    z-index: 1;
 }
 
 #shellProfileBtn {
