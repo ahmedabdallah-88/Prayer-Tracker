@@ -452,7 +452,9 @@ window.App.Config = {
 
         // Onboarding
         'usage_guide': { ar: 'دليل الاستخدام', en: 'Usage Guide' },
-        'usage_guide_subtitle': { ar: 'جولة تعريفية بالتطبيق', en: 'Guided app walkthrough' }
+        'usage_guide_subtitle': { ar: 'جولة تعريفية بالتطبيق', en: 'Guided app walkthrough' },
+        'check_updates': { ar: 'تحديث التطبيق', en: 'Check for Updates' },
+        'check_updates_subtitle': { ar: 'مسح ذاكرة التخزين المؤقت وإعادة التحميل', en: 'Clear cache and reload' }
     }
 
 };

@@ -11,6 +11,12 @@ window.App.Main = (function() {
         var Profiles = window.App.Profiles;
         var DataIO = window.App.DataIO;
 
+        // Safety: always clear body scroll locks left from prior state
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+
         // --- Profile check (from _origInit) ---
         var profiles = Profiles.getProfiles();
         var activeId = Profiles.getActiveProfileId();
@@ -202,6 +208,55 @@ window.App.Main = (function() {
         }
     }
 
+    // ==================== CHECK FOR UPDATES (manual) ====================
+
+    function checkForUpdates() {
+        var lang = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
+        var toast = window.App.UI && window.App.UI.showToast;
+
+        if (toast) toast(lang === 'ar' ? 'جاري التحديث...' : 'Updating...', 'info', 3000);
+
+        // 1. Unregister service worker
+        // 2. Clear all caches
+        // 3. Force reload
+        var swPromise = Promise.resolve();
+        if ('serviceWorker' in navigator) {
+            swPromise = navigator.serviceWorker.getRegistrations().then(function(regs) {
+                return Promise.all(regs.map(function(r) { return r.unregister(); }));
+            });
+        }
+        var cachePromise = ('caches' in window) ? caches.keys().then(function(keys) {
+            return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+        }) : Promise.resolve();
+
+        Promise.all([swPromise, cachePromise]).then(function() {
+            setTimeout(function() { window.location.reload(true); }, 1000);
+        }).catch(function() {
+            setTimeout(function() { window.location.reload(true); }, 1000);
+        });
+    }
+
+    // ==================== UPDATE BANNER ====================
+
+    function showUpdateBanner() {
+        if (document.getElementById('swUpdateBanner')) return;
+        var lang = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
+        var banner = document.createElement('div');
+        banner.id = 'swUpdateBanner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:var(--primary);color:white;padding:12px 16px;z-index:9999;display:flex;align-items:center;gap:10px;justify-content:center;font-family:inherit;font-size:0.85em;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+        banner.innerHTML = '<span class="material-symbols-rounded" style="font-size:20px;">system_update</span>' +
+            '<span>' + (lang === 'ar' ? 'تحديث جديد متاح — اضغط للتحديث' : 'New update available — tap to update') + '</span>';
+        banner.onclick = function() {
+            banner.textContent = lang === 'ar' ? 'جاري التحديث...' : 'Updating...';
+            navigator.serviceWorker.ready.then(function(reg) {
+                if (reg.waiting) {
+                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+            });
+        };
+        document.body.appendChild(banner);
+    }
+
     // ==================== STARTUP SEQUENCE ====================
 
     function startup() {
@@ -226,8 +281,15 @@ window.App.Main = (function() {
         // If splash is active, defer init + monitors until splash finishes
         if (window._splashActive) {
             window._onSplashDone = function() {
-                init();
-                startPostInitTasks();
+                try {
+                    init();
+                    startPostInitTasks();
+                } catch(e) {
+                    console.error('[APP] init/post-init error:', e);
+                    // Ensure page is usable even if init fails
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                }
                 // Fade in app content: add transition class, then remove hiding class
                 document.body.classList.add('app-revealing');
                 requestAnimationFrame(function() {
@@ -239,8 +301,14 @@ window.App.Main = (function() {
             };
         } else {
             // No splash (return visit) — init immediately
-            init();
-            startPostInitTasks();
+            try {
+                init();
+                startPostInitTasks();
+            } catch(e) {
+                console.error('[APP] init/post-init error:', e);
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+            }
         }
 
         // Clamp year inputs to valid Hijri range (1400-1500)
@@ -258,37 +326,43 @@ window.App.Main = (function() {
 
         // PWA Service Worker
         if ('serviceWorker' in navigator) {
+            // Auto-reload when new SW takes control
+            var swRefreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function() {
+                if (!swRefreshing) {
+                    swRefreshing = true;
+                    window.location.reload();
+                }
+            });
+
+            // Listen for notification clicks from SW
+            navigator.serviceWorker.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'notification-click') {
+                    window.focus();
+                    if (event.data.tag && event.data.tag.indexOf('prayer-after-') !== -1) {
+                        try { if (typeof window.scrollToUnmarkedPrayer === 'function') window.scrollToUnmarkedPrayer(); } catch(e) {}
+                    }
+                }
+            });
+
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('./service-worker.js')
                     .then(function(reg) {
+                        // If a new SW is already waiting, activate it immediately
+                        if (reg.waiting) {
+                            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        }
 
-                        // Listen for notification clicks from SW
-                        navigator.serviceWorker.addEventListener('message', function(event) {
-                            if (event.data && event.data.type === 'notification-click') {
-                                window.focus();
-                                if (event.data.tag && event.data.tag.indexOf('prayer-after-') !== -1) {
-                                    try { if (typeof window.scrollToUnmarkedPrayer === 'function') window.scrollToUnmarkedPrayer(); } catch(e) {}
-                                }
-                            }
-                        });
-
-                        // Auto-apply SW update immediately (no manual click needed)
+                        // Detect new SW installing — force activate as soon as installed
                         reg.addEventListener('updatefound', function() {
                             var newWorker = reg.installing;
+                            if (!newWorker) return;
                             newWorker.addEventListener('statechange', function() {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version ready — skip waiting immediately
                                     newWorker.postMessage({ type: 'SKIP_WAITING' });
                                 }
                             });
-                        });
-
-                        // Auto-reload when new SW takes control
-                        var swRefreshing = false;
-                        navigator.serviceWorker.addEventListener('controllerchange', function() {
-                            if (!swRefreshing) {
-                                swRefreshing = true;
-                                window.location.reload();
-                            }
                         });
 
                         // Force check for SW updates on every page load
@@ -309,16 +383,12 @@ window.App.Main = (function() {
             });
         }
 
-        // Re-check prayer times when app becomes visible
+        // Re-check prayer times and ALL notifications when app becomes visible
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
                 var activeProfile = window.App.Storage.getActiveProfile();
-                if (activeProfile) {
-                    if (typeof window.renderPrayerTimes === 'function') window.renderPrayerTimes();
-                    if (window.App.Notifications) {
-                        window.App.Notifications.checkBeforeAthan();
-                        window.App.Notifications.checkAfterAthan();
-                    }
+                if (activeProfile && window.App.Notifications) {
+                    window.App.Notifications.runAllChecks();
                 }
             }
         });
@@ -375,7 +445,9 @@ window.App.Main = (function() {
         updateShellBar: updateShellBar,
         openProfileSettings: openProfileSettings,
         closeProfileSettings: closeProfileSettings,
-        applyUpdate: applyUpdate
+        applyUpdate: applyUpdate,
+        checkForUpdates: checkForUpdates,
+        showUpdateBanner: showUpdateBanner
     };
 })();
 
@@ -385,6 +457,24 @@ window.updateShellBar = window.App.Main.updateShellBar;
 window.openProfileSettings = window.App.Main.openProfileSettings;
 window.closeProfileSettings = window.App.Main.closeProfileSettings;
 window.applyUpdate = window.App.Main.applyUpdate;
+window.checkForUpdates = window.App.Main.checkForUpdates;
+
+// ==================== SCROLL LOCK SAFETY ====================
+// Ensure body is never permanently locked — runs independently of app init
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        if (document.body.style.overflow === 'hidden' || document.body.style.position === 'fixed') {
+            var profileOverlay = document.getElementById('profileOverlay');
+            var confirmOverlay = document.querySelector('.confirm-overlay.show');
+            if ((!profileOverlay || profileOverlay.classList.contains('hidden')) && !confirmOverlay) {
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+                document.body.style.top = '';
+            }
+        }
+    }, 3000);
+});
 
 // ==================== RUN STARTUP ====================
 window.App.Main.startup();
