@@ -86,10 +86,12 @@ input, textarea {
 }
 
 /* ==================== iOS OVERSCROLL FIX ==================== */
-html, body {
+/* CRITICAL: overflow-x:hidden must ONLY be on body, NOT on html.
+   When both html and body have overflow set, body becomes its own
+   scroll container instead of using the viewport scroll. This breaks
+   one-finger scroll on mobile (fixed bars work, content doesn't). */
+html {
     overscroll-behavior: none;
-    -webkit-overflow-scrolling: touch;
-    overflow-x: hidden;
 }
 
 /* ==================== BODY ==================== */
@@ -104,8 +106,12 @@ body {
     padding-right: env(safe-area-inset-right, 20px);
     direction: rtl;
     position: relative;
-    touch-action: manipulation;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
     color: var(--text-primary);
+    /* touch-action removed — user-scalable=no in viewport meta already
+       disables double-tap zoom. manipulation on body can break scroll
+       on some mobile browsers. Default auto is safest. */
 }
 
 /* LTR mode overrides */
