@@ -49,7 +49,17 @@ window.App.InfoTooltips = (function() {
         16: { ar: 'بيوضح أيام الإعفاء (الحيض أو النفاس). أيام الإعفاء مش بتتحسب في نسبة الإنجاز — يعني مش بتأثر على إحصائياتك.',
               en: 'Shows exemption days (menstruation or postpartum). Exemption days are excluded from completion calculations — they don\'t affect your stats.' },
         17: { ar: 'سجل تاريخي لفترات الإعفاء. بيساعدك تتابعي مدة وانتظام الدورة. البيانات خاصة ومش بتتشارك.',
-              en: 'Historical record of exemption periods. Helps track duration and regularity. Data is private and not shared.' }
+              en: 'Historical record of exemption periods. Helps track duration and regularity. Data is private and not shared.' },
+        18: { ar: 'شريط التقدم يوضح نسبة الصلوات المقضية من الإجمالي. كل ما الشريط يمتلئ يبقى اقتربت من إنهاء القضاء.',
+              en: 'The progress bar shows the percentage of qada prayers completed out of the total. As the bar fills up, you are closer to finishing your qada.' },
+        19: { ar: 'كل شريط يوضح تقدمك في قضاء صلاة معينة. ركّز على الصلاة اللي نسبتها أقل.',
+              en: 'Each bar shows your progress in making up a specific prayer. Focus on the prayer with the lowest percentage.' },
+        20: { ar: 'أفضل شهر = أكتر شهر سجلت فيه قضاء. المعدل اليومي = متوسطك الفعلي. تاريخ الانتهاء محسوب على أدائك الفعلي مش الهدف.',
+              en: 'Best month = month with most qada logged. Daily average = your actual average. Expected completion is calculated from your actual performance, not the target.' },
+        21: { ar: 'مقارنة بين الهدف اللي حددته والأداء الفعلي. لو متأخر حاول تزود عدد الصلوات اليومي.',
+              en: 'Comparison between your set target and actual performance. If behind, try increasing your daily prayer count.' },
+        22: { ar: 'الخط التنازلي بيوضح كم صلاة باقية آخر كل شهر. كل ما ينزل أسرع يبقى أداؤك أحسن.',
+              en: 'The descending line shows remaining prayers at the end of each month. The steeper the drop, the better your performance.' }
     };
 
     function getDescription(reportId) {

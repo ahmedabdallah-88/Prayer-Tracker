@@ -489,6 +489,7 @@
                                 window.renderStreaks('sunnah');
                             }
                             if (window.updateShellBar) window.updateShellBar();
+                            if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
                             if (window.switchSection) window.switchSection('fard');
 
                             showToast(t('import_success') + ' (' + importCount + ')', 'success');
@@ -560,6 +561,9 @@
                     if (sunnahDash && sunnahDash.classList.contains('active') && window.updateDashboard) {
                         window.updateDashboard('sunnah');
                     }
+
+                    // Inject qada tab if imported data contains a plan
+                    if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
 
                     showToast(t('import_success') + ' (' + importCount + ')', 'success');
                 }

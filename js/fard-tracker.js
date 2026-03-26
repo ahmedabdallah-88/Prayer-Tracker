@@ -182,6 +182,18 @@ window.App.Tracker = (function() {
             if (typeof window.updateYearlyView === 'function') {
                 window.updateYearlyView(type);
             }
+        } else if (view === 'qada') {
+            var qadaView = document.getElementById(prefix + 'QadaView');
+            if (qadaView) qadaView.classList.add('active');
+            var todayHQ = Hijri.getTodayHijri();
+            Hijri.setCurrentHijriMonth(todayHQ.month);
+            Hijri.setCurrentHijriYear(todayHQ.year);
+            Storage.setCurrentMonth(todayHQ.month);
+            Storage.setCurrentYear(todayHQ.year);
+            // Update month label
+            var qLabel = document.getElementById('qadaTrackerMonthLabel');
+            if (qLabel) qLabel.textContent = Hijri.getHijriMonthName(todayHQ.month - 1) + ' ' + todayHQ.year;
+            if (window.App.QadaTracker) window.App.QadaTracker.render();
         } else if (view === 'dashboard') {
             var dshView = document.getElementById(prefix + 'DashboardView');
             if (dshView) dshView.classList.add('active');
@@ -200,14 +212,19 @@ window.App.Tracker = (function() {
         var subTabs = document.getElementById(prefix + 'SubTabs');
         if (subTabs) {
             var tabs = subTabs.querySelectorAll('.sub-tab');
+            var numTabs = tabs.length;
+            var viewOrder = ['tracker', 'yearly', 'qada', 'dashboard'];
             var pillPos = 0;
             for (var i = 0; i < tabs.length; i++) {
                 tabs[i].classList.remove('active');
-                if ((view === 'tracker' && i === 0) || (view === 'yearly' && i === 1) || (view === 'dashboard' && i === 2)) {
-                    tabs[i].classList.add('active');
-                    pillPos = i;
-                }
             }
+            // Find which tab index matches the current view
+            // Tab order: tracker(0), yearly(1), [qada if exists], dashboard(last)
+            if (view === 'tracker') { pillPos = 0; }
+            else if (view === 'yearly') { pillPos = 1; }
+            else if (view === 'qada' && numTabs === 4) { pillPos = 2; }
+            else if (view === 'dashboard') { pillPos = numTabs - 1; }
+            if (tabs[pillPos]) tabs[pillPos].classList.add('active');
             // Animate sliding pill
             var pill = subTabs.querySelector('.sub-tabs-pill');
             if (pill) pill.setAttribute('data-pos', pillPos);
@@ -918,6 +935,29 @@ window.App.Tracker = (function() {
         });
     }
 
+    // ==================== changeQadaMonth ====================
+
+    function changeQadaMonth(delta) {
+        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+        var Hijri = _getHijri();
+        var Storage = _getStorage();
+
+        var hMonth = Hijri.getCurrentHijriMonth() + delta;
+        var hYear = Hijri.getCurrentHijriYear();
+        if (hMonth > 12) { hMonth = 1; hYear++; }
+        else if (hMonth < 1) { hMonth = 12; hYear--; }
+
+        Hijri.setCurrentHijriMonth(hMonth);
+        Hijri.setCurrentHijriYear(hYear);
+        Storage.setCurrentMonth(hMonth);
+        Storage.setCurrentYear(hYear);
+
+        var label = document.getElementById('qadaTrackerMonthLabel');
+        if (label) label.textContent = Hijri.getHijriMonthName(hMonth - 1) + ' ' + hYear;
+
+        if (window.App.QadaTracker) window.App.QadaTracker.render();
+    }
+
     // ==================== PUBLIC API ====================
 
     return {
@@ -928,6 +968,7 @@ window.App.Tracker = (function() {
         toggleTrackerDay:   toggleTrackerDay,
         updateTrackerStats: updateTrackerStats,
         changeTrackerMonth: changeTrackerMonth,
+        changeQadaMonth:    changeQadaMonth,
         resetTrackerMonth:  resetTrackerMonth,
         handleDayClick:     handleDayClick,
         batchMarkPrayer:    batchMarkPrayer,
@@ -944,6 +985,7 @@ window.renderTrackerMonth = window.App.Tracker.renderTrackerMonth;
 window.updateTrackerStats = window.App.Tracker.updateTrackerStats;
 window.updateTrackerView  = window.App.Tracker.updateTrackerView;
 window.changeTrackerMonth = window.App.Tracker.changeTrackerMonth;
+window.changeQadaMonth    = window.App.Tracker.changeQadaMonth;
 window.resetTrackerMonth  = window.App.Tracker.resetTrackerMonth;
 window.handleDayClick     = window.App.Tracker.handleDayClick;
 window.batchMarkPrayer    = window.App.Tracker.batchMarkPrayer;

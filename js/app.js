@@ -92,6 +92,10 @@ window.App.Main = (function() {
                 if (typeof window.updateTrackerView === 'function') {
                     window.updateTrackerView('fard');
                 }
+                // Inject qada tab if plan exists
+                if (window.App.QadaTracker) {
+                    window.App.QadaTracker.injectTab();
+                }
             } catch(e) {
                 console.error('Initial render error:', e);
             }
@@ -185,6 +189,9 @@ window.App.Main = (function() {
         if (overlay) {
             overlay.classList.add('show');
             updateShellBar();
+            if (window.App.QadaCalc && window.App.QadaCalc.updateSettingsLabel) {
+                window.App.QadaCalc.updateSettingsLabel();
+            }
         }
     }
 

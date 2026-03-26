@@ -354,6 +354,7 @@ window.App.Profiles = (function() {
             window.updateTrackerView('sunnah');
         }
         if (window.switchSection) window.switchSection('fard');
+        if (window.App.QadaTracker) window.App.QadaTracker.injectTab();
         if (window.startPrayerTimesMonitor) setTimeout(window.startPrayerTimesMonitor, 500);
 
         // Trigger onboarding AFTER profile loaded and UI rendered (500ms for render)

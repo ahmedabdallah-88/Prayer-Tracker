@@ -246,6 +246,11 @@ window.App.Dashboard = (function() {
             window.renderQadaReport();
         }
 
+        // Qada Dashboard sub-toggle (fard only)
+        if (type === 'fard' && window.App.QadaDashboard) {
+            window.App.QadaDashboard.injectSubToggle();
+        }
+
         // Period history (females)
         var activeProfile = Storage.getActiveProfile();
         if (type === 'fard' && activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12) {

@@ -2600,6 +2600,243 @@ body {
     font-size: 0.75em;
 }
 
+/* ==================== QADA CALCULATOR ==================== */
+.qada-primary-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.qada-primary-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+.qada-secondary-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--bg, #f3f4f6);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1em;
+    font-family: inherit;
+    cursor: pointer;
+}
+.qada-secondary-btn:active { opacity: 0.85; }
+
+.qada-pill-btn {
+    padding: 8px 16px;
+    border: 1.5px solid var(--border, rgba(0,0,0,0.1));
+    border-radius: 20px;
+    background: var(--card-bg, white);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.qada-pill-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+.qada-pill-btn:active { transform: scale(0.96); }
+
+.qada-date-input {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* ==================== QADA TRACKER (Phase 2) ==================== */
+
+/* Summary banner */
+.qada-summary-banner {
+    padding: 14px 16px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(0,0,0,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.qada-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.qada-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+.qada-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+/* Qada day-box with badge */
+.day-box.qada-day-box {
+    position: relative;
+}
+.day-box.qada-filled {
+    background: rgba(var(--primary-rgb, 45,106,79), 0.12);
+    border-color: rgba(var(--primary-rgb, 45,106,79), 0.3);
+}
+.day-box.qada-filled .day-number {
+    color: var(--primary);
+    font-weight: 700;
+}
+.qada-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--primary);
+    color: white;
+    font-size: 0.65em;
+    font-weight: 800;
+    font-family: 'Rubik', sans-serif;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+[dir="rtl"] .qada-badge {
+    right: auto;
+    left: -4px;
+}
+
+/* Popup */
+.qada-popup {
+    position: fixed;
+    z-index: 20001;
+    animation: qadaPopIn 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes qadaPopIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.qada-popup-body {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--card-bg, rgba(255,255,255,0.85));
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    overflow: hidden;
+}
+.qada-popup-btn {
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: transparent;
+    font-size: 1.5em;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+    font-family: 'Rubik', sans-serif;
+}
+.qada-popup-btn:active { transform: scale(0.9); }
+.qada-popup-btn.plus {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb, 45,106,79), 0.1);
+}
+.qada-popup-btn.plus:active { background: rgba(var(--primary-rgb, 45,106,79), 0.22); }
+.qada-popup-btn.minus {
+    color: var(--danger);
+    background: rgba(var(--danger-rgb, 230,57,70), 0.1);
+}
+.qada-popup-btn.minus:active { background: rgba(var(--danger-rgb, 230,57,70), 0.22); }
+.qada-popup-num {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.35em;
+    color: var(--text-primary);
+    font-family: 'Rubik', sans-serif;
+}
+
+/* Popup arrow */
+.qada-popup-arrow {
+    width: 14px;
+    height: 14px;
+    background: var(--card-bg, rgba(255,255,255,0.85));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.25);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    z-index: -1;
+}
+.qada-popup-arrow.arrow-bottom {
+    bottom: -7px;
+    border-top: none;
+    border-left: none;
+}
+.qada-popup-arrow.arrow-top {
+    top: -7px;
+    border-bottom: none;
+    border-right: none;
+}
+
+/* 4-tab pill support */
+.sub-tabs-pill[data-pos="3"] {
+    /* JS sets transform inline for 4-tab mode */
+}
+[dir="rtl"] .sub-tabs-pill[data-pos="3"] { transform: translateX(calc(-300% - 6px)); }
+[dir="ltr"] .sub-tabs-pill[data-pos="3"] { transform: translateX(calc(300% + 6px)); }
+
+/* ==================== QADA DASHBOARD SUB-TOGGLE ==================== */
+.qada-dash-sub-btn {
+    flex: 1;
+    padding: 7px 0;
+    border: none;
+    background: transparent;
+    font-size: 0.82em;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 1;
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    transition: color 0.25s ease;
+    border-radius: 10px;
+}
+.qada-dash-sub-btn.active {
+    color: var(--text-primary);
+}
+.qada-dash-sub-pill {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    background: var(--card-bg, white);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
 /* ==================== PERIOD HISTORY ==================== */
 .period-history { margin-top: 20px; }
 
