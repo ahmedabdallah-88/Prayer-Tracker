@@ -1,39 +1,39 @@
-// Prayer Tracker PWA — Service Worker v200
-const CACHE_NAME = 'salah-tracker-v200';
+// Prayer Tracker PWA — Service Worker v201
+const CACHE_NAME = 'salah-tracker-v201';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
     // CSS (versioned)
-    './css/main.css?v=200',
-    './css/themes.css?v=200',
-    './css/dashboard.css?v=200',
-    './css/splash.css?v=200',
+    './css/main.css?v=201',
+    './css/themes.css?v=201',
+    './css/dashboard.css?v=201',
+    './css/splash.css?v=201',
     // JS modules (dependency order)
-    './js/config.js?v=200',
-    './js/storage.js?v=200',
-    './js/hijri-calendar.js?v=200',
-    './js/ui-utils.js?v=200',
-    './js/i18n.js?v=200',
-    './js/themes.js?v=200',
-    './js/profiles.js?v=200',
-    './js/female-features.js?v=200',
-    './js/fard-tracker.js?v=200',
-    './js/sunnah-tracker.js?v=200',
-    './js/jamaah-tracker.js?v=200',
-    './js/weekly-view.js?v=200',
-    './js/fasting-tracker.js?v=200',
-    './js/prayer-times.js?v=200',
-    './js/notifications.js?v=200',
-    './js/azkar-tracker.js?v=200',
-    './js/svg-charts.js?v=200',
-    './js/info-tooltips.js?v=200',
-    './js/qada-report.js?v=200',
-    './js/dashboard.js?v=200',
-    './js/year-overview.js?v=200',
-    './js/data-io.js?v=200',
-    './js/onboarding.js?v=200',
-    './js/app.js?v=200',
+    './js/config.js?v=201',
+    './js/storage.js?v=201',
+    './js/hijri-calendar.js?v=201',
+    './js/ui-utils.js?v=201',
+    './js/i18n.js?v=201',
+    './js/themes.js?v=201',
+    './js/profiles.js?v=201',
+    './js/female-features.js?v=201',
+    './js/fard-tracker.js?v=201',
+    './js/sunnah-tracker.js?v=201',
+    './js/jamaah-tracker.js?v=201',
+    './js/weekly-view.js?v=201',
+    './js/fasting-tracker.js?v=201',
+    './js/prayer-times.js?v=201',
+    './js/notifications.js?v=201',
+    './js/azkar-tracker.js?v=201',
+    './js/svg-charts.js?v=201',
+    './js/info-tooltips.js?v=201',
+    './js/qada-report.js?v=201',
+    './js/dashboard.js?v=201',
+    './js/year-overview.js?v=201',
+    './js/data-io.js?v=201',
+    './js/onboarding.js?v=201',
+    './js/app.js?v=201',
     // Icons
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
@@ -83,12 +83,12 @@ button:active{transform:scale(0.97)}
 </body>
 </html>`;
 
-// ==================== INSTALL — skip waiting immediately ====================
+// ==================== INSTALL — cache assets then skip waiting ====================
 self.addEventListener('install', event => {
-    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS))
+            .then(() => self.skipWaiting())
     );
 });
 

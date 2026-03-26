@@ -459,19 +459,45 @@ window.closeProfileSettings = window.App.Main.closeProfileSettings;
 window.applyUpdate = window.App.Main.applyUpdate;
 window.checkForUpdates = window.App.Main.checkForUpdates;
 
-// ==================== SCROLL LOCK SAFETY ====================
-// Ensure body is never permanently locked — runs independently of app init
+// ==================== NUCLEAR OVERLAY CLEANUP ====================
+// Runs independently of app init — finds and neutralizes any invisible blockers
 document.addEventListener('DOMContentLoaded', function() {
+    // Immediate: remove stale splash if sessionStorage says it already played
+    if (sessionStorage.getItem('splashShown')) {
+        var stale = document.getElementById('splashScreen');
+        if (stale) stale.remove();
+    }
+
+    // After 3s: clean up any invisible full-screen blockers
     setTimeout(function() {
-        if (document.body.style.overflow === 'hidden' || document.body.style.position === 'fixed') {
-            var profileOverlay = document.getElementById('profileOverlay');
-            var confirmOverlay = document.querySelector('.confirm-overlay.show');
-            if ((!profileOverlay || profileOverlay.classList.contains('hidden')) && !confirmOverlay) {
-                document.body.style.overflow = '';
-                document.body.style.position = '';
-                document.body.style.width = '';
-                document.body.style.top = '';
-            }
+        // 1. Force-remove splash screen if still present
+        var splash = document.getElementById('splashScreen');
+        if (splash && (splash.classList.contains('splash-fade-out') || getComputedStyle(splash).opacity === '0')) {
+            splash.remove();
+        }
+
+        // 2. Clear body scroll locks if no overlay is legitimately open
+        var profileOverlay = document.getElementById('profileOverlay');
+        var confirmOverlay = document.querySelector('.confirm-overlay.show');
+        var profileSettings = document.getElementById('profileSettingsOverlay');
+        var profileSettingsOpen = profileSettings && profileSettings.classList.contains('show');
+        if ((!profileOverlay || profileOverlay.classList.contains('hidden')) && !confirmOverlay && !profileSettingsOpen) {
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+        }
+
+        // 3. Remove splash-active class if splash is gone
+        if (!document.getElementById('splashScreen')) {
+            document.body.classList.remove('splash-active');
+            document.body.classList.remove('app-revealing');
+        }
+
+        // 4. Kill any orphaned onboarding overlays
+        var onboard = document.getElementById('onboardOverlay');
+        if (onboard && !onboard.classList.contains('active')) {
+            onboard.remove();
         }
     }, 3000);
 });
