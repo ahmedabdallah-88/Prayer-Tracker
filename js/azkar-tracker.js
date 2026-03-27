@@ -35,8 +35,8 @@ window.App.Azkar = (function() {
     // ==================== CATEGORIES ====================
 
     var categories = [
-        { id: 'morning', icon: 'light_mode', gradient: 'linear-gradient(135deg, #FBBF24, #F59E0B)', color: '#F59E0B' },
-        { id: 'evening', icon: 'nights_stay', gradient: 'linear-gradient(135deg, #818CF8, #6366F1)', color: '#6366F1' }
+        { id: 'morning', icon: 'light_mode', gradient: 'linear-gradient(135deg, #FBBF24, #D97706)', color: '#D97706', shadow: 'rgba(217,119,6,0.35)' },
+        { id: 'evening', icon: 'nights_stay', gradient: 'linear-gradient(135deg, #818CF8, #4F46E5)', color: '#4F46E5', shadow: 'rgba(79,70,229,0.35)' }
     ];
 
     // ==================== TRACKER VIEW ====================
@@ -92,7 +92,7 @@ window.App.Azkar = (function() {
             var nameDiv = document.createElement('div');
             nameDiv.className = 'prayer-name';
             var catName = cat.id === 'morning' ? I18n.t('azkar_morning') : I18n.t('azkar_evening');
-            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + cat.gradient + '"><span class="material-symbols-rounded" style="font-size:18px;color:white;">' + cat.icon + '</span></span><span>' + catName + '</span>';
+            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + cat.gradient + ';box-shadow:0 4px 12px ' + (cat.shadow || 'rgba(0,0,0,0.2)') + '"><span class="material-symbols-rounded" style="font-size:22px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + cat.icon + '</span></span><span>' + catName + '</span>';
 
             var headerEnd = document.createElement('div');
             headerEnd.className = 'prayer-header-end';

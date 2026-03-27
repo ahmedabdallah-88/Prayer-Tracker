@@ -194,7 +194,6 @@ window.App.Fasting = (function() {
             if (window.App.Storage.isFutureDate(day, fastingMonth, fastingYear)) {
                 dayBox.appendChild(window.App.Hijri.createDualDayNum(day, fastingYear, fastingMonth));
                 dayBox.classList.add('disabled');
-                dayBox.style.opacity = '0.3';
             } else if (isFemale && fastingExemptModeOn) {
                 dayBox.appendChild(window.App.Hijri.createDualDayNum(day, fastingYear, fastingMonth));
 

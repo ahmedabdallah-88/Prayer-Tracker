@@ -20,11 +20,18 @@ window.App.QadaTracker = (function() {
         maghrib: 'prayer_maghrib', isha: 'prayer_isha'
     };
     var SKY_GRADIENTS = {
-        fajr: 'linear-gradient(135deg, #E8B4B8, #D4A0A7)',
-        dhuhr: 'linear-gradient(135deg, #F0C75E, #E8B84A)',
-        asr: 'linear-gradient(135deg, #E8A849, #D4943A)',
-        maghrib: 'linear-gradient(135deg, #C47A5A, #B0664A)',
-        isha: 'linear-gradient(135deg, #5B6B8A, #4A5A7A)'
+        fajr: 'linear-gradient(135deg, #E8B4B8, #C48A90)',
+        dhuhr: 'linear-gradient(135deg, #F0C75E, #D4A030)',
+        asr: 'linear-gradient(135deg, #E8A849, #C07828)',
+        maghrib: 'linear-gradient(135deg, #C47A5A, #9E5238)',
+        isha: 'linear-gradient(135deg, #5B6B8A, #3A4A68)'
+    };
+    var SKY_SHADOWS = {
+        fajr: 'rgba(196,138,144,0.35)',
+        dhuhr: 'rgba(212,160,48,0.35)',
+        asr: 'rgba(192,120,40,0.35)',
+        maghrib: 'rgba(158,82,56,0.35)',
+        isha: 'rgba(58,74,104,0.35)'
     };
 
     var _popupTimer = null;
@@ -180,9 +187,10 @@ window.App.QadaTracker = (function() {
 
             var nameDiv = document.createElement('div');
             nameDiv.className = 'prayer-name';
+            var iconShadow = SKY_SHADOWS[prayerId] || 'rgba(0,0,0,0.2)';
             nameDiv.innerHTML =
-                '<span class="prayer-icon-badge" style="background:' + iconBg + '">' +
-                    '<span class="material-symbols-rounded" style="font-size:18px;color:white;">' + icon + '</span>' +
+                '<span class="prayer-icon-badge" style="background:' + iconBg + ';box-shadow:0 4px 12px ' + iconShadow + '">' +
+                    '<span class="material-symbols-rounded" style="font-size:22px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + icon + '</span>' +
                 '</span><span>' + t(PRAYER_KEYS[prayerId]) + '</span>';
 
             var headerEnd = document.createElement('div');
@@ -212,11 +220,8 @@ window.App.QadaTracker = (function() {
 
                 if (isDayToday) dayBox.classList.add('today-box');
 
-                // Always show day number
-                var numSpan = document.createElement('span');
-                numSpan.className = 'day-number';
-                numSpan.textContent = day;
-                dayBox.appendChild(numSpan);
+                // Always show day number + gregorian
+                dayBox.appendChild(Hijri.createDualDayNum(day, hYear, hMonth));
 
                 if (isFuture) {
                     dayBox.classList.add('disabled');

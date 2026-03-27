@@ -807,8 +807,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    padding: 10px 14px;
+    margin-bottom: 12px;
+    padding: 12px 14px;
     background: rgba(255,255,255,0.5);
     border-radius: 14px;
     border: 1px solid rgba(0,0,0,0.04);
@@ -817,8 +817,8 @@ body {
 }
 
 .prayer-name {
-    font-size: 1.1em;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 800;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -826,24 +826,24 @@ body {
 }
 
 .prayer-name .prayer-icon-badge {
-    width: 34px; height: 34px;
-    border-radius: 10px;
+    width: 42px; height: 42px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 18px;
+    font-size: 22px;
 }
 
-.prayer-name .prayer-icon-badge.fajr-icon { background: linear-gradient(135deg, #E8B4B8, #D4A0A7); }
-.prayer-name .prayer-icon-badge.dhuhr-icon { background: linear-gradient(135deg, #F0C75E, var(--accent-light)); }
-.prayer-name .prayer-icon-badge.asr-icon { background: linear-gradient(135deg, #E8A849, #D4943A); }
-.prayer-name .prayer-icon-badge.maghrib-icon { background: linear-gradient(135deg, #C47A5A, #B0664A); }
-.prayer-name .prayer-icon-badge.isha-icon { background: linear-gradient(135deg, #5B6B8A, #4A5A7A); }
+.prayer-name .prayer-icon-badge.fajr-icon { background: linear-gradient(135deg, #E8B4B8, #C48A90); box-shadow: 0 4px 12px rgba(196,138,144,0.35); }
+.prayer-name .prayer-icon-badge.dhuhr-icon { background: linear-gradient(135deg, #F0C75E, #D4A030); box-shadow: 0 4px 12px rgba(212,160,48,0.35); }
+.prayer-name .prayer-icon-badge.asr-icon { background: linear-gradient(135deg, #E8A849, #C07828); box-shadow: 0 4px 12px rgba(192,120,40,0.35); }
+.prayer-name .prayer-icon-badge.maghrib-icon { background: linear-gradient(135deg, #C47A5A, #9E5238); box-shadow: 0 4px 12px rgba(158,82,56,0.35); }
+.prayer-name .prayer-icon-badge.isha-icon { background: linear-gradient(135deg, #5B6B8A, #3A4A68); box-shadow: 0 4px 12px rgba(58,74,104,0.35); }
 
 .prayer-counter {
-    font-size: 0.8em;
-    padding: 4px 12px;
+    font-size: 0.7em;
+    padding: 3px 10px;
     background: rgba(var(--primary-rgb),0.08);
     color: var(--primary);
     border-radius: 20px;
@@ -873,16 +873,16 @@ body {
     flex-wrap: wrap;
     gap: 4px;
     justify-content: flex-start;
-    padding: 6px 6px 8px;
+    padding: 6px 10px 8px;
     position: relative;
     z-index: 1;
     overflow: visible;
 }
 
 .day-box {
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     border: 1.5px solid rgba(0,0,0,0.08);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -897,7 +897,7 @@ body {
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     aspect-ratio: 1;
-    font-size: 0.75em;
+    font-size: 0.8em;
 }
 
 .day-box:hover {
@@ -911,7 +911,7 @@ body {
 
 /* Day number always visible */
 .day-number {
-    font-size: 0.85em;
+    font-size: 15px;
     font-weight: 700;
     color: var(--text-primary);
     font-family: 'Rubik', sans-serif;
@@ -923,8 +923,8 @@ body {
 }
 
 .day-greg {
-    font-size: 0.6em;
-    color: var(--text-secondary, #6B7280);
+    font-size: 9px;
+    color: rgba(0,0,0,0.4);
     font-family: 'Rubik', sans-serif;
     line-height: 1;
     margin-top: 1px;
@@ -938,11 +938,20 @@ body {
 
 /* === Today === */
 .day-box.today {
-    background: rgba(var(--primary-rgb),0.08);
+    background: rgba(var(--primary-rgb),0.06);
     border-color: var(--primary);
+    box-shadow: 0 0 0 2.5px var(--primary);
 }
 
 .day-box.today .day-number { color: var(--primary); }
+.day-box.today .day-number::after {
+    content: '';
+    display: block;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin: 2px auto 0;
+}
 
 /* === Prayed (Munfarid) === */
 .day-box.checked {
@@ -957,14 +966,14 @@ body {
 .day-box.checked::after {
     content: '';
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
     border-radius: 50%;
     background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     z-index: 1;
 }
 
@@ -973,8 +982,8 @@ body {
     font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 14;
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
     font-size: 10px;
     color: var(--primary);
     display: flex;
@@ -996,11 +1005,11 @@ body {
 .day-box.congregation::after {
     content: '';
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
-    border-radius: 4px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    border-radius: 5px;
     background: var(--accent);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     z-index: 1;
 }
 
@@ -1009,9 +1018,9 @@ body {
     font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 14;
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
-    font-size: 9px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    font-size: 10px;
     color: white;
     display: flex;
     align-items: center;
@@ -1032,11 +1041,11 @@ body {
 .day-box.qada::after {
     content: '';
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
     border-radius: 50%;
     background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     z-index: 1;
 }
 
@@ -1045,8 +1054,8 @@ body {
     font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 14;
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
     font-size: 10px;
     color: var(--danger);
     display: flex;
@@ -1057,7 +1066,7 @@ body {
 
 /* === Future === */
 .day-box.disabled {
-    opacity: 0.2;
+    opacity: 0.3;
     cursor: not-allowed;
     pointer-events: none;
 }
@@ -1802,9 +1811,9 @@ body {
 /* ==================== FASTING ==================== */
 .fasting-day-box {
     aspect-ratio: 1;
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     border: 1.5px solid rgba(0,0,0,0.08);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -1817,6 +1826,7 @@ body {
     background: transparent;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    font-size: 0.8em;
 }
 
 .fasting-day-box.fasted {
@@ -1830,8 +1840,8 @@ body {
     font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 14;
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
     font-size: 10px;
     color: var(--primary);
     background: white;
@@ -1839,7 +1849,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 .fasting-day-box.exempt-fast {
@@ -1852,15 +1862,16 @@ body {
     font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 14;
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
-    font-size: 9px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    font-size: 10px;
     color: white;
     background: var(--purple);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 .fasting-day-box.missed {
@@ -1873,8 +1884,8 @@ body {
     font-family: 'Material Symbols Rounded';
     font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 14;
     position: absolute;
-    top: -2px; right: -2px;
-    width: 14px; height: 14px;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
     font-size: 10px;
     color: var(--danger);
     background: white;
@@ -1882,11 +1893,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 .fasting-day-box.disabled {
-    opacity: 0.2;
+    opacity: 0.3;
     cursor: not-allowed;
     pointer-events: none;
 }
@@ -2435,11 +2446,12 @@ body {
 
 @media (max-width: 480px) {
     .header h1 { font-size: 1.1em; }
-    .days-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 3px; }
-    .day-box { width: 34px; height: 34px; }
-    .prayer-section { padding: 12px; }
-    .prayer-name { font-size: 0.95em; gap: 8px; }
-    .prayer-counter { font-size: 0.7em; padding: 3px 8px; }
+    .days-grid { grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 3px; }
+    .day-box { width: 40px; height: 40px; }
+    .fasting-day-box { width: 40px; height: 40px; }
+    .prayer-section { padding: 10px; }
+    .prayer-name { font-size: 16px; gap: 8px; }
+    .prayer-counter { font-size: 0.65em; padding: 3px 8px; }
     .pt-item .pt-name { font-size: 9px; }
     .pt-item .pt-time { font-size: 10px; }
 }
@@ -2980,16 +2992,9 @@ body {
 /* ==================== FLOWING GRID (Sequential Days) ==================== */
 .flow-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
     justify-items: center;
-}
-
-@media (max-width: 480px) {
-    .flow-grid {
-        grid-template-columns: repeat(7, 1fr);
-        gap: 4px;
-    }
 }
 
 @media (max-width: 360px) {
@@ -3326,32 +3331,47 @@ body::before {
 
 /* ==================== TODAY BOX VARIANT ==================== */
 .day-box.today-box {
-    background: rgba(var(--primary-rgb),0.08);
+    background: rgba(var(--primary-rgb),0.06);
     border-color: var(--primary);
+    box-shadow: 0 0 0 2.5px var(--primary);
 }
 
 .day-box.today-box .day-number { color: var(--primary); }
+.day-box.today-box .day-number::after {
+    content: '';
+    display: block;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin: 2px auto 0;
+}
 
-/* Today + checked/congregation/qada: filled state wins */
+/* Today + checked/congregation/qada: filled state wins, hide dot */
 .day-box.today-box.checked {
     background: linear-gradient(135deg, var(--primary-mid), var(--primary-light));
     border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(var(--primary-mid-rgb),0.35);
 }
 .day-box.today-box.checked .day-number { color: white; }
+.day-box.today-box.checked .day-number::after { background: rgba(255,255,255,0.7); }
 .day-box.today-box.checked .day-greg { color: rgba(255,255,255,0.7); }
 
 .day-box.today-box.congregation {
     background: linear-gradient(135deg, var(--primary-mid), var(--primary-light)) !important;
     border: 2.5px solid var(--accent) !important;
+    box-shadow: 0 2px 10px rgba(var(--accent-rgb),0.4), 0 2px 8px rgba(var(--primary-mid-rgb),0.2);
 }
 .day-box.today-box.congregation .day-number { color: white !important; }
+.day-box.today-box.congregation .day-number::after { background: rgba(255,255,255,0.7); }
 .day-box.today-box.congregation .day-greg { color: rgba(255,255,255,0.7) !important; }
 
 .day-box.today-box.qada {
     background: linear-gradient(135deg, var(--danger), var(--danger-light));
     border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(var(--danger-rgb),0.35);
 }
 .day-box.today-box.qada .day-number { color: white; }
+.day-box.today-box.qada .day-number::after { background: rgba(255,255,255,0.7); }
 .day-box.today-box.qada .day-greg { color: rgba(255,255,255,0.7); }
 
 /* SVG Chart Legend (used by dashboard charts) */

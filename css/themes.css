@@ -255,7 +255,7 @@
 }
 
 [data-theme="dark"] .day-number { color: #E8E6E1; }
-[data-theme="dark"] .day-greg { color: #A0A0A6; }
+[data-theme="dark"] .day-greg { color: rgba(255,255,255,0.4); }
 
 /* ─── Dark theme: additional component overrides ─── */
 

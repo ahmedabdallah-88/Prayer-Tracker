@@ -314,19 +314,19 @@ window.App.Tracker = (function() {
 
         // Sky-time gradient map for prayer icon backgrounds
         var skyGradients = {
-            'fajr': 'linear-gradient(135deg, #E8B4B8, #D4A0A7)',
-            'dhuhr': 'linear-gradient(135deg, #F0C75E, #E8B84A)',
-            'asr': 'linear-gradient(135deg, #E8A849, #D4943A)',
-            'maghrib': 'linear-gradient(135deg, #C47A5A, #B0664A)',
-            'isha': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)',
+            'fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
+            'dhuhr': 'linear-gradient(135deg, #F0C75E, #D4A030)',
+            'asr': 'linear-gradient(135deg, #E8A849, #C07828)',
+            'maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
+            'isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
             'tahajjud': 'linear-gradient(135deg, #2e4482, #1e3a8a)',
-            'sunnah-fajr': 'linear-gradient(135deg, #E8B4B8, #D4A0A7)',
+            'sunnah-fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
             'duha': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-            'sunnah-dhuhr': 'linear-gradient(135deg, #F0C75E, #E8B84A)',
-            'sunnah-asr': 'linear-gradient(135deg, #E8A849, #D4943A)',
-            'sunnah-maghrib': 'linear-gradient(135deg, #C47A5A, #B0664A)',
-            'sunnah-isha': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)',
-            'witr': 'linear-gradient(135deg, #a855f7, #8b4789)'
+            'sunnah-dhuhr': 'linear-gradient(135deg, #F0C75E, #D4A030)',
+            'sunnah-asr': 'linear-gradient(135deg, #E8A849, #C07828)',
+            'sunnah-maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
+            'sunnah-isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
+            'witr': 'linear-gradient(135deg, #a855f7, #7E3A8A)'
         };
 
         prayers.forEach(function(prayer) {
@@ -357,7 +357,7 @@ window.App.Tracker = (function() {
             var iconBg = skyGradients[prayer.id] || 'linear-gradient(135deg, #888, #666)';
             var nameDiv = document.createElement('div');
             nameDiv.className = 'prayer-name';
-            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + iconBg + '"><span class="material-symbols-rounded" style="font-size:18px;color:white;">' + prayer.icon + '</span></span><span>' + I18n.getPrayerName(prayer.id) + '</span>';
+            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + iconBg + ';box-shadow:0 4px 12px ' + (prayer.color || 'rgba(0,0,0,0.2)') + '35"><span class="material-symbols-rounded" style="font-size:22px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + prayer.icon + '</span></span><span>' + I18n.getPrayerName(prayer.id) + '</span>';
 
             var headerEnd = document.createElement('div');
             headerEnd.className = 'prayer-header-end';
