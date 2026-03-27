@@ -366,65 +366,100 @@ window.App.Tracker = (function() {
         }
         if (!found) { activePrayerId = prayers[0].id; _activeTab[type] = activePrayerId; }
 
-        // ── PRAYER TABS ROW ──
-        var tabsContainer = document.createElement('div');
-        tabsContainer.className = 'prayer-tabs-container';
-        tabsContainer.id = type + 'PrayerTabs';
+        // ── PRAYER SELECTOR (Tabs for fard, Chips for sunnah) ──
+        if (type === 'sunnah') {
+            // ── SUNNAH: CHIPS LAYOUT ──
+            var chipsContainer = document.createElement('div');
+            chipsContainer.className = 'prayer-chips-container';
+            chipsContainer.id = type + 'PrayerTabs';
 
-        var tabPill = document.createElement('div');
-        tabPill.className = 'prayer-tabs-pill';
-        tabsContainer.appendChild(tabPill);
+            prayers.forEach(function(prayer) {
+                var chip = document.createElement('button');
+                chip.className = 'prayer-chip' + (prayer.id === activePrayerId ? ' active' : '');
+                chip.setAttribute('data-prayer', prayer.id);
 
-        var activeIdx = 0;
-        prayers.forEach(function(prayer, idx) {
-            if (prayer.id === activePrayerId) activeIdx = idx;
-            var tab = document.createElement('button');
-            tab.className = 'prayer-tab' + (prayer.id === activePrayerId ? ' active' : '');
-            tab.setAttribute('data-prayer', prayer.id);
+                chip.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>' +
+                    '<span class="prayer-chip-name">' + I18n.getPrayerName(prayer.id) + '</span>';
 
-            var iconWrap = document.createElement('div');
-            iconWrap.className = 'prayer-tab-icon';
-            if (prayer.id === activePrayerId) {
-                iconWrap.style.background = SKY_GRADIENTS[prayer.id] || '#888';
-                iconWrap.style.boxShadow = '0 2px 8px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
-            }
-            iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
+                chip.onclick = (function(pid) {
+                    return function() {
+                        _activeTab[type] = pid;
+                        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+                        renderTrackerMonth(type);
+                    };
+                })(prayer.id);
 
-            var nameSpan = document.createElement('span');
-            nameSpan.className = 'prayer-tab-name';
-            nameSpan.textContent = I18n.getPrayerName(prayer.id);
+                chipsContainer.appendChild(chip);
+            });
 
-            tab.appendChild(iconWrap);
-            tab.appendChild(nameSpan);
+            container.appendChild(chipsContainer);
 
-            tab.onclick = (function(pid) {
-                return function() {
-                    _activeTab[type] = pid;
-                    if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
-                    renderTrackerMonth(type);
-                };
-            })(prayer.id);
+            // Selected prayer full name
+            var selectedName = document.createElement('div');
+            selectedName.className = 'prayer-selected-name';
+            selectedName.textContent = I18n.getPrayerName(activePrayerId);
+            container.appendChild(selectedName);
+        } else {
+            // ── FARD: TABS LAYOUT ──
+            var tabsContainer = document.createElement('div');
+            tabsContainer.className = 'prayer-tabs-container';
+            tabsContainer.id = type + 'PrayerTabs';
 
-            tabsContainer.appendChild(tab);
-        });
+            var tabPill = document.createElement('div');
+            tabPill.className = 'prayer-tabs-pill';
+            tabsContainer.appendChild(tabPill);
 
-        container.appendChild(tabsContainer);
+            var activeIdx = 0;
+            prayers.forEach(function(prayer, idx) {
+                if (prayer.id === activePrayerId) activeIdx = idx;
+                var tab = document.createElement('button');
+                tab.className = 'prayer-tab' + (prayer.id === activePrayerId ? ' active' : '');
+                tab.setAttribute('data-prayer', prayer.id);
 
-        // Position pill after DOM insertion
-        requestAnimationFrame(function() {
-            var tabs = tabsContainer.querySelectorAll('.prayer-tab');
-            if (tabs[activeIdx]) {
-                var tt = tabs[activeIdx];
-                var isRTL = document.documentElement.dir === 'rtl';
-                tabPill.style.width = tt.offsetWidth + 'px';
-                if (isRTL) {
-                    var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
-                    tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
-                } else {
-                    tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
+                var iconWrap = document.createElement('div');
+                iconWrap.className = 'prayer-tab-icon';
+                if (prayer.id === activePrayerId) {
+                    iconWrap.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-mid))';
+                    iconWrap.style.boxShadow = '0 2px 8px rgba(var(--primary-rgb),0.3)';
                 }
-            }
-        });
+                iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
+
+                var nameSpan = document.createElement('span');
+                nameSpan.className = 'prayer-tab-name';
+                nameSpan.textContent = I18n.getPrayerName(prayer.id);
+
+                tab.appendChild(iconWrap);
+                tab.appendChild(nameSpan);
+
+                tab.onclick = (function(pid) {
+                    return function() {
+                        _activeTab[type] = pid;
+                        if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+                        renderTrackerMonth(type);
+                    };
+                })(prayer.id);
+
+                tabsContainer.appendChild(tab);
+            });
+
+            container.appendChild(tabsContainer);
+
+            // Position pill after DOM insertion
+            requestAnimationFrame(function() {
+                var tabs = tabsContainer.querySelectorAll('.prayer-tab');
+                if (tabs[activeIdx]) {
+                    var tt = tabs[activeIdx];
+                    var isRTL = document.documentElement.dir === 'rtl';
+                    tabPill.style.width = tt.offsetWidth + 'px';
+                    if (isRTL) {
+                        var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
+                        tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
+                    } else {
+                        tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
+                    }
+                }
+            });
+        }
 
         // ── STATS ROW ──
         var activePrayer = null;

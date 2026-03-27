@@ -205,6 +205,36 @@
     color: #8A8A8E;
 }
 
+[data-theme="dark"] .prayer-chip {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.10);
+}
+
+[data-theme="dark"] .prayer-chip .material-symbols-rounded {
+    color: #8A8A8E;
+}
+
+[data-theme="dark"] .prayer-chip-name {
+    color: #8A8A8E;
+}
+
+[data-theme="dark"] .prayer-chip.active {
+    background: rgba(var(--primary-rgb), 0.18);
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .prayer-chip.active .material-symbols-rounded {
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .prayer-chip.active .prayer-chip-name {
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .prayer-selected-name {
+    color: var(--primary-light);
+}
+
 [data-theme="dark"] .prayer-section,
 [data-theme="dark"] .controls,
 [data-theme="dark"] .stat-item,

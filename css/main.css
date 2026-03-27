@@ -710,6 +710,72 @@ body {
     opacity: 0;
 }
 
+/* ==================== SUNNAH CHIPS LAYOUT ==================== */
+.prayer-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 8px;
+    padding: 0 4px;
+}
+
+.prayer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+}
+
+.prayer-chip .material-symbols-rounded {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-variation-settings: 'FILL' 0, 'wght' 400;
+    transition: all 0.25s ease;
+}
+
+.prayer-chip-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    white-space: nowrap;
+    line-height: 1.2;
+    transition: all 0.25s ease;
+}
+
+.prayer-chip.active {
+    background: rgba(var(--primary-rgb), 0.12);
+    border-color: var(--primary);
+}
+
+.prayer-chip.active .material-symbols-rounded {
+    color: var(--primary);
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+
+.prayer-chip.active .prayer-chip-name {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.prayer-selected-name {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    line-height: 1.4;
+}
+
 /* ==================== MONTH NAVIGATION ==================== */
 .controls {
     display: flex;
