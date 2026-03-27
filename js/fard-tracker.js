@@ -438,13 +438,13 @@ window.App.Tracker = (function() {
                 var isDoneToday = isCurrentMonth && dataObj[hMonth] && dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][todayDay];
 
                 var tab = document.createElement('button');
-                tab.className = 'sunnah-tab' + (isActive ? ' active' : '') + (isDoneToday && !isActive ? ' done' : '');
+                tab.className = 'sunnah-tab' + (isActive ? ' active' : '');
                 tab.setAttribute('data-prayer', prayer.id);
 
                 var iconWrap = document.createElement('div');
                 iconWrap.className = 'sunnah-tab-icon';
                 var iconSize = isActive ? '22px' : '18px';
-                var iconColor = isActive ? '#fff' : (isDoneToday ? 'var(--primary)' : '#8D99AE');
+                var iconColor = isActive ? '#fff' : '#8D99AE';
                 var iconFill = isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400";
                 iconWrap.innerHTML = '<span class="material-symbols-rounded" style="font-size:' + iconSize + ';color:' + iconColor + ';font-variation-settings:' + iconFill + '">' + prayer.icon + '</span>';
 

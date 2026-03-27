@@ -929,16 +929,6 @@ body {
     box-shadow: 0 4px 10px rgba(45,106,79,0.3);
 }
 
-/* Done today (not active) */
-.sunnah-tab.done {
-    color: var(--primary);
-}
-.sunnah-tab.done .sunnah-tab-name {
-    color: var(--primary);
-}
-.sunnah-tab.done .sunnah-tab-icon {
-    background: rgba(45,106,79,0.08);
-}
 
 /* ==================== MONTH NAVIGATION ==================== */
 .controls {
