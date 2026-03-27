@@ -272,7 +272,7 @@ window.App.Tracker = (function() {
         }
 
         Storage.loadAllData(type);
-        renderTrackerMonth(type);
+        renderTrackerMonth(type, true);
         updateTrackerStats(type);
         if (typeof window.renderStreaks === 'function') {
             window.renderStreaks(type);
@@ -317,7 +317,6 @@ window.App.Tracker = (function() {
 
     // ==================== PRAYER TAB STATE ====================
     var _activeTab = { fard: null, sunnah: null };
-    var _lastRenderedSunnahTab = null; // tracks tab changes to avoid scroll reset
 
     var SKY_GRADIENTS = {
         'fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
@@ -364,7 +363,7 @@ window.App.Tracker = (function() {
 
     // ==================== renderTrackerMonth (Tab-based single calendar) ====================
 
-    function renderTrackerMonth(type) {
+    function renderTrackerMonth(type, scrollToTab) {
         var Storage = _getStorage();
         var Hijri   = _getHijri();
         var Female  = _getFemale();
@@ -445,7 +444,7 @@ window.App.Tracker = (function() {
                     return function() {
                         _activeTab[type] = pid;
                         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
-                        renderTrackerMonth(type);
+                        renderTrackerMonth(type, true);
                     };
                 })(prayer.id);
 
@@ -455,17 +454,10 @@ window.App.Tracker = (function() {
 
             container.appendChild(scroller);
 
-            // Only auto-scroll when tab changed or first render — not on re-renders from day clicks etc.
-            var tabChanged = (_lastRenderedSunnahTab !== activePrayerId);
-            _lastRenderedSunnahTab = activePrayerId;
-            if (tabChanged && activeTabEl) {
+            // Only scroll to active tab when explicitly requested (tab click or initial open)
+            if (scrollToTab && activeTabEl) {
                 requestAnimationFrame(function() {
-                    // Manual scroll — avoids scrollIntoView which scrolls ancestor containers too
-                    var tabLeft = activeTabEl.offsetLeft;
-                    var tabWidth = activeTabEl.offsetWidth;
-                    var scrollerWidth = scroller.clientWidth;
-                    var centered = tabLeft - (scrollerWidth / 2) + (tabWidth / 2);
-                    scroller.scrollLeft = centered;
+                    activeTabEl.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'instant' });
                 });
             }
         } else {
