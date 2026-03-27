@@ -31,6 +31,7 @@ window.App.QadaCalc = (function() {
     var currentStep = 1;
     var wizardData = {};
     var additionalPeriods = [];
+    var alreadyPrayedPeriods = [];
     var isEditing = false;
 
     // ==================== STORAGE ====================
@@ -212,11 +213,13 @@ window.App.QadaCalc = (function() {
         isEditing = !!plan;
         currentStep = 1;
         additionalPeriods = [];
+        alreadyPrayedPeriods = [];
         wizardData = {};
 
         if (plan) {
             wizardData = JSON.parse(JSON.stringify(plan));
             additionalPeriods = plan.additionalPeriods ? JSON.parse(JSON.stringify(plan.additionalPeriods)) : [];
+            alreadyPrayedPeriods = plan.alreadyPrayedPeriods ? JSON.parse(JSON.stringify(plan.alreadyPrayedPeriods)) : [];
         }
 
         renderOverlay();
@@ -338,6 +341,25 @@ window.App.QadaCalc = (function() {
         '</button>';
         html += '</div>';
 
+        // Already prayed question
+        html += '<div class="ps-section" style="margin-bottom:12px;">' +
+            '<div style="font-size:0.85em;font-weight:600;color:var(--text-secondary);margin-bottom:8px;padding:0 4px;">' +
+                t('qada_already_prayed') +
+            '</div>' +
+            '<div style="display:flex;gap:8px;">' +
+                '<button class="qada-pill-btn" id="qadaAlreadyYes" data-val="yes">' + t('qada_yes') + '</button>' +
+                '<button class="qada-pill-btn" id="qadaAlreadyNo" data-val="no">' + t('qada_no') + '</button>' +
+            '</div>' +
+        '</div>';
+
+        // Already prayed container (hidden initially)
+        html += '<div id="qadaAlreadyContainer" style="display:none;">';
+        html += '<div id="qadaAlreadyList"></div>';
+        html += '<button id="qadaAddAlreadyBtn" style="width:100%;padding:10px;border:2px dashed var(--primary);border-radius:12px;background:transparent;color:var(--primary);font-weight:600;font-family:inherit;font-size:0.9em;cursor:pointer;margin-bottom:12px;">' +
+            '<span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">add</span> ' + t('qada_add_already') +
+        '</button>';
+        html += '</div>';
+
         // Running total
         html += '<div id="qadaRunningTotal" style="padding:14px 16px;background:rgba(var(--accent-rgb,45,106,79),0.1);border-radius:14px;margin-bottom:16px;display:none;">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;">' +
@@ -354,15 +376,6 @@ window.App.QadaCalc = (function() {
             '</label>' +
             '<input type="date" id="qadaPlanStartDate" style="width:100%;padding:12px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:12px;font-size:16px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;">' +
             '<div id="qadaStartDatePreview" style="padding:8px 12px;font-size:0.8em;color:var(--text-primary);background:rgba(var(--accent-rgb,45,106,79),0.1);border-radius:10px;margin-top:6px;display:none;"></div>' +
-        '</div>';
-
-        // Already prayed qada days
-        html += '<div class="ps-section" style="margin-bottom:12px;">' +
-            '<label style="display:block;font-size:0.85em;font-weight:600;color:var(--text-secondary);margin-bottom:6px;padding:0 4px;">' +
-                t('qada_already_prayed') +
-            '</label>' +
-            '<div style="font-size:0.75em;color:var(--text-muted);margin-bottom:6px;padding:0 4px;">' + t('qada_already_prayed_hint') + '</div>' +
-            '<input type="number" id="qadaAlreadyPrayed" min="0" value="0" style="width:100%;padding:12px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:12px;font-size:16px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;">' +
         '</div>';
 
         // Next button
@@ -404,8 +417,13 @@ window.App.QadaCalc = (function() {
         var nifas = document.getElementById('qadaNifasDays');
         if (nifas && wizardData.nifasTotalDays) nifas.value = wizardData.nifasTotalDays;
 
-        var alreadyEl = document.getElementById('qadaAlreadyPrayed');
-        if (alreadyEl && wizardData.alreadyPrayed) alreadyEl.value = wizardData.alreadyPrayed;
+        if (alreadyPrayedPeriods.length > 0) {
+            var alreadyYes = document.getElementById('qadaAlreadyYes');
+            if (alreadyYes) alreadyYes.classList.add('active');
+            var alreadyCont = document.getElementById('qadaAlreadyContainer');
+            if (alreadyCont) alreadyCont.style.display = '';
+            renderAlreadyList();
+        }
 
         if (additionalPeriods.length > 0) {
             var yesBtn = document.getElementById('qadaAddYes');
@@ -593,12 +611,16 @@ window.App.QadaCalc = (function() {
         }
 
         // Already prayed deduction
-        if (wizardData.alreadyPrayed > 0) {
+        if (alreadyPrayedPeriods.length > 0) {
+            var alreadyTotal = 0;
             html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border,rgba(0,0,0,0.06));font-size:0.85em;">' +
-                '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_already_deduction') + '</div>' +
-                '<div style="color:#dc2626;font-weight:600;">-' + (wizardData.alreadyPrayed * 5) + ' ' + t('qada_period_prayers') +
-                ' (' + wizardData.alreadyPrayed + ' ' + t('qada_period_days') + ')</div>' +
-            '</div>';
+                '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_already_deduction') + ' (' + alreadyPrayedPeriods.length + ')</div>';
+            alreadyPrayedPeriods.forEach(function(p) {
+                var prayerName = p.prayerId === 'all' ? t('qada_all_prayers') : t(PRAYER_KEYS[p.prayerId]);
+                html += '<div style="color:#dc2626;font-weight:500;margin-top:2px;">-' + p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
+                alreadyTotal += p.count;
+            });
+            html += '</div>';
         }
 
         // Additional periods
@@ -734,6 +756,93 @@ window.App.QadaCalc = (function() {
             };
         });
     }
+
+    // ==================== ALREADY PRAYED ENTRIES ====================
+
+    function renderAlreadyList() {
+        var list = document.getElementById('qadaAlreadyList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        alreadyPrayedPeriods.forEach(function(p, idx) {
+            var card = document.createElement('div');
+            card.style.cssText = 'background:var(--card-bg);border:1px solid var(--border,rgba(0,0,0,0.08));border-radius:12px;padding:12px;margin-bottom:8px;position:relative;';
+
+            var prayerName = p.prayerId === 'all' ? t('qada_all_prayers') : t(PRAYER_KEYS[p.prayerId]);
+            var detailHtml = p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName;
+
+            card.innerHTML =
+                '<div style="display:flex;justify-content:space-between;align-items:start;">' +
+                    '<div>' +
+                        '<div style="font-size:0.75em;color:var(--text-muted);margin-bottom:2px;">' + t('qada_already_deduction') + '</div>' +
+                        '<div style="font-size:0.85em;color:var(--text-primary);">' + detailHtml + '</div>' +
+                    '</div>' +
+                    '<button class="qada-del-already" data-idx="' + idx + '" style="background:none;border:none;color:#dc2626;cursor:pointer;padding:4px;">' +
+                        '<span class="material-symbols-rounded" style="font-size:18px;">delete</span>' +
+                    '</button>' +
+                '</div>';
+
+            list.appendChild(card);
+        });
+
+        // Bind delete buttons
+        list.querySelectorAll('.qada-del-already').forEach(function(btn) {
+            btn.onclick = function() {
+                var idx = parseInt(btn.dataset.idx);
+                alreadyPrayedPeriods.splice(idx, 1);
+                renderAlreadyList();
+                updateRunningTotal();
+            };
+        });
+    }
+
+    function showAddAlreadyDialog() {
+        var dialog = document.createElement('div');
+        dialog.id = 'qadaAlreadyDialog';
+        dialog.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10003;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+        var prayerOpts = '';
+        PRAYER_IDS.forEach(function(id) {
+            prayerOpts += '<option value="' + id + '">' + t(PRAYER_KEYS[id]) + '</option>';
+        });
+
+        dialog.innerHTML =
+            '<div style="background:var(--card-bg);border-radius:20px;padding:20px;max-width:380px;width:100%;font-family:inherit;">' +
+                '<div style="font-weight:700;font-size:1em;color:var(--text-primary);margin-bottom:12px;">' + t('qada_add_already') + '</div>' +
+                '<label style="font-size:0.8em;color:var(--text-muted);display:block;margin-bottom:4px;">' + t('qada_already_count') + '</label>' +
+                '<input type="number" id="qadaAlreadyCount" min="1" style="width:100%;padding:10px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:10px;font-size:14px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;margin-bottom:8px;">' +
+                '<label style="font-size:0.8em;color:var(--text-muted);display:block;margin-bottom:4px;">' + t('qada_select_prayer') + '</label>' +
+                '<select id="qadaAlreadyPrayer" style="width:100%;padding:10px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:10px;font-size:14px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);margin-bottom:8px;">' +
+                    '<option value="all">' + t('qada_all_prayers') + '</option>' +
+                    prayerOpts +
+                '</select>' +
+                '<div style="display:flex;gap:8px;margin-top:8px;">' +
+                    '<button id="qadaAlreadySave" style="flex:1;padding:10px;background:var(--primary);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">' + t('qada_next') + '</button>' +
+                    '<button id="qadaAlreadyCancel" style="padding:10px 20px;background:var(--bg,#f3f4f6);color:var(--text-secondary);border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;">' + t('qada_back') + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(dialog);
+
+        // Save
+        document.getElementById('qadaAlreadySave').onclick = function() {
+            var countInput = document.getElementById('qadaAlreadyCount');
+            var count = parseInt(countInput.value);
+            if (!count || count <= 0) return;
+            var prayerId = document.getElementById('qadaAlreadyPrayer').value;
+            alreadyPrayedPeriods.push({ count: count, prayerId: prayerId });
+            dialog.remove();
+            renderAlreadyList();
+            updateRunningTotal();
+        };
+
+        // Cancel
+        document.getElementById('qadaAlreadyCancel').onclick = function() {
+            dialog.remove();
+        };
+    }
+
+    // ==================== ADDITIONAL PERIODS ====================
 
     function showAddPeriodDialog() {
         var dialog = document.createElement('div');
@@ -881,14 +990,23 @@ window.App.QadaCalc = (function() {
         }
 
         var totals = calculateTotals(base);
-        var displayTotal = totals.totalAll;
+        var byPrayer = {};
+        PRAYER_IDS.forEach(function(id) { byPrayer[id] = totals.totalByPrayer[id]; });
 
-        // Deduct already prayed days
-        var alreadyInput = document.getElementById('qadaAlreadyPrayed');
-        var alreadyPrayed = alreadyInput ? parseInt(alreadyInput.value) || 0 : 0;
-        if (alreadyPrayed > 0) {
-            displayTotal = Math.max(0, displayTotal - (alreadyPrayed * 5));
-        }
+        // Deduct already prayed periods
+        alreadyPrayedPeriods.forEach(function(p) {
+            if (p.prayerId === 'all') {
+                var each = Math.ceil(p.count / 5);
+                PRAYER_IDS.forEach(function(id) {
+                    byPrayer[id] = Math.max(0, byPrayer[id] - each);
+                });
+            } else {
+                byPrayer[p.prayerId] = Math.max(0, byPrayer[p.prayerId] - p.count);
+            }
+        });
+
+        var displayTotal = 0;
+        PRAYER_IDS.forEach(function(id) { displayTotal += byPrayer[id]; });
 
         numEl.textContent = displayTotal;
         totalEl.style.display = '';
@@ -944,9 +1062,6 @@ window.App.QadaCalc = (function() {
             var startDateEl = document.getElementById('qadaPlanStartDate');
             if (startDateEl) startDateEl.onchange = function() { updateStartDatePreview(); };
 
-            var alreadyEl = document.getElementById('qadaAlreadyPrayed');
-            if (alreadyEl) alreadyEl.oninput = function() { updateRunningTotal(); };
-
             // Yes/No additional
             var yesBtn = document.getElementById('qadaAddYes');
             var noBtn = document.getElementById('qadaAddNo');
@@ -965,6 +1080,25 @@ window.App.QadaCalc = (function() {
             // Add period button
             var addBtn = document.getElementById('qadaAddPeriodBtn');
             if (addBtn) addBtn.onclick = showAddPeriodDialog;
+
+            // Yes/No already prayed
+            var alreadyYesBtn = document.getElementById('qadaAlreadyYes');
+            var alreadyNoBtn = document.getElementById('qadaAlreadyNo');
+            var alreadyCont = document.getElementById('qadaAlreadyContainer');
+            if (alreadyYesBtn) alreadyYesBtn.onclick = function() {
+                alreadyYesBtn.classList.add('active');
+                if (alreadyNoBtn) alreadyNoBtn.classList.remove('active');
+                if (alreadyCont) alreadyCont.style.display = '';
+            };
+            if (alreadyNoBtn) alreadyNoBtn.onclick = function() {
+                alreadyNoBtn.classList.add('active');
+                if (alreadyYesBtn) alreadyYesBtn.classList.remove('active');
+                if (alreadyCont) alreadyCont.style.display = 'none';
+            };
+
+            // Add already prayed button
+            var addAlreadyBtn = document.getElementById('qadaAddAlreadyBtn');
+            if (addAlreadyBtn) addAlreadyBtn.onclick = showAddAlreadyDialog;
 
             // Next
             var nextBtn = document.getElementById('qadaNextBtn1');
@@ -985,17 +1119,21 @@ window.App.QadaCalc = (function() {
                 wizardData.totalByPrayer = totals.totalByPrayer;
                 wizardData.totalAll = totals.totalAll;
 
-                // Save already prayed and deduct
-                var apEl = document.getElementById('qadaAlreadyPrayed');
-                var apVal = apEl ? parseInt(apEl.value) || 0 : 0;
-                wizardData.alreadyPrayed = apVal;
-                if (apVal > 0) {
-                    var deductPerPrayer = apVal;
-                    PRAYER_IDS.forEach(function(id) {
-                        wizardData.totalByPrayer[id] = Math.max(0, wizardData.totalByPrayer[id] - deductPerPrayer);
-                    });
-                    wizardData.totalAll = Math.max(0, wizardData.totalAll - (apVal * 5));
-                }
+                // Save already prayed periods and deduct
+                wizardData.alreadyPrayedPeriods = JSON.parse(JSON.stringify(alreadyPrayedPeriods));
+                alreadyPrayedPeriods.forEach(function(p) {
+                    if (p.prayerId === 'all') {
+                        var each = Math.ceil(p.count / 5);
+                        PRAYER_IDS.forEach(function(id) {
+                            wizardData.totalByPrayer[id] = Math.max(0, wizardData.totalByPrayer[id] - each);
+                        });
+                    } else {
+                        wizardData.totalByPrayer[p.prayerId] = Math.max(0, wizardData.totalByPrayer[p.prayerId] - p.count);
+                    }
+                });
+                // Recalculate totalAll after deductions
+                wizardData.totalAll = 0;
+                PRAYER_IDS.forEach(function(id) { wizardData.totalAll += wizardData.totalByPrayer[id]; });
 
                 currentStep = 2;
                 renderOverlay();
@@ -1085,7 +1223,7 @@ window.App.QadaCalc = (function() {
                     nifasTotalDays: wizardData.nifasTotalDays || 0,
                     planStartDate: wizardData.planStartDate || null,
                     planStartDateGregorian: wizardData.planStartDateGregorian || '',
-                    alreadyPrayed: wizardData.alreadyPrayed || 0,
+                    alreadyPrayedPeriods: JSON.parse(JSON.stringify(alreadyPrayedPeriods)),
                     additionalPeriods: JSON.parse(JSON.stringify(additionalPeriods)),
                     totalByPrayer: wizardData.totalByPrayer,
                     totalAll: wizardData.totalAll,
