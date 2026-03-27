@@ -2154,6 +2154,30 @@ body {
     font-weight: 600;
 }
 
+/* ==================== VOLUNTARY FASTING HERO STAT ==================== */
+.vol-fasting-hero-stat {
+    background: rgba(255,255,255,0.6);
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.04);
+    padding: 14px 18px;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 8px;
+}
+.vol-fasting-hero-count {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--primary);
+    font-family: 'Rubik', sans-serif;
+    line-height: 1;
+}
+.vol-fasting-hero-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #8D99AE;
+    margin-top: 4px;
+}
+
 /* ==================== FASTING ==================== */
 .fasting-day-box {
     aspect-ratio: 1;

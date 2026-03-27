@@ -246,14 +246,8 @@ window.App.Fasting = (function() {
         renderShawwalBanner(fastingMonth, fastingYear);
 
         var elFasted = document.getElementById('volFastedCount');
-        var elExempt = document.getElementById('volExemptCount');
-        var elRate = document.getElementById('volFastRate');
         var elCounter = document.getElementById('volFastingCounter');
         if (elFasted) elFasted.textContent = fasted;
-        if (elExempt) elExempt.textContent = exemptCount;
-        var possible = daysInMonth - exemptCount;
-        var rate = possible > 0 ? Math.round((fasted / possible) * 100) : 0;
-        if (elRate) elRate.textContent = rate + '%';
         if (elCounter) elCounter.textContent = fasted + ' / ' + daysInMonth;
     }
 

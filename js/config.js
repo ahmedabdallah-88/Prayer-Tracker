@@ -174,6 +174,7 @@ window.App.Config = {
         'broke_fast': { ar: '\u0623\u0641\u0637\u0631\u062a \u2717', en: 'Missed \u2717' },
         'not_set': { ar: '\u0644\u0645 \u064a\u064f\u062d\u062f\u062f', en: 'Not set' },
         'fasting_days': { ar: '\u0623\u064a\u0627\u0645 \u0627\u0644\u0635\u064a\u0627\u0645', en: 'Fasting Days' },
+        'fasting_days_label': { ar: '\u064a\u0648\u0645 \u0635\u064a\u0627\u0645', en: 'Fasting Days' },
         'period_days': { ar: '\u0623\u064a\u0627\u0645 \u0627\u0644\u062d\u064a\u0636', en: 'Period Days' },
         'missed_days': { ar: '\u0623\u064a\u0627\u0645 \u0627\u0644\u0625\u0641\u0637\u0627\u0631', en: 'Missed Days' },
         'owed_days': { ar: '\u0623\u064a\u0627\u0645 \u0644\u0644\u0642\u0636\u0627\u0621', en: 'Days Owed' },

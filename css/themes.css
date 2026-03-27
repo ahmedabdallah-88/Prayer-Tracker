@@ -537,6 +537,12 @@
     border-color: #6D28D9 !important;
 }
 
+/* Dark mode: voluntary fasting hero stat */
+[data-theme="dark"] .vol-fasting-hero-stat {
+    background: var(--card-bg);
+    border-color: rgba(255,255,255,0.06);
+}
+
 /* Dark mode: fasting legend */
 [data-theme="dark"] .fasting-legend {
     border-color: rgba(255,255,255,0.06);
