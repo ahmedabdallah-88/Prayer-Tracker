@@ -318,23 +318,6 @@ window.App.QadaTracker = (function() {
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
         container.appendChild(trackerCard);
-
-        // ── DELETE PLAN BUTTON ──
-        var deleteBtn = document.createElement('button');
-        deleteBtn.className = 'qada-delete-plan-btn';
-        deleteBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">delete</span> ' + t('qada_delete_plan');
-        deleteBtn.onclick = function() {
-            if (window.App.UI && window.App.UI.showConfirm) {
-                window.App.UI.showConfirm(t('qada_delete_confirm')).then(function(ok) {
-                    if (!ok) return;
-                    deleteAllQadaData();
-                    removeTab();
-                    if (window.switchView) window.switchView('fard', 'tracker');
-                    if (window.App.UI && window.App.UI.showToast) window.App.UI.showToast(t('qada_plan_deleted'), 'info');
-                });
-            }
-        };
-        container.appendChild(deleteBtn);
     }
 
     function _buildBannerHTML(pct, pctColor, todayCount, dailyTarget, remaining) {

@@ -582,7 +582,8 @@ window.App.QadaCalc = (function() {
 
         // Delete button (edit mode only)
         if (isEditing) {
-            html += '<button id="qadaDeleteBtn" style="width:100%;padding:12px;border:none;border-radius:12px;background:rgba(220,38,38,0.08);color:#dc2626;font-weight:700;font-family:inherit;font-size:0.9em;cursor:pointer;">' +
+            html += '<button id="qadaDeleteBtn" class="qada-delete-plan-btn">' +
+                '<span class="material-symbols-rounded" style="font-size:18px;">delete</span> ' +
                 t('qada_delete_plan') +
             '</button>';
         }
