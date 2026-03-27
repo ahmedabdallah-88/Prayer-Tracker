@@ -317,6 +317,7 @@ window.App.Tracker = (function() {
 
     // ==================== PRAYER TAB STATE ====================
     var _activeTab = { fard: null, sunnah: null };
+    var _lastRenderedSunnahTab = null; // tracks tab changes to avoid scroll reset
 
     var SKY_GRADIENTS = {
         'fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
@@ -454,10 +455,17 @@ window.App.Tracker = (function() {
 
             container.appendChild(scroller);
 
-            // Scroll active tab into view
-            if (activeTabEl) {
+            // Only auto-scroll when tab changed or first render — not on re-renders from day clicks etc.
+            var tabChanged = (_lastRenderedSunnahTab !== activePrayerId);
+            _lastRenderedSunnahTab = activePrayerId;
+            if (tabChanged && activeTabEl) {
                 requestAnimationFrame(function() {
-                    activeTabEl.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'instant' });
+                    // Manual scroll — avoids scrollIntoView which scrolls ancestor containers too
+                    var tabLeft = activeTabEl.offsetLeft;
+                    var tabWidth = activeTabEl.offsetWidth;
+                    var scrollerWidth = scroller.clientWidth;
+                    var centered = tabLeft - (scrollerWidth / 2) + (tabWidth / 2);
+                    scroller.scrollLeft = centered;
                 });
             }
         } else {
