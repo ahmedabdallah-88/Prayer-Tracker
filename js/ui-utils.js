@@ -198,70 +198,6 @@ window.App.UI = (function() {
     // Check reminders every 5 minutes
     setInterval(checkPrayerReminders, 5 * 60 * 1000);
 
-    // ==================== SWIPE NAVIGATION ====================
-
-    var touchStartX = 0;
-    var touchEndX = 0;
-    var SWIPE_THRESHOLD = 60;
-
-    document.addEventListener('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    document.addEventListener('touchend', function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, { passive: true });
-
-    function handleSwipe() {
-        var diff = touchStartX - touchEndX;
-        if (Math.abs(diff) < SWIPE_THRESHOLD) return;
-
-        var active = document.activeElement;
-        if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT' || active.tagName === 'TEXTAREA')) return;
-
-        var currentSection = window.App.Storage ? window.App.Storage.getCurrentSection() : 'fard';
-
-        if (currentSection === 'fard' || currentSection === 'sunnah') {
-            var trackerView = document.getElementById(currentSection + 'TrackerView');
-            if (trackerView && trackerView.classList.contains('active')) {
-                if (diff > 0) {
-                    swipeMonth(currentSection, 1);
-                } else {
-                    swipeMonth(currentSection, -1);
-                }
-            }
-        } else if (currentSection === 'fasting') {
-            var volView = document.getElementById('fastingVoluntaryView');
-            if (volView && volView.classList.contains('active')) {
-                if (diff > 0) {
-                    if (typeof window.changeFastingMonth === 'function') window.changeFastingMonth(1);
-                    animateSwipe('left');
-                } else {
-                    if (typeof window.changeFastingMonth === 'function') window.changeFastingMonth(-1);
-                    animateSwipe('right');
-                }
-            }
-        }
-    }
-
-    function swipeMonth(type, delta) {
-        if (typeof window.changeTrackerMonth === 'function') window.changeTrackerMonth(type, delta);
-        animateSwipe(delta > 0 ? 'left' : 'right');
-    }
-
-    function animateSwipe(direction) {
-        var containers = document.querySelectorAll('.prayers-container, #voluntaryFastingGrid');
-        containers.forEach(function(c) {
-            if (c.offsetParent !== null) {
-                c.classList.remove('swipe-slide-left', 'swipe-slide-right');
-                void c.offsetWidth;
-                c.classList.add(direction === 'left' ? 'swipe-slide-left' : 'swipe-slide-right');
-                setTimeout(function() { c.classList.remove('swipe-slide-left', 'swipe-slide-right'); }, 300);
-            }
-        });
-    }
-
     // ==================== OFFLINE DETECTION ====================
 
     // iOS Safari fix
@@ -643,9 +579,6 @@ window.App.UI = (function() {
         hideReminder: hideReminder,
         dismissReminder: dismissReminder,
         scrollToUnmarkedPrayer: scrollToUnmarkedPrayer,
-        handleSwipe: handleSwipe,
-        swipeMonth: swipeMonth,
-        animateSwipe: animateSwipe,
         updateOnlineStatus: updateOnlineStatus,
         animateDayBox: animateDayBox,
         applyGlow: applyGlow,
