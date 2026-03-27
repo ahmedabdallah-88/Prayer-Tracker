@@ -20,14 +20,14 @@ window.App.Config = {
     ],
 
     sunnahPrayers: [
-        { id: 'tahajjud', name: '\u0627\u0644\u062a\u0647\u062c\u062f', icon: 'dark_mode', materialIcon: 'dark_mode', class: 'tahajjud', color: '#1e3a8a' },
         { id: 'sunnah-fajr', name: '\u0633\u0646\u0629 \u0627\u0644\u0641\u062c\u0631', icon: 'wb_twilight', materialIcon: 'wb_twilight', class: 'sunnah-fajr', color: '#D4A0A7' },
         { id: 'duha', name: '\u0627\u0644\u0636\u062d\u0649', icon: 'wb_sunny', materialIcon: 'wb_sunny', class: 'duha', color: '#f59e0b' },
         { id: 'sunnah-dhuhr', name: '\u0633\u0646\u0629 \u0627\u0644\u0638\u0647\u0631', icon: 'wb_sunny', materialIcon: 'wb_sunny', class: 'sunnah-dhuhr', color: '#E8B84A' },
         { id: 'sunnah-asr', name: '\u0633\u0646\u0629 \u0627\u0644\u0639\u0635\u0631', icon: 'partly_cloudy_day', materialIcon: 'partly_cloudy_day', class: 'sunnah-asr', color: '#D4943A' },
         { id: 'sunnah-maghrib', name: '\u0633\u0646\u0629 \u0627\u0644\u0645\u063a\u0631\u0628', icon: 'wb_twilight', materialIcon: 'wb_twilight', class: 'sunnah-maghrib', color: '#B0664A' },
         { id: 'sunnah-isha', name: '\u0633\u0646\u0629 \u0627\u0644\u0639\u0634\u0627\u0621', icon: 'dark_mode', materialIcon: 'dark_mode', class: 'sunnah-isha', color: '#4A5A7A' },
-        { id: 'witr', name: '\u0627\u0644\u0648\u062a\u0631', icon: 'auto_awesome', materialIcon: 'auto_awesome', class: 'witr', color: '#8b4789' }
+        { id: 'witr', name: '\u0627\u0644\u0648\u062a\u0631', icon: 'auto_awesome', materialIcon: 'auto_awesome', class: 'witr', color: '#8b4789' },
+        { id: 'tahajjud', name: '\u0627\u0644\u062a\u0647\u062c\u062f', icon: 'dark_mode', materialIcon: 'dark_mode', class: 'tahajjud', color: '#1e3a8a' }
     ],
 
     // ==================== MONTH NAMES ====================

@@ -907,6 +907,7 @@ body {
     font-family: 'Noto Kufi Arabic', sans-serif;
     white-space: nowrap;
     line-height: 1.2;
+    color: inherit;
 }
 
 /* Active sunnah tab */
@@ -916,6 +917,9 @@ body {
     color: #2B2D42;
     margin: -2px 0;
     z-index: 1;
+}
+.sunnah-tab.active .sunnah-tab-name {
+    color: #2B2D42;
 }
 .sunnah-tab.active .sunnah-tab-icon {
     width: 44px;
@@ -927,6 +931,9 @@ body {
 
 /* Done today (not active) */
 .sunnah-tab.done {
+    color: var(--primary);
+}
+.sunnah-tab.done .sunnah-tab-name {
     color: var(--primary);
 }
 .sunnah-tab.done .sunnah-tab-icon {
