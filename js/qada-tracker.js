@@ -123,6 +123,7 @@ window.App.QadaTracker = (function() {
 
     // Track current view state for in-place updates
     var _viewState = { hYear: 0, hMonth: 0 };
+    var _activeQadaTab = null;
 
     function render() {
         var container = document.getElementById('qadaTrackerContainer');
@@ -167,88 +168,122 @@ window.App.QadaTracker = (function() {
         banner.innerHTML = _buildBannerHTML(pct, pctColor, todayCount, dailyTarget, remaining);
         container.appendChild(banner);
 
-        // ---- Prayer rows ----
-        PRAYER_IDS.forEach(function(prayerId) {
-            var section = document.createElement('div');
-            section.className = 'prayer-section';
+        // Default active tab
+        if (!_activeQadaTab) {
+            try {
+                var state = window.getCurrentPrayerState ? window.getCurrentPrayerState() : null;
+                _activeQadaTab = (state && state.active) ? state.active : 'fajr';
+            } catch(e) { _activeQadaTab = 'fajr'; }
+        }
+        var activePrayerId = _activeQadaTab;
 
-            var totalForPrayer = plan.totalByPrayer ? (plan.totalByPrayer[prayerId] || 0) : 0;
-            var completedForPrayer = plan.completedByPrayer ? (plan.completedByPrayer[prayerId] || 0) : 0;
-            var remainForPrayer = totalForPrayer - completedForPrayer;
-            if (remainForPrayer < 0) remainForPrayer = 0;
+        // ── PRAYER TABS ROW ──
+        var tabsContainer = document.createElement('div');
+        tabsContainer.className = 'prayer-tabs-container';
+        var tabPill = document.createElement('div');
+        tabPill.className = 'prayer-tabs-pill';
+        tabsContainer.appendChild(tabPill);
 
-            // Header
-            var header = document.createElement('div');
-            header.className = 'prayer-header';
-            header.id = 'qadaHeader_' + prayerId;
-            var iconBg = SKY_GRADIENTS[prayerId] || 'linear-gradient(135deg,#888,#666)';
+        var activeIdx = 0;
+        PRAYER_IDS.forEach(function(prayerId, idx) {
+            if (prayerId === activePrayerId) activeIdx = idx;
             var prayerDef = window.App.Config.fardPrayers.find(function(p) { return p.id === prayerId; });
             var icon = prayerDef ? prayerDef.icon : 'mosque';
 
-            var nameDiv = document.createElement('div');
-            nameDiv.className = 'prayer-name';
-            var iconShadow = SKY_SHADOWS[prayerId] || 'rgba(0,0,0,0.2)';
-            nameDiv.innerHTML =
-                '<span class="prayer-icon-badge" style="background:' + iconBg + ';box-shadow:0 4px 12px ' + iconShadow + '">' +
-                    '<span class="material-symbols-rounded" style="font-size:22px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + icon + '</span>' +
-                '</span><span>' + t(PRAYER_KEYS[prayerId]) + '</span>';
+            var tab = document.createElement('button');
+            tab.className = 'prayer-tab' + (prayerId === activePrayerId ? ' active' : '');
 
-            var headerEnd = document.createElement('div');
-            headerEnd.className = 'prayer-header-end';
-            headerEnd.id = 'qadaHeaderEnd_' + prayerId;
-            headerEnd.innerHTML =
-                '<span class="prayer-counter" style="color:var(--text-muted);font-size:0.8em;">' +
-                    t('qada_remaining_short') + ': ' + remainForPrayer +
-                '</span>';
-
-            header.appendChild(nameDiv);
-            header.appendChild(headerEnd);
-
-            // Day grid
-            var grid = document.createElement('div');
-            grid.className = 'days-grid flow-grid';
-
-            for (var day = 1; day <= daysInMonth; day++) {
-                var dayBox = document.createElement('div');
-                dayBox.className = 'day-box qada-day-box';
-                dayBox.setAttribute('role', 'button');
-                dayBox.setAttribute('tabindex', '0');
-
-                var count = getCount(logData, String(day), prayerId);
-                var isDayToday = isCurrentMonth && todayH.day === day;
-                var isFuture = Hijri.isFutureDateHijri(day, hMonth, hYear);
-
-                if (isDayToday) dayBox.classList.add('today-box');
-
-                // Always show day number + gregorian
-                dayBox.appendChild(Hijri.createDualDayNum(day, hYear, hMonth));
-
-                if (isFuture) {
-                    dayBox.classList.add('disabled');
-                } else {
-                    if (count > 0) {
-                        dayBox.classList.add('qada-filled');
-                        var badge = document.createElement('span');
-                        badge.className = 'qada-badge';
-                        badge.textContent = count;
-                        dayBox.appendChild(badge);
-                    }
-
-                    dayBox.onclick = (function(pid, d, box) {
-                        return function(e) {
-                            e.stopPropagation();
-                            showPopup(pid, d, _viewState.hYear, _viewState.hMonth, box);
-                        };
-                    })(prayerId, day, dayBox);
-                }
-
-                grid.appendChild(dayBox);
+            var iconWrap = document.createElement('div');
+            iconWrap.className = 'prayer-tab-icon';
+            if (prayerId === activePrayerId) {
+                iconWrap.style.background = SKY_GRADIENTS[prayerId] || '#888';
+                iconWrap.style.boxShadow = '0 2px 8px ' + (SKY_SHADOWS[prayerId] || 'rgba(0,0,0,0.2)');
             }
+            iconWrap.innerHTML = '<span class="material-symbols-rounded">' + icon + '</span>';
 
-            section.appendChild(header);
-            section.appendChild(grid);
-            container.appendChild(section);
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'prayer-tab-name';
+            nameSpan.textContent = t(PRAYER_KEYS[prayerId]);
+
+            tab.appendChild(iconWrap);
+            tab.appendChild(nameSpan);
+            tab.onclick = (function(pid) {
+                return function() {
+                    _activeQadaTab = pid;
+                    if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+                    render();
+                };
+            })(prayerId);
+            tabsContainer.appendChild(tab);
         });
+        container.appendChild(tabsContainer);
+
+        requestAnimationFrame(function() {
+            var tabs = tabsContainer.querySelectorAll('.prayer-tab');
+            if (tabs[activeIdx]) {
+                var tt = tabs[activeIdx];
+                var isRTL = document.documentElement.dir === 'rtl';
+                tabPill.style.width = tt.offsetWidth + 'px';
+                if (isRTL) {
+                    var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
+                    tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
+                } else {
+                    tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
+                }
+            }
+        });
+
+        // ── STATS ROW ──
+        var totalForPrayer = plan.totalByPrayer ? (plan.totalByPrayer[activePrayerId] || 0) : 0;
+        var completedForPrayer = plan.completedByPrayer ? (plan.completedByPrayer[activePrayerId] || 0) : 0;
+        var remainForPrayer = totalForPrayer - completedForPrayer;
+        if (remainForPrayer < 0) remainForPrayer = 0;
+
+        var statsRow = document.createElement('div');
+        statsRow.className = 'prayer-tab-stats';
+        statsRow.innerHTML = '<span class="stat-badge count">' + t('qada_remaining_short') + ': ' + remainForPrayer + '</span>';
+        container.appendChild(statsRow);
+
+        // ── SINGLE CALENDAR GRID ──
+        var gridWrap = document.createElement('div');
+        gridWrap.className = 'prayer-tab-grid';
+        var grid = document.createElement('div');
+        grid.className = 'days-grid flow-grid';
+
+        for (var day = 1; day <= daysInMonth; day++) {
+            var dayBox = document.createElement('div');
+            dayBox.className = 'day-box qada-day-box';
+            dayBox.setAttribute('role', 'button');
+            dayBox.setAttribute('tabindex', '0');
+
+            var count = getCount(logData, String(day), activePrayerId);
+            var isDayToday = isCurrentMonth && todayH.day === day;
+            var isFuture = Hijri.isFutureDateHijri(day, hMonth, hYear);
+
+            if (isDayToday) dayBox.classList.add('today-box');
+            dayBox.appendChild(Hijri.createDualDayNum(day, hYear, hMonth));
+
+            if (isFuture) {
+                dayBox.classList.add('disabled');
+            } else {
+                if (count > 0) {
+                    dayBox.classList.add('qada-filled');
+                    var badge = document.createElement('span');
+                    badge.className = 'qada-badge';
+                    badge.textContent = count;
+                    dayBox.appendChild(badge);
+                }
+                dayBox.onclick = (function(pid, d, box) {
+                    return function(e) {
+                        e.stopPropagation();
+                        showPopup(pid, d, _viewState.hYear, _viewState.hMonth, box);
+                    };
+                })(activePrayerId, day, dayBox);
+            }
+            grid.appendChild(dayBox);
+        }
+        gridWrap.appendChild(grid);
+        container.appendChild(gridWrap);
     }
 
     function _buildBannerHTML(pct, pctColor, todayCount, dailyTarget, remaining) {

@@ -41,6 +41,8 @@ window.App.Azkar = (function() {
 
     // ==================== TRACKER VIEW ====================
 
+    var _activeAzkarTab = null;
+
     function updateAzkarTracker() {
         _init();
         var monthEl = document.getElementById('azkarTrackerMonth');
@@ -66,95 +68,142 @@ window.App.Azkar = (function() {
         var todayH = Hijri.getTodayHijri();
         var isCurrentMonth = (todayH.year === year && todayH.month === month);
 
-        categories.forEach(function(cat) {
-            var catData = data[cat.id] || {};
-            var section = document.createElement('div');
-            section.className = 'prayer-section';
+        // Default to morning if no tab selected
+        if (!_activeAzkarTab) {
+            var now = new Date();
+            _activeAzkarTab = now.getHours() < 15 ? 'morning' : 'evening';
+        }
+        var activeCatId = _activeAzkarTab;
 
-            var completed = 0;
-            // Count completed
-            for (var d = 1; d <= daysInMonth; d++) {
-                if (catData[d]) completed++;
+        // ── AZKAR TABS ROW ──
+        var tabsContainer = document.createElement('div');
+        tabsContainer.className = 'prayer-tabs-container';
+        var tabPill = document.createElement('div');
+        tabPill.className = 'prayer-tabs-pill';
+        tabsContainer.appendChild(tabPill);
+
+        var activeIdx = 0;
+        categories.forEach(function(cat, idx) {
+            if (cat.id === activeCatId) activeIdx = idx;
+            var tab = document.createElement('button');
+            tab.className = 'prayer-tab' + (cat.id === activeCatId ? ' active' : '');
+
+            var iconWrap = document.createElement('div');
+            iconWrap.className = 'prayer-tab-icon';
+            if (cat.id === activeCatId) {
+                iconWrap.style.background = cat.gradient;
+                iconWrap.style.boxShadow = '0 2px 8px ' + (cat.shadow || 'rgba(0,0,0,0.2)');
             }
+            iconWrap.innerHTML = '<span class="material-symbols-rounded">' + cat.icon + '</span>';
 
-            var possible = daysInMonth;
-            if (todayH.year === year && todayH.month === month) {
-                possible = todayH.day;
-            } else if (Storage.isFutureDate(1, month, year)) {
-                possible = 0;
-            }
-            var pct = possible > 0 ? Math.round((completed / possible) * 100) : 0;
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'prayer-tab-name';
+            nameSpan.textContent = cat.id === 'morning' ? I18n.t('azkar_morning') : I18n.t('azkar_evening');
 
-            // Header (same style as fard prayer rows)
-            var header = document.createElement('div');
-            header.className = 'prayer-header';
-
-            var nameDiv = document.createElement('div');
-            nameDiv.className = 'prayer-name';
-            var catName = cat.id === 'morning' ? I18n.t('azkar_morning') : I18n.t('azkar_evening');
-            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + cat.gradient + ';box-shadow:0 4px 12px ' + (cat.shadow || 'rgba(0,0,0,0.2)') + '"><span class="material-symbols-rounded" style="font-size:22px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + cat.icon + '</span></span><span>' + catName + '</span>';
-
-            var headerEnd = document.createElement('div');
-            headerEnd.className = 'prayer-header-end';
-            var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
-            headerEnd.innerHTML = '<span class="pct-pill" style="background:' + pctColor + '">' + pct + '%</span>' +
-                '<span class="prayer-counter">' + completed + '/' + daysInMonth + '</span>';
-
-            header.appendChild(nameDiv);
-            header.appendChild(headerEnd);
-            section.appendChild(header);
-
-            // Day circle grid
-            var grid = document.createElement('div');
-            grid.className = 'days-grid flow-grid';
-
-            for (var day = 1; day <= daysInMonth; day++) {
-                var dayBox = document.createElement('div');
-                dayBox.className = 'day-box';
-                dayBox.appendChild(Hijri.createDualDayNum(day, year, month));
-
-                if (isCurrentMonth && todayH.day === day) {
-                    dayBox.classList.add('today-box');
-                }
-
-                if (Storage.isFutureDate(day, month, year)) {
-                    dayBox.classList.add('disabled');
-                } else {
-                    if (catData[day]) {
-                        dayBox.classList.add('checked');
-                        dayBox.style.background = 'linear-gradient(135deg, #0EA5E9, #38BDF8)';
-                        dayBox.style.color = 'white';
-                    }
-                    (function(d, catId) {
-                        dayBox.onclick = function() {
-                            var azData = getAzkarData(year, month);
-                            if (!azData[catId]) azData[catId] = {};
-                            azData[catId][d] = !azData[catId][d];
-                            if (!azData[catId][d]) delete azData[catId][d];
-                            window.App.UI.hapticFeedback(azData[catId][d] ? 'success' : 'light');
-                            saveAzkarData(year, month, azData);
-                            updateAzkarTracker();
-                        };
-                    })(day, cat.id);
-                }
-                grid.appendChild(dayBox);
-            }
-            section.appendChild(grid);
-
-            // Mark all button for this category
-            var actionRow = document.createElement('div');
-            actionRow.style.cssText = 'margin-top:8px;margin-bottom:4px;display:flex;gap:8px;justify-content:center;';
-            var markBtn = document.createElement('button');
-            markBtn.className = 'btn btn-sm btn-outline';
-            markBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">done_all</span> ' + I18n.t('mark_all');
-            (function(catId) {
-                markBtn.onclick = function() { markAllAzkar(catId); };
+            tab.appendChild(iconWrap);
+            tab.appendChild(nameSpan);
+            tab.onclick = (function(cid) {
+                return function() {
+                    _activeAzkarTab = cid;
+                    if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+                    updateAzkarTracker();
+                };
             })(cat.id);
-            actionRow.appendChild(markBtn);
-            section.appendChild(actionRow);
-
-            container.appendChild(section);
+            tabsContainer.appendChild(tab);
         });
+        container.appendChild(tabsContainer);
+
+        requestAnimationFrame(function() {
+            var tabs = tabsContainer.querySelectorAll('.prayer-tab');
+            if (tabs[activeIdx]) {
+                var tt = tabs[activeIdx];
+                var isRTL = document.documentElement.dir === 'rtl';
+                tabPill.style.width = tt.offsetWidth + 'px';
+                if (isRTL) {
+                    var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
+                    tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
+                } else {
+                    tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
+                }
+            }
+        });
+
+        // ── STATS ROW ──
+        var activeCat = categories[activeIdx];
+        var catData = data[activeCatId] || {};
+        var completed = 0;
+        for (var d = 1; d <= daysInMonth; d++) {
+            if (catData[d]) completed++;
+        }
+        var possible = daysInMonth;
+        if (isCurrentMonth) { possible = todayH.day; }
+        else if (Storage.isFutureDate(1, month, year)) { possible = 0; }
+        var pct = possible > 0 ? Math.round((completed / possible) * 100) : 0;
+
+        var statsRow = document.createElement('div');
+        statsRow.className = 'prayer-tab-stats';
+        var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
+        statsRow.innerHTML = '<span class="stat-badge pct" style="color:' + pctColor + '">' + pct + '%</span>' +
+            '<span class="stat-badge count">' + completed + '/' + daysInMonth + '</span>';
+        container.appendChild(statsRow);
+
+        // ── SINGLE CALENDAR GRID ──
+        var gridWrap = document.createElement('div');
+        gridWrap.className = 'prayer-tab-grid';
+        var grid = document.createElement('div');
+        grid.className = 'days-grid flow-grid';
+
+        for (var day = 1; day <= daysInMonth; day++) {
+            var dayBox = document.createElement('div');
+            dayBox.className = 'day-box';
+            dayBox.appendChild(Hijri.createDualDayNum(day, year, month));
+
+            if (isCurrentMonth && todayH.day === day) {
+                dayBox.classList.add('today-box');
+            }
+
+            if (Storage.isFutureDate(day, month, year)) {
+                dayBox.classList.add('disabled');
+            } else {
+                if (catData[day]) {
+                    dayBox.classList.add('checked');
+                    dayBox.style.background = 'linear-gradient(135deg, #0EA5E9, #38BDF8)';
+                    dayBox.style.color = 'white';
+                }
+                (function(d, catId) {
+                    dayBox.onclick = function() {
+                        var azData = getAzkarData(year, month);
+                        if (!azData[catId]) azData[catId] = {};
+                        azData[catId][d] = !azData[catId][d];
+                        if (!azData[catId][d]) delete azData[catId][d];
+                        window.App.UI.hapticFeedback(azData[catId][d] ? 'success' : 'light');
+                        saveAzkarData(year, month, azData);
+                        updateAzkarTracker();
+                    };
+                })(day, activeCatId);
+            }
+            grid.appendChild(dayBox);
+        }
+        gridWrap.appendChild(grid);
+        container.appendChild(gridWrap);
+
+        // Mark all button
+        var actionRow = document.createElement('div');
+        actionRow.style.cssText = 'margin-top:8px;margin-bottom:4px;display:flex;gap:8px;justify-content:center;';
+        var markBtn = document.createElement('button');
+        markBtn.className = 'btn btn-sm btn-outline';
+        markBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">done_all</span> ' + I18n.t('mark_all');
+        markBtn.onclick = function() { markAllAzkar(activeCatId); };
+        actionRow.appendChild(markBtn);
+        container.appendChild(actionRow);
+
+        // ── LEGEND ──
+        var legend = document.createElement('div');
+        legend.className = 'prayer-legend';
+        legend.innerHTML =
+            '<div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);"><span class="material-symbols-rounded" style="font-size:10px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'تم' : 'Done') + '</span></div>' +
+            '<div class="legend-item"><div class="legend-dot" style="background:transparent;border:1.5px solid rgba(0,0,0,0.1);"></div><span>' + (currentLang === 'ar' ? 'لم يتم' : 'Not done') + '</span></div>';
+        container.appendChild(legend);
     }
 
     function changeAzkarMonth(delta) {

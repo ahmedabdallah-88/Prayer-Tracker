@@ -279,7 +279,53 @@ window.App.Tracker = (function() {
         }
     }
 
-    // ==================== renderTrackerMonth (final override version with all features) ====================
+    // ==================== PRAYER TAB STATE ====================
+    var _activeTab = { fard: null, sunnah: null };
+
+    var SKY_GRADIENTS = {
+        'fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
+        'dhuhr': 'linear-gradient(135deg, #F0C75E, #D4A030)',
+        'asr': 'linear-gradient(135deg, #E8A849, #C07828)',
+        'maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
+        'isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
+        'tahajjud': 'linear-gradient(135deg, #2e4482, #1e3a8a)',
+        'sunnah-fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
+        'duha': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+        'sunnah-dhuhr': 'linear-gradient(135deg, #F0C75E, #D4A030)',
+        'sunnah-asr': 'linear-gradient(135deg, #E8A849, #C07828)',
+        'sunnah-maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
+        'sunnah-isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
+        'witr': 'linear-gradient(135deg, #a855f7, #7E3A8A)'
+    };
+
+    var SKY_SHADOWS = {
+        'fajr': 'rgba(196,138,144,0.35)', 'dhuhr': 'rgba(212,160,48,0.35)',
+        'asr': 'rgba(192,120,40,0.35)', 'maghrib': 'rgba(158,82,56,0.35)',
+        'isha': 'rgba(58,74,104,0.35)', 'tahajjud': 'rgba(30,58,138,0.35)',
+        'sunnah-fajr': 'rgba(196,138,144,0.35)', 'duha': 'rgba(245,158,11,0.35)',
+        'sunnah-dhuhr': 'rgba(212,160,48,0.35)', 'sunnah-asr': 'rgba(192,120,40,0.35)',
+        'sunnah-maghrib': 'rgba(158,82,56,0.35)', 'sunnah-isha': 'rgba(58,74,104,0.35)',
+        'witr': 'rgba(126,58,138,0.35)'
+    };
+
+    function _getDefaultPrayerTab(type) {
+        if (type === 'sunnah') return 'sunnah-fajr';
+        // Use current prayer time if available
+        try {
+            var state = window.getCurrentPrayerState ? window.getCurrentPrayerState() : null;
+            if (state && state.active) return state.active;
+        } catch(e) {}
+        return 'fajr';
+    }
+
+    function _getActiveTab(type) {
+        if (!_activeTab[type]) {
+            _activeTab[type] = _getDefaultPrayerTab(type);
+        }
+        return _activeTab[type];
+    }
+
+    // ==================== renderTrackerMonth (Tab-based single calendar) ====================
 
     function renderTrackerMonth(type) {
         var Storage = _getStorage();
@@ -312,122 +358,163 @@ window.App.Tracker = (function() {
         var daysPill = document.getElementById(type === 'fard' ? 'monthDaysToggleBtn' : type + 'MonthDaysPill');
         if (daysPill) daysPill.textContent = daysInMonth;
 
-        // Sky-time gradient map for prayer icon backgrounds
-        var skyGradients = {
-            'fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
-            'dhuhr': 'linear-gradient(135deg, #F0C75E, #D4A030)',
-            'asr': 'linear-gradient(135deg, #E8A849, #C07828)',
-            'maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
-            'isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
-            'tahajjud': 'linear-gradient(135deg, #2e4482, #1e3a8a)',
-            'sunnah-fajr': 'linear-gradient(135deg, #E8B4B8, #C48A90)',
-            'duha': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-            'sunnah-dhuhr': 'linear-gradient(135deg, #F0C75E, #D4A030)',
-            'sunnah-asr': 'linear-gradient(135deg, #E8A849, #C07828)',
-            'sunnah-maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
-            'sunnah-isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
-            'witr': 'linear-gradient(135deg, #a855f7, #7E3A8A)'
-        };
+        var activePrayerId = _getActiveTab(type);
+        // Validate tab exists in prayers array
+        var found = false;
+        for (var p = 0; p < prayers.length; p++) {
+            if (prayers[p].id === activePrayerId) { found = true; break; }
+        }
+        if (!found) { activePrayerId = prayers[0].id; _activeTab[type] = activePrayerId; }
 
-        prayers.forEach(function(prayer) {
-            var section = document.createElement('div');
-            section.className = 'prayer-section ' + prayer.class;
+        // ── PRAYER TABS ROW ──
+        var tabsContainer = document.createElement('div');
+        tabsContainer.className = 'prayer-tabs-container';
+        tabsContainer.id = type + 'PrayerTabs';
 
-            var completed = 0;
-            var exemptCount = isFemale ? Female.getExemptCountForPrayer(hYear, hMonth, prayer.id) : 0;
-            if (dataObj[hMonth] && dataObj[hMonth][prayer.id]) {
-                completed = Object.values(dataObj[hMonth][prayer.id]).filter(function(v) { return v; }).length;
+        var tabPill = document.createElement('div');
+        tabPill.className = 'prayer-tabs-pill';
+        tabsContainer.appendChild(tabPill);
+
+        var activeIdx = 0;
+        prayers.forEach(function(prayer, idx) {
+            if (prayer.id === activePrayerId) activeIdx = idx;
+            var tab = document.createElement('button');
+            tab.className = 'prayer-tab' + (prayer.id === activePrayerId ? ' active' : '');
+            tab.setAttribute('data-prayer', prayer.id);
+
+            var iconWrap = document.createElement('div');
+            iconWrap.className = 'prayer-tab-icon';
+            if (prayer.id === activePrayerId) {
+                iconWrap.style.background = SKY_GRADIENTS[prayer.id] || '#888';
+                iconWrap.style.boxShadow = '0 2px 8px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
             }
-            var adjustedTotal = daysInMonth - exemptCount;
-            var pct = adjustedTotal > 0 ? Math.round((completed / adjustedTotal) * 100) : 0;
+            iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
 
-            // Congregation count for fard
-            var congCount = 0;
-            if (type === 'fard') {
-                var congDataH = Storage.getCongregationData(hYear, hMonth);
-                if (congDataH[prayer.id]) {
-                    congCount = Object.values(congDataH[prayer.id]).filter(Boolean).length;
-                }
-            }
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'prayer-tab-name';
+            nameSpan.textContent = I18n.getPrayerName(prayer.id);
 
-            // Prayer header with sky-time icon, name, congregation pill, % pill
-            var header = document.createElement('div');
-            header.className = 'prayer-header';
+            tab.appendChild(iconWrap);
+            tab.appendChild(nameSpan);
 
-            var iconBg = skyGradients[prayer.id] || 'linear-gradient(135deg, #888, #666)';
-            var nameDiv = document.createElement('div');
-            nameDiv.className = 'prayer-name';
-            nameDiv.innerHTML = '<span class="prayer-icon-badge" style="background:' + iconBg + ';box-shadow:0 4px 12px ' + (prayer.color || 'rgba(0,0,0,0.2)') + '35"><span class="material-symbols-rounded" style="font-size:22px;color:white;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + prayer.icon + '</span></span><span>' + I18n.getPrayerName(prayer.id) + '</span>';
+            tab.onclick = (function(pid) {
+                return function() {
+                    _activeTab[type] = pid;
+                    if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+                    renderTrackerMonth(type);
+                };
+            })(prayer.id);
 
-            var headerEnd = document.createElement('div');
-            headerEnd.className = 'prayer-header-end';
-            if (type === 'fard' && congCount > 0) {
-                headerEnd.innerHTML += '<span class="cong-pill"><span class="material-symbols-rounded" style="font-size:12px;">mosque</span> ' + congCount + '</span>';
-            }
-            var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
-            headerEnd.innerHTML += '<span class="pct-pill" style="background:' + pctColor + '">' + pct + '%</span>';
-            headerEnd.innerHTML += '<span class="prayer-counter">' + completed + '/' + adjustedTotal + '</span>';
-
-            header.appendChild(nameDiv);
-            header.appendChild(headerEnd);
-
-            // Flowing sequential grid (NO weekday headers, NO offsets)
-            var grid = document.createElement('div');
-            grid.className = 'days-grid flow-grid';
-
-            for (var day = 1; day <= daysInMonth; day++) {
-                var dayBox = document.createElement('div');
-                dayBox.className = 'day-box';
-                dayBox.setAttribute('role', 'button');
-                dayBox.setAttribute('tabindex', '0');
-                dayBox.setAttribute('aria-label', I18n.getPrayerName(prayer.id) + ' - ' + day);
-
-                dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
-
-                try {
-                    var gDate = Hijri.hijriToGregorian(hYear, hMonth, day);
-                    dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
-                } catch(e) {}
-
-                var isDayToday = isCurrentMonth && todayH.day === day;
-                if (isDayToday) dayBox.classList.add('today-box');
-
-                if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
-                    dayBox.classList.add('disabled');
-                } else {
-                    // Check current state and apply visual classes
-                    var isExempt = Female.isPrayerExempt(exemptData, prayer.id, day);
-                    if (isExempt) {
-                        dayBox.classList.add('exempt');
-                    } else if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
-                        dayBox.classList.add('checked');
-                        if (type === 'fard') {
-                            var congData = Storage.getCongregationData(hYear, hMonth);
-                            if (isCongregation(congData, prayer.id, day)) {
-                                dayBox.classList.add('congregation');
-                                dayBox.classList.remove('checked');
-                            }
-                        }
-                        var qadaData = Storage.getQadaData(hYear, hMonth);
-                        if (qadaData[prayer.id] && qadaData[prayer.id][day]) {
-                            dayBox.classList.remove('checked', 'congregation');
-                            dayBox.classList.add('qada');
-                        }
-                    }
-                    dayBox.onclick = (function(t, pId, d) {
-                        return function() { handleDayClick(t, pId, d); };
-                    })(type, prayer.id, day);
-                }
-
-                grid.appendChild(dayBox);
-            }
-
-            section.appendChild(header);
-            section.appendChild(grid);
-            container.appendChild(section);
+            tabsContainer.appendChild(tab);
         });
 
-        // ONE legend at bottom of all prayers (Bug 1.11)
+        container.appendChild(tabsContainer);
+
+        // Position pill after DOM insertion
+        requestAnimationFrame(function() {
+            var tabs = tabsContainer.querySelectorAll('.prayer-tab');
+            if (tabs[activeIdx]) {
+                var tt = tabs[activeIdx];
+                var isRTL = document.documentElement.dir === 'rtl';
+                tabPill.style.width = tt.offsetWidth + 'px';
+                if (isRTL) {
+                    var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
+                    tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
+                } else {
+                    tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
+                }
+            }
+        });
+
+        // ── STATS ROW ──
+        var activePrayer = null;
+        for (var pi = 0; pi < prayers.length; pi++) {
+            if (prayers[pi].id === activePrayerId) { activePrayer = prayers[pi]; break; }
+        }
+
+        var completed = 0;
+        var exemptCount = isFemale ? Female.getExemptCountForPrayer(hYear, hMonth, activePrayerId) : 0;
+        if (dataObj[hMonth] && dataObj[hMonth][activePrayerId]) {
+            completed = Object.values(dataObj[hMonth][activePrayerId]).filter(function(v) { return v; }).length;
+        }
+        var adjustedTotal = daysInMonth - exemptCount;
+        var pct = adjustedTotal > 0 ? Math.round((completed / adjustedTotal) * 100) : 0;
+
+        var congCount = 0;
+        if (type === 'fard') {
+            var congDataH = Storage.getCongregationData(hYear, hMonth);
+            if (congDataH[activePrayerId]) {
+                congCount = Object.values(congDataH[activePrayerId]).filter(Boolean).length;
+            }
+        }
+
+        var statsRow = document.createElement('div');
+        statsRow.className = 'prayer-tab-stats';
+        var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
+        var statsHTML = '<span class="stat-badge pct" style="color:' + pctColor + ';background:' + pctColor.replace('var(--', 'rgba(var(--').replace(')', '-rgb),0.1)') + '">' + pct + '%</span>';
+        if (type === 'fard' && congCount > 0) {
+            statsHTML += '<span class="stat-badge cong"><span class="material-symbols-rounded" style="font-size:12px;">mosque</span> ' + congCount + '</span>';
+        }
+        statsHTML += '<span class="stat-badge count">' + completed + '/' + adjustedTotal + '</span>';
+        statsRow.innerHTML = statsHTML;
+        container.appendChild(statsRow);
+
+        // ── SINGLE CALENDAR GRID ──
+        var gridWrap = document.createElement('div');
+        gridWrap.className = 'prayer-tab-grid';
+        var grid = document.createElement('div');
+        grid.className = 'days-grid flow-grid';
+
+        for (var day = 1; day <= daysInMonth; day++) {
+            var dayBox = document.createElement('div');
+            dayBox.className = 'day-box';
+            dayBox.setAttribute('role', 'button');
+            dayBox.setAttribute('tabindex', '0');
+            dayBox.setAttribute('aria-label', I18n.getPrayerName(activePrayerId) + ' - ' + day);
+
+            dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+
+            try {
+                var gDate = Hijri.hijriToGregorian(hYear, hMonth, day);
+                dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
+            } catch(e) {}
+
+            var isDayToday = isCurrentMonth && todayH.day === day;
+            if (isDayToday) dayBox.classList.add('today-box');
+
+            if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
+                dayBox.classList.add('disabled');
+            } else {
+                var isExempt = Female.isPrayerExempt(exemptData, activePrayerId, day);
+                if (isExempt) {
+                    dayBox.classList.add('exempt');
+                } else if (dataObj[hMonth][activePrayerId] && dataObj[hMonth][activePrayerId][day]) {
+                    dayBox.classList.add('checked');
+                    if (type === 'fard') {
+                        var congData = Storage.getCongregationData(hYear, hMonth);
+                        if (isCongregation(congData, activePrayerId, day)) {
+                            dayBox.classList.add('congregation');
+                            dayBox.classList.remove('checked');
+                        }
+                    }
+                    var qadaData = Storage.getQadaData(hYear, hMonth);
+                    if (qadaData[activePrayerId] && qadaData[activePrayerId][day]) {
+                        dayBox.classList.remove('checked', 'congregation');
+                        dayBox.classList.add('qada');
+                    }
+                }
+                dayBox.onclick = (function(t, pId, d) {
+                    return function() { handleDayClick(t, pId, d); };
+                })(type, activePrayerId, day);
+            }
+
+            grid.appendChild(dayBox);
+        }
+
+        gridWrap.appendChild(grid);
+        container.appendChild(gridWrap);
+
+        // ── LEGEND ──
         var legend = document.createElement('div');
         legend.className = 'prayer-legend';
         if (type === 'fard') {
