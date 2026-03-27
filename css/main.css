@@ -677,18 +677,27 @@ body {
     animation: tab-icon-tap 0.1s ease;
 }
 
-/* Stats row between tabs and calendar */
+/* Tracker card — wraps stats + grid + legend */
+.tracker-card {
+    background: var(--card-bg, rgba(255,255,255,0.55));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--card-radius, 20px);
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    padding: 14px 16px;
+    margin-top: 12px;
+}
+
+/* Stats row inside tracker card */
 .prayer-tab-stats {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 20px;
     padding: 14px 16px;
-    border: 1px solid rgba(0,0,0,0.04);
+    padding-bottom: 12px;
     margin-bottom: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
     transition: opacity 0.2s ease;
 }
 

@@ -518,6 +518,10 @@ window.App.Tracker = (function() {
             });
         }
 
+        // ── TRACKER CARD (wraps stats + grid + legend) ──
+        var trackerCard = document.createElement('div');
+        trackerCard.className = 'tracker-card';
+
         // ── STATS ROW ──
         var activePrayer = null;
         for (var pi = 0; pi < prayers.length; pi++) {
@@ -550,7 +554,7 @@ window.App.Tracker = (function() {
             showJamaah: type === 'fard',
             dayLabel: 'الأيام'
         });
-        container.appendChild(statsRow);
+        trackerCard.appendChild(statsRow);
 
         // ── SINGLE CALENDAR GRID ──
         var gridWrap = document.createElement('div');
@@ -605,7 +609,7 @@ window.App.Tracker = (function() {
         }
 
         gridWrap.appendChild(grid);
-        container.appendChild(gridWrap);
+        trackerCard.appendChild(gridWrap);
 
         // ── LEGEND ──
         var legend = document.createElement('div');
@@ -627,7 +631,8 @@ window.App.Tracker = (function() {
                     '<div class="legend-item"><div class="legend-dot exempt-dot"><span class="material-symbols-rounded" style="font-size:10px;color:white;">do_not_disturb</span></div><span>' + (currentLang === 'ar' ? 'إعفاء' : 'Exemption') + '</span></div>';
             }
         }
-        container.appendChild(legend);
+        trackerCard.appendChild(legend);
+        container.appendChild(trackerCard);
     }
 
     // ==================== _refreshGridAndStats (lightweight re-render without tabs/chips) ====================

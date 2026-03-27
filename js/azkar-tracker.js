@@ -128,6 +128,10 @@ window.App.Azkar = (function() {
             }
         });
 
+        // ── TRACKER CARD (wraps stats + grid + legend) ──
+        var trackerCard = document.createElement('div');
+        trackerCard.className = 'tracker-card';
+
         // ── STATS ROW ──
         var activeCat = categories[activeIdx];
         var catData = data[activeCatId] || {};
@@ -149,7 +153,7 @@ window.App.Azkar = (function() {
             showJamaah: false,
             dayLabel: 'الأيام'
         });
-        container.appendChild(statsRow);
+        trackerCard.appendChild(statsRow);
 
         // ── SINGLE CALENDAR GRID ──
         var gridWrap = document.createElement('div');
@@ -189,7 +193,7 @@ window.App.Azkar = (function() {
             grid.appendChild(dayBox);
         }
         gridWrap.appendChild(grid);
-        container.appendChild(gridWrap);
+        trackerCard.appendChild(gridWrap);
 
         // Mark all button
         var actionRow = document.createElement('div');
@@ -199,7 +203,7 @@ window.App.Azkar = (function() {
         markBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">done_all</span> ' + I18n.t('mark_all');
         markBtn.onclick = function() { markAllAzkar(activeCatId); };
         actionRow.appendChild(markBtn);
-        container.appendChild(actionRow);
+        trackerCard.appendChild(actionRow);
 
         // ── LEGEND ──
         var legend = document.createElement('div');
@@ -207,7 +211,8 @@ window.App.Azkar = (function() {
         legend.innerHTML =
             '<div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);"><span class="material-symbols-rounded" style="font-size:10px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'تم' : 'Done') + '</span></div>' +
             '<div class="legend-item"><div class="legend-dot" style="background:transparent;border:1.5px solid rgba(0,0,0,0.1);"></div><span>' + (currentLang === 'ar' ? 'لم يتم' : 'Not done') + '</span></div>';
-        container.appendChild(legend);
+        trackerCard.appendChild(legend);
+        container.appendChild(trackerCard);
     }
 
     function changeAzkarMonth(delta) {
