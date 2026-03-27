@@ -392,7 +392,7 @@ body {
 .tab-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    min-height: calc(64px + env(safe-area-inset-bottom, 0px));
+    min-height: calc(70px + env(safe-area-inset-bottom, 0px));
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     background: var(--tab-bg, rgba(245,243,239,0.92));
     backdrop-filter: blur(16px);
@@ -426,13 +426,13 @@ body {
 }
 
 .tab-item .tab-icon {
-    font-size: 1.3em;
+    font-size: 1.6em;
     line-height: 1;
 }
 
 .tab-item .tab-label {
-    font-size: 0.65em;
-    font-weight: 600;
+    font-size: 0.75em;
+    font-weight: 700;
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -441,8 +441,8 @@ body {
 }
 
 .tab-item .tab-icon-wrap {
-    width: 36px; height: 28px;
-    border-radius: 10px;
+    width: 42px; height: 32px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -450,11 +450,11 @@ body {
 }
 
 .tab-item.active .tab-icon-wrap {
-    width: 48px;
-    height: 28px;
-    border-radius: 14px;
+    width: 56px;
+    height: 32px;
+    border-radius: 16px;
     background: linear-gradient(135deg, var(--primary), var(--primary-mid));
-    box-shadow: 0 3px 10px rgba(var(--primary-rgb),0.25);
+    box-shadow: 0 4px 14px rgba(var(--primary-rgb),0.35);
 }
 
 /* Icon bounce on activation */
@@ -768,7 +768,7 @@ body {
 }
 
 .stat-item .value {
-    font-size: 1.6em;
+    font-size: 2em;
     font-weight: 800;
     color: var(--primary);
     font-family: 'Rubik', sans-serif;
@@ -923,11 +923,12 @@ body {
 }
 
 .day-greg {
-    font-size: 0.55em;
-    color: var(--text-muted);
+    font-size: 0.6em;
+    color: var(--text-secondary, #6B7280);
     font-family: 'Rubik', sans-serif;
     line-height: 1;
     margin-top: 1px;
+    font-weight: 500;
 }
 
 /* Day icon (hidden by default, shown by state) */
@@ -2429,7 +2430,7 @@ body {
     .exempt-toggle-bar { flex-wrap: wrap; justify-content: center; }
     .stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .stat-item { padding: 10px 6px; }
-    .stat-item .value { font-size: 1.3em; }
+    .stat-item .value { font-size: 1.6em; }
 }
 
 @media (max-width: 480px) {

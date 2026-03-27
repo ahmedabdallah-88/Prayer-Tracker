@@ -13,7 +13,7 @@ window.App.Fasting = (function() {
     var SUNNAH_BADGE_CONFIG = {
         'dhul-hijjah':      { icon: 'brightness_2', color: 'var(--accent)', radius: '50%' },
         'ashura':           { icon: 'star', color: 'var(--accent)', radius: '50%' },
-        'white-days':       { icon: 'circle', color: '#A8B4C4', radius: '50%', fill: true },
+        'white-days':       { icon: 'circle', color: '#7B8CA3', radius: '50%', fill: true },
         'monday-thursday':  { icon: 'event_repeat', color: 'var(--accent)', radius: '4px' }
     };
 
@@ -32,13 +32,14 @@ window.App.Fasting = (function() {
         if (!cfg) return null;
         var badge = document.createElement('span');
         badge.className = 'sunnah-fast-badge';
-        badge.style.cssText = 'position:absolute;bottom:-5px;left:-5px;width:18px;height:18px;' +
-            'background:var(--card-bg);border:1px solid ' + cfg.color + ';border-radius:6px;' +
-            'display:flex;align-items:center;justify-content:center;z-index:2;';
+        badge.style.cssText = 'position:absolute;bottom:-6px;left:-6px;width:22px;height:22px;' +
+            'background:var(--card-bg);border:1.5px solid ' + cfg.color + ';border-radius:7px;' +
+            'display:flex;align-items:center;justify-content:center;z-index:2;' +
+            'box-shadow:0 1px 3px rgba(0,0,0,0.15);';
         var icon = document.createElement('span');
         icon.className = 'material-symbols-rounded';
-        icon.style.cssText = 'font-size:11px;color:' + cfg.color + ';' +
-            (cfg.fill ? "font-variation-settings:'FILL' 1;" : '');
+        icon.style.cssText = 'font-size:14px;color:' + cfg.color + ';font-variation-settings:\'wght\' 600;' +
+            (cfg.fill ? "font-variation-settings:'FILL' 1,'wght' 600;" : '');
         icon.textContent = cfg.icon;
         badge.appendChild(icon);
         return badge;

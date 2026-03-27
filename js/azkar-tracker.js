@@ -357,7 +357,7 @@ window.App.Azkar = (function() {
                 '<div class="dashboard-grid" style="margin-bottom:16px;">' +
                     '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">light_mode</span> ' + I18n.t('azkar_morning') + '</div><div class="value" style="color:#F59E0B">' + avgMorn + '%</div></div>' +
                     '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">nights_stay</span> ' + I18n.t('azkar_evening') + '</div><div class="value" style="color:#6366F1">' + avgEve + '%</div></div>' +
-                    '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">emoji_events</span> ' + I18n.t('best_month') + '</div><div class="value" style="font-size:1.2em;">' + bestName + '</div><div class="sublabel">' + bestPct + '%</div></div>' +
+                    '<div class="stat-card"><div class="label"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">emoji_events</span> ' + I18n.t('best_month') + '</div><div class="value" style="font-size:0.9em;">' + bestName + '</div><div class="sublabel">' + bestPct + '%</div></div>' +
                 '</div>';
         }
     }

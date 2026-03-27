@@ -175,8 +175,8 @@
 }
 
 .streak-value {
-    font-size: 2.2em;
-    font-weight: 700;
+    font-size: 2em;
+    font-weight: 800;
     font-family: 'Rubik', sans-serif;
     color: var(--text-primary);
     line-height: 1;
@@ -205,7 +205,7 @@
         gap: 8px;
     }
     .streak-value {
-        font-size: 1.8em;
+        font-size: 1.6em;
     }
 }
 
@@ -301,7 +301,7 @@
 }
 
 .month-pct {
-    font-size: 1.5em;
+    font-size: 2em;
     font-weight: 800;
     font-family: 'Rubik', sans-serif;
     color: var(--primary);
