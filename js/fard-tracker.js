@@ -443,7 +443,7 @@ window.App.Tracker = (function() {
 
                 var iconWrap = document.createElement('div');
                 iconWrap.className = 'sunnah-tab-icon';
-                var iconSize = isActive ? '20px' : '16px';
+                var iconSize = isActive ? '22px' : '18px';
                 var iconColor = isActive ? '#fff' : (isDoneToday ? 'var(--primary)' : '#8D99AE');
                 var iconFill = isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400";
                 iconWrap.innerHTML = '<span class="material-symbols-rounded" style="font-size:' + iconSize + ';color:' + iconColor + ';font-variation-settings:' + iconFill + '">' + prayer.icon + '</span>';
