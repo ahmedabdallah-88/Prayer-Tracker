@@ -469,6 +469,13 @@ window.App.Tracker = (function() {
             });
 
             container.appendChild(scroller);
+
+            // Scroll active tab into view after DOM append
+            if (activeTabEl) {
+                requestAnimationFrame(function() {
+                    activeTabEl.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'instant' });
+                });
+            }
         } else {
             // ── FARD: TABS LAYOUT ──
             var tabsContainer = document.createElement('div');
