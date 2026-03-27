@@ -303,7 +303,6 @@ window.App.Tracker = (function() {
                 '<div class="stats-section">' +
                 '<div class="stats-icon-wrap jamaah"><span class="material-symbols-rounded" style="font-size:22px;color:#D4A03C;font-variation-settings:\'FILL\' 1,\'wght\' 600">mosque</span></div>' +
                 '<span class="stats-value jamaah-val">' + (opts.congCount || 0) + '</span>' +
-                '<span class="stats-label">جماعة</span>' +
                 '</div>';
         }
 
@@ -311,7 +310,6 @@ window.App.Tracker = (function() {
             '<div class="stats-section">' +
             '<div class="stats-icon-wrap days"><span class="material-symbols-rounded" style="font-size:20px;color:#8D99AE;font-variation-settings:\'FILL\' 1,\'wght\' 500">calendar_today</span></div>' +
             '<span class="stats-value days-val">' + opts.completed + '<span class="days-total">/' + opts.total + '</span></span>' +
-            '<span class="stats-label">' + (opts.dayLabel || 'الأيام') + '</span>' +
             '</div>';
 
         return html;
