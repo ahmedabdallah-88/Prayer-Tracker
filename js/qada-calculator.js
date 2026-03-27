@@ -970,6 +970,11 @@ window.App.QadaCalc = (function() {
                 showToast(isEditing ? t('qada_plan_updated') : t('qada_plan_saved'), 'success');
                 close();
                 updateSettingsLabel();
+                // Inject Qada tab and switch to it
+                if (window.App.QadaTracker && window.App.QadaTracker.injectTab) {
+                    window.App.QadaTracker.injectTab();
+                }
+                if (window.switchView) window.switchView('fard', 'qada');
             };
 
         }
