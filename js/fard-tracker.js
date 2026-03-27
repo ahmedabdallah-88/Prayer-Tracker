@@ -630,6 +630,118 @@ window.App.Tracker = (function() {
         container.appendChild(legend);
     }
 
+    // ==================== _refreshGridAndStats (lightweight re-render without tabs/chips) ====================
+
+    function _refreshGridAndStats(type) {
+        var Storage = _getStorage();
+        var Hijri   = _getHijri();
+        var Female  = _getFemale();
+        var I18n    = _getI18n();
+
+        var container = document.getElementById(type + 'TrackerPrayersContainer');
+        if (!container) return;
+
+        var prayers     = Storage.getPrayersArray(type);
+        var dataObj     = Storage.getDataObject(type);
+        var hYear       = Hijri.getCurrentHijriYear();
+        var hMonth      = Hijri.getCurrentHijriMonth();
+        var daysInMonth = Hijri.getHijriDaysInMonth(hYear, hMonth);
+        var profile     = Storage.getActiveProfile();
+        var isFemale    = profile && profile.gender === 'female' && profile.age >= 12;
+        var isFemaleUser = isFemale;
+        var exemptData  = isFemale ? Female.getExemptDays(hYear, hMonth) : {};
+        var currentLang = I18n.getCurrentLang();
+        var todayH      = Hijri.getTodayHijri();
+        var isCurrentMonth = (todayH.year === hYear && todayH.month === hMonth);
+
+        var activePrayerId = _getActiveTab(type);
+
+        // ── Rebuild STATS ROW ──
+        var oldStats = container.querySelector('.prayer-tab-stats');
+        if (oldStats) {
+            var completed = 0;
+            var exemptCount = isFemale ? Female.getExemptCountForPrayer(hYear, hMonth, activePrayerId) : 0;
+            if (dataObj[hMonth] && dataObj[hMonth][activePrayerId]) {
+                completed = Object.values(dataObj[hMonth][activePrayerId]).filter(function(v) { return v; }).length;
+            }
+            var adjustedTotal = daysInMonth - exemptCount;
+            var pct = adjustedTotal > 0 ? Math.round((completed / adjustedTotal) * 100) : 0;
+
+            var congCount = 0;
+            if (type === 'fard') {
+                var congDataH = Storage.getCongregationData(hYear, hMonth);
+                if (congDataH[activePrayerId]) {
+                    congCount = Object.values(congDataH[activePrayerId]).filter(Boolean).length;
+                }
+            }
+
+            oldStats.innerHTML = _buildStatsRow({
+                pct: pct,
+                completed: completed,
+                total: adjustedTotal,
+                congCount: congCount,
+                showJamaah: type === 'fard',
+                dayLabel: 'الأيام'
+            });
+        }
+
+        // ── Rebuild CALENDAR GRID ──
+        var oldGridWrap = container.querySelector('.prayer-tab-grid');
+        if (oldGridWrap) {
+            var grid = document.createElement('div');
+            grid.className = 'days-grid flow-grid';
+
+            for (var day = 1; day <= daysInMonth; day++) {
+                var dayBox = document.createElement('div');
+                dayBox.className = 'day-box';
+                dayBox.setAttribute('role', 'button');
+                dayBox.setAttribute('tabindex', '0');
+                dayBox.setAttribute('aria-label', I18n.getPrayerName(activePrayerId) + ' - ' + day);
+
+                dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+
+                try {
+                    var gDate = Hijri.hijriToGregorian(hYear, hMonth, day);
+                    dayBox.title = gDate.getDate() + '/' + (gDate.getMonth() + 1) + '/' + gDate.getFullYear();
+                } catch(e) {}
+
+                var isDayToday = isCurrentMonth && todayH.day === day;
+                if (isDayToday) dayBox.classList.add('today-box');
+
+                if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
+                    dayBox.classList.add('disabled');
+                } else {
+                    var isExempt = Female.isPrayerExempt(exemptData, activePrayerId, day);
+                    if (isExempt) {
+                        dayBox.classList.add('exempt');
+                    } else if (dataObj[hMonth][activePrayerId] && dataObj[hMonth][activePrayerId][day]) {
+                        dayBox.classList.add('checked');
+                        if (type === 'fard') {
+                            var congData = Storage.getCongregationData(hYear, hMonth);
+                            if (isCongregation(congData, activePrayerId, day)) {
+                                dayBox.classList.add('congregation');
+                                dayBox.classList.remove('checked');
+                            }
+                        }
+                        var qadaData = Storage.getQadaData(hYear, hMonth);
+                        if (qadaData[activePrayerId] && qadaData[activePrayerId][day]) {
+                            dayBox.classList.remove('checked', 'congregation');
+                            dayBox.classList.add('qada');
+                        }
+                    }
+                    dayBox.onclick = (function(t, pId, d) {
+                        return function() { handleDayClick(t, pId, d); };
+                    })(type, activePrayerId, day);
+                }
+
+                grid.appendChild(dayBox);
+            }
+
+            oldGridWrap.innerHTML = '';
+            oldGridWrap.appendChild(grid);
+        }
+    }
+
     // ==================== toggleTrackerDay ====================
 
     function toggleTrackerDay(type, prayerId, day) {
@@ -650,7 +762,7 @@ window.App.Tracker = (function() {
 
         dataObj[currentMonth][prayerId][day] = !dataObj[currentMonth][prayerId][day];
         Storage.saveMonthData(type, currentMonth);
-        renderTrackerMonth(type);
+        _refreshGridAndStats(type);
         updateTrackerStats(type);
         if (typeof window.renderStreaks === 'function') {
             window.renderStreaks(type);
@@ -908,7 +1020,7 @@ window.App.Tracker = (function() {
         Storage.saveMonthData(type, currentMonth);
         if (type === 'fard' && congData) Storage.saveCongregationData(currentYear, currentMonth, congData);
         Storage.saveQadaData(currentYear, currentMonth, qadaData);
-        renderTrackerMonth(type);
+        _refreshGridAndStats(type);
         updateTrackerStats(type);
         if (typeof window.renderStreaks === 'function') {
             window.renderStreaks(type);
