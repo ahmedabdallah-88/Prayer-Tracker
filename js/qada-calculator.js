@@ -956,9 +956,18 @@ window.App.QadaCalc = (function() {
                     window.App.UI.showConfirm(t('qada_delete_confirm')).then(function(ok) {
                         if (!ok) return;
                         deletePlanData();
+                        // Also delete all qada log and tracking data
+                        if (window.App.QadaTracker && window.App.QadaTracker.deleteAllData) {
+                            window.App.QadaTracker.deleteAllData();
+                        }
                         showToast(t('qada_plan_deleted'), 'info');
                         close();
                         updateSettingsLabel();
+                        // Remove qada tab and switch to fard tracker
+                        if (window.App.QadaTracker && window.App.QadaTracker.removeTab) {
+                            window.App.QadaTracker.removeTab();
+                        }
+                        if (window.switchView) window.switchView('fard', 'tracker');
                     });
                 }
             };

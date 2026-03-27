@@ -3189,6 +3189,30 @@ body {
 [dir="rtl"] .sub-tabs-pill[data-pos="3"] { transform: translateX(calc(-300% - 6px)); }
 [dir="ltr"] .sub-tabs-pill[data-pos="3"] { transform: translateX(calc(300% + 6px)); }
 
+/* ==================== QADA DELETE PLAN BUTTON ==================== */
+.qada-delete-plan-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: rgba(193,87,78,0.08);
+    border: 1px solid rgba(193,87,78,0.15);
+    border-radius: 14px;
+    color: #C1574E;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s;
+}
+.qada-delete-plan-btn:active {
+    background: rgba(193,87,78,0.15);
+}
+
 /* ==================== QADA DASHBOARD SUB-TOGGLE ==================== */
 .qada-dash-sub-btn {
     flex: 1;

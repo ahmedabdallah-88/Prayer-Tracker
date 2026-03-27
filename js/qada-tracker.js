@@ -66,6 +66,29 @@ window.App.QadaTracker = (function() {
         localStorage.setItem(key, JSON.stringify(data));
     }
 
+    function deleteAllQadaData() {
+        var pid = _profileId();
+        if (!pid) return;
+        // Delete the plan
+        if (window.App.QadaCalc && window.App.QadaCalc.loadPlan) {
+            var planKey = 'salah_qada_plan_' + pid;
+            localStorage.removeItem(planKey);
+        }
+        // Delete all qada log keys (salah_qada_log_{pid}_h...)
+        var logPrefix = 'salah_qada_log_' + pid + '_';
+        // Delete all qada storage keys (salah_qada_{profilePrefix}h...)
+        var profilePrefix = window.App.Storage.getProfilePrefix ? window.App.Storage.getProfilePrefix() : (pid + '_');
+        var storagePrefix = 'salah_qada_' + profilePrefix + 'h';
+        var keysToDelete = [];
+        for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && (k.indexOf(logPrefix) === 0 || k.indexOf(storagePrefix) === 0)) {
+                keysToDelete.push(k);
+            }
+        }
+        keysToDelete.forEach(function(k) { localStorage.removeItem(k); });
+    }
+
     function getCount(logData, day, prayerId) {
         if (logData[day] && logData[day][prayerId]) return logData[day][prayerId];
         return 0;
@@ -295,6 +318,23 @@ window.App.QadaTracker = (function() {
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
         container.appendChild(trackerCard);
+
+        // ── DELETE PLAN BUTTON ──
+        var deleteBtn = document.createElement('button');
+        deleteBtn.className = 'qada-delete-plan-btn';
+        deleteBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">delete</span> ' + t('qada_delete_plan');
+        deleteBtn.onclick = function() {
+            if (window.App.UI && window.App.UI.showConfirm) {
+                window.App.UI.showConfirm(t('qada_delete_confirm')).then(function(ok) {
+                    if (!ok) return;
+                    deleteAllQadaData();
+                    removeTab();
+                    if (window.switchView) window.switchView('fard', 'tracker');
+                    if (window.App.UI && window.App.UI.showToast) window.App.UI.showToast(t('qada_plan_deleted'), 'info');
+                });
+            }
+        };
+        container.appendChild(deleteBtn);
     }
 
     function _buildBannerHTML(pct, pctColor, todayCount, dailyTarget, remaining) {
@@ -537,6 +577,7 @@ window.App.QadaTracker = (function() {
         removeTab: removeTab,
         closePopup: closePopup,
         loadLog: loadLog,
-        saveLog: saveLog
+        saveLog: saveLog,
+        deleteAllData: deleteAllQadaData
     };
 })();
