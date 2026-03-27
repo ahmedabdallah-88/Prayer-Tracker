@@ -164,6 +164,11 @@ window.App.Female = (function() {
         if (!container) return;
         var Storage = window.App.Storage;
         var Hijri = window.App.Hijri;
+        var profile = Storage.getActiveProfile();
+        if (!profile || profile.gender !== 'female' || profile.age < 12) {
+            container.innerHTML = '';
+            return;
+        }
 
         var yearInput = document.getElementById('fastingYearInput');
         var year = yearInput ? (parseInt(yearInput.value) || Storage.getCurrentYear()) : Storage.getCurrentYear();
@@ -192,6 +197,11 @@ window.App.Female = (function() {
         if (!container) return;
         var Storage = window.App.Storage;
         var Hijri = window.App.Hijri;
+        var profile = Storage.getActiveProfile();
+        if (!profile || profile.gender !== 'female' || profile.age < 12) {
+            container.innerHTML = '';
+            return;
+        }
 
         var yearInput = document.getElementById('fardDashboardYear');
         var year = yearInput ? (parseInt(yearInput.value) || Storage.getCurrentYear()) : Storage.getCurrentYear();

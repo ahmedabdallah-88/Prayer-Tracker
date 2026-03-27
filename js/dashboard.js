@@ -251,12 +251,17 @@ window.App.Dashboard = (function() {
             window.App.QadaDashboard.injectSubToggle();
         }
 
-        // Period history (females)
+        // Period history (females only)
         var activeProfile = Storage.getActiveProfile();
-        if (type === 'fard' && activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12) {
+        var isFemaleAdult = activeProfile && activeProfile.gender === 'female' && activeProfile.age >= 12;
+        if (type === 'fard') {
             var fardPeriodDash = document.getElementById('fardPeriodDashboard');
-            if (fardPeriodDash) fardPeriodDash.style.display = '';
-            renderPeriodHistoryDashboard();
+            if (fardPeriodDash) {
+                fardPeriodDash.style.display = isFemaleAdult ? '' : 'none';
+            }
+            if (isFemaleAdult) {
+                renderPeriodHistoryDashboard();
+            }
         }
     }
 
@@ -265,6 +270,11 @@ window.App.Dashboard = (function() {
     function renderPeriodHistoryDashboard() {
         var container = document.getElementById('fardPeriodHistoryContainer');
         if (!container) return;
+        var profile = Storage.getActiveProfile();
+        if (!profile || profile.gender !== 'female' || profile.age < 12) {
+            container.innerHTML = '';
+            return;
+        }
 
         var currentYear = Storage.getCurrentYear();
         var dashYrEl = document.getElementById('fardDashboardYear');
