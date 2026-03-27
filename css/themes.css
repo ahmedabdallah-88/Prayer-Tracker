@@ -238,6 +238,25 @@
     color: #E8E6E1;
 }
 
+[data-theme="dark"] .sunnah-tabs-scroller {
+    background: var(--card-bg);
+    border-color: rgba(255,255,255,0.06);
+}
+[data-theme="dark"] .sunnah-tab {
+    color: #8A8A8E;
+}
+[data-theme="dark"] .sunnah-tab.active {
+    background: var(--card-bg);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+    color: #E8E6E1;
+}
+[data-theme="dark"] .sunnah-tab.done {
+    color: var(--primary);
+}
+[data-theme="dark"] .sunnah-tab.done .sunnah-tab-icon {
+    background: rgba(45,106,79,0.15);
+}
+
 [data-theme="dark"] .prayer-section,
 [data-theme="dark"] .controls,
 [data-theme="dark"] .stat-item,
