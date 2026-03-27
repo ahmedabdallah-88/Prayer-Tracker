@@ -125,6 +125,7 @@ window.App.QadaCalc = (function() {
 
         // Female menstrual deduction
         var profile = window.App.Profiles.getActiveProfile();
+        result.nifasTotalDays = 0;
         if (profile && profile.gender === 'female') {
             var avgInput = document.getElementById('qadaMenstrualDays');
             var avg = avgInput ? parseInt(avgInput.value) || 7 : 0;
@@ -135,6 +136,12 @@ window.App.QadaCalc = (function() {
                 result.menstrualTotalDays = menstrualDays;
                 result.basePrayers = totalDays - menstrualDays;
             }
+
+            // Nifas deduction
+            var nifasInput = document.getElementById('qadaNifasDays');
+            var nifasDays = nifasInput ? parseInt(nifasInput.value) || 0 : 0;
+            result.nifasTotalDays = nifasDays;
+            result.basePrayers = result.basePrayers - nifasDays;
         }
 
         return result;
@@ -183,8 +190,13 @@ window.App.QadaCalc = (function() {
         var hijriMonthsNeeded = totalDaysNeeded / 29.5;
         var years = Math.floor(hijriMonthsNeeded / 12);
         var months = Math.round(hijriMonthsNeeded % 12);
-        var todayH = window.App.Hijri.getTodayHijri();
-        var endH = addHijriDays(todayH, totalDaysNeeded);
+        var startH;
+        if (wizardData.planStartDate) {
+            startH = wizardData.planStartDate;
+        } else {
+            startH = window.App.Hijri.getTodayHijri();
+        }
+        var endH = addHijriDays(startH, totalDaysNeeded);
         return {
             totalDays: totalDaysNeeded,
             years: years,
@@ -288,13 +300,22 @@ window.App.QadaCalc = (function() {
         // Hijri conversion preview
         html += '<div id="qadaHijriPreview" style="padding:8px 12px;font-size:0.8em;color:var(--text-primary);background:rgba(var(--accent-rgb,45,106,79),0.1);border-radius:10px;margin-bottom:12px;display:none;"></div>';
 
-        // Female: menstrual days
+        // Female: menstrual days + nifas days
         if (isFemale) {
             html += '<div class="ps-section" style="margin-bottom:12px;">' +
                 '<label style="display:block;font-size:0.85em;font-weight:600;color:var(--text-secondary);margin-bottom:6px;padding:0 4px;">' +
                     t('qada_menstrual_avg') +
                 '</label>' +
                 '<input type="number" id="qadaMenstrualDays" min="3" max="15" value="7" style="width:100%;padding:12px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:12px;font-size:16px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;">' +
+            '</div>';
+
+            // Nifas days
+            html += '<div class="ps-section" style="margin-bottom:12px;">' +
+                '<label style="display:block;font-size:0.85em;font-weight:600;color:var(--text-secondary);margin-bottom:6px;padding:0 4px;">' +
+                    t('qada_nifas_days') +
+                '</label>' +
+                '<input type="number" id="qadaNifasDays" min="0" value="0" style="width:100%;padding:12px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:12px;font-size:16px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;">' +
+                '<div style="font-size:0.75em;color:var(--text-muted);margin-top:4px;padding:0 4px;">' + t('qada_nifas_hint') + '</div>' +
             '</div>';
         }
 
@@ -326,6 +347,24 @@ window.App.QadaCalc = (function() {
             '<div style="font-size:0.75em;color:var(--text-muted);margin-top:2px;">' + t('qada_period_prayers') + '</div>' +
         '</div>';
 
+        // Plan start date
+        html += '<div class="ps-section" style="margin-bottom:12px;">' +
+            '<label style="display:block;font-size:0.85em;font-weight:600;color:var(--text-secondary);margin-bottom:6px;padding:0 4px;">' +
+                t('qada_start_date') +
+            '</label>' +
+            '<input type="date" id="qadaPlanStartDate" style="width:100%;padding:12px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:12px;font-size:16px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;">' +
+            '<div id="qadaStartDatePreview" style="padding:8px 12px;font-size:0.8em;color:var(--text-primary);background:rgba(var(--accent-rgb,45,106,79),0.1);border-radius:10px;margin-top:6px;display:none;"></div>' +
+        '</div>';
+
+        // Already prayed qada days
+        html += '<div class="ps-section" style="margin-bottom:12px;">' +
+            '<label style="display:block;font-size:0.85em;font-weight:600;color:var(--text-secondary);margin-bottom:6px;padding:0 4px;">' +
+                t('qada_already_prayed') +
+            '</label>' +
+            '<div style="font-size:0.75em;color:var(--text-muted);margin-bottom:6px;padding:0 4px;">' + t('qada_already_prayed_hint') + '</div>' +
+            '<input type="number" id="qadaAlreadyPrayed" min="0" value="0" style="width:100%;padding:12px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:12px;font-size:16px;font-family:inherit;background:var(--card-bg);color:var(--text-primary);box-sizing:border-box;">' +
+        '</div>';
+
         // Next button
         html += '<button id="qadaNextBtn1" class="qada-primary-btn">' + t('qada_next') + '</button>';
 
@@ -342,6 +381,17 @@ window.App.QadaCalc = (function() {
     }
 
     function restoreStep1Values() {
+        // Set plan start date default even for new plans
+        var startEl = document.getElementById('qadaPlanStartDate');
+        if (startEl) {
+            if (wizardData.planStartDateGregorian) {
+                startEl.value = wizardData.planStartDateGregorian;
+            } else {
+                startEl.value = new Date().toISOString().split('T')[0];
+            }
+            updateStartDatePreview();
+        }
+
         if (!wizardData.pubertyDateGregorian) return;
         var pub = document.getElementById('qadaPubertyDate');
         var reg = document.getElementById('qadaRegularDate');
@@ -350,6 +400,12 @@ window.App.QadaCalc = (function() {
 
         var mens = document.getElementById('qadaMenstrualDays');
         if (mens && wizardData.menstrualDaysPerCycle) mens.value = wizardData.menstrualDaysPerCycle;
+
+        var nifas = document.getElementById('qadaNifasDays');
+        if (nifas && wizardData.nifasTotalDays) nifas.value = wizardData.nifasTotalDays;
+
+        var alreadyEl = document.getElementById('qadaAlreadyPrayed');
+        if (alreadyEl && wizardData.alreadyPrayed) alreadyEl.value = wizardData.alreadyPrayed;
 
         if (additionalPeriods.length > 0) {
             var yesBtn = document.getElementById('qadaAddYes');
@@ -361,6 +417,18 @@ window.App.QadaCalc = (function() {
 
         updateHijriPreview();
         updateRunningTotal();
+    }
+
+    function updateStartDatePreview() {
+        var el = document.getElementById('qadaPlanStartDate');
+        var preview = document.getElementById('qadaStartDatePreview');
+        if (!el || !preview) return;
+        if (!el.value) { preview.style.display = 'none'; return; }
+        var h = gToH(el.value);
+        wizardData.planStartDate = h;
+        wizardData.planStartDateGregorian = el.value;
+        preview.style.display = '';
+        preview.textContent = formatHijriDate(h);
     }
 
     // ==================== STEP 2 ====================
@@ -516,6 +584,23 @@ window.App.QadaCalc = (function() {
             '</div>';
         }
 
+        // Nifas deduction (female)
+        if (wizardData.nifasTotalDays > 0) {
+            html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border,rgba(0,0,0,0.06));font-size:0.85em;">' +
+                '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_nifas_deduction') + '</div>' +
+                '<div style="color:#dc2626;font-weight:600;">-' + wizardData.nifasTotalDays + ' ' + t('qada_period_days') + '</div>' +
+            '</div>';
+        }
+
+        // Already prayed deduction
+        if (wizardData.alreadyPrayed > 0) {
+            html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border,rgba(0,0,0,0.06));font-size:0.85em;">' +
+                '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_already_deduction') + '</div>' +
+                '<div style="color:#dc2626;font-weight:600;">-' + (wizardData.alreadyPrayed * 5) + ' ' + t('qada_period_prayers') +
+                ' (' + wizardData.alreadyPrayed + ' ' + t('qada_period_days') + ')</div>' +
+            '</div>';
+        }
+
         // Additional periods
         if (additionalPeriods.length > 0) {
             html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border,rgba(0,0,0,0.06));font-size:0.85em;">' +
@@ -560,6 +645,15 @@ window.App.QadaCalc = (function() {
                 '<span style="color:var(--text-secondary);">' + t('qada_daily_count') + '</span>' +
                 '<span style="font-weight:700;color:var(--primary);">' + wizardData.dailyTarget + '</span>' +
             '</div>';
+
+        // Plan start date
+        if (wizardData.planStartDate) {
+            var startDateText = formatDualDate(wizardData.planStartDate);
+            html += '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">' +
+                '<span style="color:var(--text-secondary);">' + t('qada_start_date') + '</span>' +
+                '<span style="font-weight:700;color:var(--primary);text-align:left;direction:ltr;">' + startDateText + '</span>' +
+            '</div>';
+        }
 
         var est = calculateCompletion(wizardData.totalAll, wizardData.dailyTarget);
         if (est) {
@@ -787,7 +881,16 @@ window.App.QadaCalc = (function() {
         }
 
         var totals = calculateTotals(base);
-        numEl.textContent = totals.totalAll;
+        var displayTotal = totals.totalAll;
+
+        // Deduct already prayed days
+        var alreadyInput = document.getElementById('qadaAlreadyPrayed');
+        var alreadyPrayed = alreadyInput ? parseInt(alreadyInput.value) || 0 : 0;
+        if (alreadyPrayed > 0) {
+            displayTotal = Math.max(0, displayTotal - (alreadyPrayed * 5));
+        }
+
+        numEl.textContent = displayTotal;
         totalEl.style.display = '';
     }
 
@@ -835,6 +938,15 @@ window.App.QadaCalc = (function() {
             var mensEl = document.getElementById('qadaMenstrualDays');
             if (mensEl) mensEl.oninput = function() { updateRunningTotal(); };
 
+            var nifasEl = document.getElementById('qadaNifasDays');
+            if (nifasEl) nifasEl.oninput = function() { updateRunningTotal(); };
+
+            var startDateEl = document.getElementById('qadaPlanStartDate');
+            if (startDateEl) startDateEl.onchange = function() { updateStartDatePreview(); };
+
+            var alreadyEl = document.getElementById('qadaAlreadyPrayed');
+            if (alreadyEl) alreadyEl.oninput = function() { updateRunningTotal(); };
+
             // Yes/No additional
             var yesBtn = document.getElementById('qadaAddYes');
             var noBtn = document.getElementById('qadaAddNo');
@@ -872,6 +984,19 @@ window.App.QadaCalc = (function() {
                 wizardData.additionalPeriods = JSON.parse(JSON.stringify(additionalPeriods));
                 wizardData.totalByPrayer = totals.totalByPrayer;
                 wizardData.totalAll = totals.totalAll;
+
+                // Save already prayed and deduct
+                var apEl = document.getElementById('qadaAlreadyPrayed');
+                var apVal = apEl ? parseInt(apEl.value) || 0 : 0;
+                wizardData.alreadyPrayed = apVal;
+                if (apVal > 0) {
+                    var deductPerPrayer = apVal;
+                    PRAYER_IDS.forEach(function(id) {
+                        wizardData.totalByPrayer[id] = Math.max(0, wizardData.totalByPrayer[id] - deductPerPrayer);
+                    });
+                    wizardData.totalAll = Math.max(0, wizardData.totalAll - (apVal * 5));
+                }
+
                 currentStep = 2;
                 renderOverlay();
             };
@@ -957,6 +1082,10 @@ window.App.QadaCalc = (function() {
                     totalHijriDays: wizardData.totalHijriDays,
                     menstrualDaysPerCycle: wizardData.menstrualDaysPerCycle || 0,
                     menstrualTotalDays: wizardData.menstrualTotalDays || 0,
+                    nifasTotalDays: wizardData.nifasTotalDays || 0,
+                    planStartDate: wizardData.planStartDate || null,
+                    planStartDateGregorian: wizardData.planStartDateGregorian || '',
+                    alreadyPrayed: wizardData.alreadyPrayed || 0,
                     additionalPeriods: JSON.parse(JSON.stringify(additionalPeriods)),
                     totalByPrayer: wizardData.totalByPrayer,
                     totalAll: wizardData.totalAll,
