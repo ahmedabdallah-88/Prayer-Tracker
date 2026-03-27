@@ -439,7 +439,7 @@ window.App.Tracker = (function() {
                 iconWrap.className = 'prayer-tab-icon';
                 if (prayer.id === activePrayerId) {
                     iconWrap.style.background = SKY_GRADIENTS[prayer.id] || '#888';
-                    iconWrap.style.boxShadow = '0 2px 8px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
+                    iconWrap.style.boxShadow = '0 4px 10px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
                 }
                 iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
 
@@ -450,13 +450,15 @@ window.App.Tracker = (function() {
                 tab.appendChild(iconWrap);
                 tab.appendChild(nameSpan);
 
-                tab.onclick = (function(pid) {
+                tab.onclick = (function(pid, iconEl) {
                     return function() {
+                        iconEl.classList.add('tap-anim');
+                        setTimeout(function() { iconEl.classList.remove('tap-anim'); }, 100);
                         _activeTab[type] = pid;
                         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
                         renderTrackerMonth(type);
                     };
-                })(prayer.id);
+                })(prayer.id, iconWrap);
 
                 tabsContainer.appendChild(tab);
             });
