@@ -295,7 +295,7 @@ window.App.Tracker = (function() {
         'sunnah-asr': 'linear-gradient(135deg, #E8A849, #C07828)',
         'sunnah-maghrib': 'linear-gradient(135deg, #C47A5A, #9E5238)',
         'sunnah-isha': 'linear-gradient(135deg, #5B6B8A, #3A4A68)',
-        'witr': 'linear-gradient(135deg, #a855f7, #7E3A8A)'
+        'witr': 'linear-gradient(135deg, #7C6DAF, #5A4B8A)'
     };
 
     var SKY_SHADOWS = {
@@ -305,7 +305,7 @@ window.App.Tracker = (function() {
         'sunnah-fajr': 'rgba(196,138,144,0.35)', 'duha': 'rgba(245,158,11,0.35)',
         'sunnah-dhuhr': 'rgba(212,160,48,0.35)', 'sunnah-asr': 'rgba(192,120,40,0.35)',
         'sunnah-maghrib': 'rgba(158,82,56,0.35)', 'sunnah-isha': 'rgba(58,74,104,0.35)',
-        'witr': 'rgba(126,58,138,0.35)'
+        'witr': 'rgba(90,75,138,0.35)'
     };
 
     function _getDefaultPrayerTab(type) {
@@ -373,13 +373,32 @@ window.App.Tracker = (function() {
             chipsContainer.className = 'prayer-chips-container';
             chipsContainer.id = type + 'PrayerTabs';
 
+            var CHIP_SHADOWS = {
+                'tahajjud': 'rgba(30,58,138,0.30)', 'sunnah-fajr': 'rgba(196,138,144,0.30)',
+                'duha': 'rgba(212,160,48,0.30)', 'sunnah-dhuhr': 'rgba(212,160,48,0.30)',
+                'sunnah-asr': 'rgba(192,120,40,0.30)', 'sunnah-maghrib': 'rgba(158,82,56,0.30)',
+                'sunnah-isha': 'rgba(58,74,104,0.30)', 'witr': 'rgba(90,75,138,0.30)'
+            };
+
             prayers.forEach(function(prayer) {
                 var chip = document.createElement('button');
-                chip.className = 'prayer-chip' + (prayer.id === activePrayerId ? ' active' : '');
+                var isActive = prayer.id === activePrayerId;
+                chip.className = 'prayer-chip' + (isActive ? ' active' : '');
                 chip.setAttribute('data-prayer', prayer.id);
 
-                chip.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>' +
-                    '<span class="prayer-chip-name">' + I18n.getPrayerName(prayer.id) + '</span>';
+                if (isActive) {
+                    chip.style.background = SKY_GRADIENTS[prayer.id] || '#888';
+                    chip.style.border = 'none';
+                    chip.style.boxShadow = '0 2px 8px ' + (CHIP_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
+                }
+
+                var iconFill = isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400";
+                var iconColor = isActive ? '#fff' : 'var(--text-muted)';
+                var nameColor = isActive ? '#fff' : 'var(--text-secondary)';
+                var nameWeight = isActive ? '700' : '600';
+
+                chip.innerHTML = '<span class="material-symbols-rounded" style="color:' + iconColor + ';font-variation-settings:' + iconFill + '">' + prayer.icon + '</span>' +
+                    '<span class="prayer-chip-name" style="color:' + nameColor + ';font-weight:' + nameWeight + '">' + I18n.getPrayerName(prayer.id) + '</span>';
 
                 chip.onclick = (function(pid) {
                     return function() {
