@@ -419,8 +419,8 @@ window.App.Tracker = (function() {
                 var iconWrap = document.createElement('div');
                 iconWrap.className = 'prayer-tab-icon';
                 if (prayer.id === activePrayerId) {
-                    iconWrap.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-mid))';
-                    iconWrap.style.boxShadow = '0 2px 8px rgba(var(--primary-rgb),0.3)';
+                    iconWrap.style.background = SKY_GRADIENTS[prayer.id] || '#888';
+                    iconWrap.style.boxShadow = '0 2px 8px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
                 }
                 iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
 
