@@ -388,13 +388,16 @@ window.App.Azkar = (function() {
             if (isFuture) card.style.opacity = '0.35';
 
             var barColor = avgPct >= 90 ? 'var(--primary)' : avgPct >= 70 ? 'var(--accent)' : 'var(--danger, #dc2626)';
+            var pctColor = avgPct >= 80 ? 'var(--primary)' : avgPct >= 50 ? 'var(--accent)' : avgPct > 0 ? 'var(--danger)' : '#8D99AE';
+            var accentColor = avgPct >= 80 ? 'var(--primary)' : avgPct >= 50 ? 'var(--accent)' : avgPct > 0 ? 'var(--danger)' : '#8D99AE';
             var hijriLabel = Hijri.getHijriMonthName(month - 1);
             var gregSpan = Hijri.getGregorianSpanForHijriMonth(yearVal, month);
 
             card.innerHTML =
+                '<div class="month-card-accent" style="background:' + accentColor + '"></div>' +
                 '<div class="month-card-header">' +
                     '<h3>' + hijriLabel + (isCurrent ? ' <span class="current-dot"></span>' : '') + '</h3>' +
-                    '<span class="month-pct">' + avgPct + '%</span>' +
+                    '<span class="month-pct" style="color:' + pctColor + '">' + avgPct + '%</span>' +
                 '</div>' +
                 '<div class="month-greg-ref">' + gregSpan + '</div>' +
                 '<div class="month-progress"><div class="progress-bar"><div class="progress-fill" style="width:' + avgPct + '%;background:' + barColor + '"></div></div></div>' +

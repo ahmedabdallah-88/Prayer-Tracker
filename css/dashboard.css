@@ -284,71 +284,8 @@
     font-weight: 700;
 }
 
-/* Year Overview restyled month cards */
-.month-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.month-card-header h3 {
-    margin: 0;
-    padding: 0;
-    border: none;
-    text-align: start;
-    font-size: 0.95em;
-}
-
-.month-pct {
-    font-size: 2em;
-    font-weight: 800;
-    font-family: 'Rubik', sans-serif;
-    color: var(--primary);
-    line-height: 1;
-}
-
-.month-greg-ref {
-    font-size: 0.72em;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-}
-
-.month-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-    flex-wrap: wrap;
-}
-
-.month-stat-mini {
-    font-size: 0.78em;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.month-badge {
-    font-size: 0.72em;
-    font-weight: 600;
-    color: var(--accent);
-    background: rgba(var(--accent-rgb),0.1);
-    padding: 2px 8px;
-    border-radius: 12px;
-}
-
+/* Year Overview month cards — overrides consolidated in main.css */
+/* Only keep margin-inline-start for RTL-aware current dot */
 .current-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: var(--primary);
-    border-radius: 50%;
     margin-inline-start: 4px;
-    vertical-align: middle;
-}
-
-.month-card.current-month {
-    background: rgba(var(--primary-rgb),0.06);
-    border: 1.5px solid rgba(var(--primary-rgb),0.2);
-    box-shadow: none;
 }

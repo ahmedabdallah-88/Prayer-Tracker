@@ -151,9 +151,11 @@ window.App.YearOverview = (function() {
             if (isCurrent) card.classList.add('current-month');
             if (isFuture) card.style.opacity = '0.35';
 
-            // Progress bar color
+            // Dynamic colors based on percentage
             var pct = ms.stats.percentage;
             var barColor = pct >= 90 ? 'linear-gradient(90deg, var(--primary-mid), var(--primary-light))' : pct >= 70 ? 'linear-gradient(90deg, var(--accent), var(--accent-light))' : pct > 0 ? 'linear-gradient(90deg, var(--danger), var(--danger-light))' : 'transparent';
+            var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : pct > 0 ? 'var(--danger)' : '#8D99AE';
+            var accentColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : pct > 0 ? 'var(--danger)' : '#8D99AE';
 
             var congBadge = '';
             if (type === 'fard' && ms.congRate > 0) {
@@ -164,9 +166,10 @@ window.App.YearOverview = (function() {
             var gregSpan = Hijri.getGregorianSpanForHijriMonth(yearVal, month);
 
             card.innerHTML =
+                '<div class="month-card-accent" style="background:' + accentColor + '"></div>' +
                 '<div class="month-card-header">' +
                     '<h3>' + hijriLabel + (isCurrent ? ' <span class="current-dot"></span>' : '') + '</h3>' +
-                    '<span class="month-pct">' + pct + '%</span>' +
+                    '<span class="month-pct" style="color:' + pctColor + '">' + pct + '%</span>' +
                 '</div>' +
                 '<div class="month-greg-ref">' + gregSpan + '</div>' +
                 '<div class="month-progress">' +
