@@ -378,6 +378,8 @@ window.App.Tracker = (function() {
         container.style.padding = '0';
         container.style.boxShadow = 'none';
         container.style.borderRadius = '0';
+        container.style.overflow = 'hidden';
+        container.style.maxWidth = '100%';
 
         var prayers     = Storage.getPrayersArray(type);
         var dataObj     = Storage.getDataObject(type);
@@ -453,13 +455,6 @@ window.App.Tracker = (function() {
             });
 
             container.appendChild(scroller);
-
-            // Only scroll to active tab when explicitly requested (tab click or initial open)
-            if (scrollToTab && activeTabEl) {
-                requestAnimationFrame(function() {
-                    activeTabEl.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'instant' });
-                });
-            }
         } else {
             // ── FARD: TABS LAYOUT ──
             var tabsContainer = document.createElement('div');
