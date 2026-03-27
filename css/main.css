@@ -685,19 +685,22 @@ body {
     border-radius: var(--card-radius, 20px);
     border: 1px solid rgba(0,0,0,0.04);
     box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-    padding: 14px 16px;
-    margin-top: 12px;
+    padding: 12px;
 }
 
-/* Stats row inside tracker card */
+/* Stats row — standalone glassmorphism card (Card 1) */
 .prayer-tab-stats {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 14px 16px;
-    padding-bottom: 12px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,0.04);
+    padding: 8px 12px;
+    margin-top: 10px;
+    margin-bottom: 8px;
     transition: opacity 0.2s ease;
 }
 
@@ -1059,6 +1062,15 @@ body {
     padding: 12px 10px;
     border: 1px solid rgba(0,0,0,0.04);
     overflow: visible;
+}
+
+/* Tracker (month) mode: strip outer card so individual cards stand alone */
+.prayers-container.tracker-mode {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
 }
 
 .prayer-section {

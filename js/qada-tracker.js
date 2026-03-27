@@ -233,11 +233,7 @@ window.App.QadaTracker = (function() {
             }
         });
 
-        // ── TRACKER CARD (wraps stats + grid) ──
-        var trackerCard = document.createElement('div');
-        trackerCard.className = 'tracker-card';
-
-        // ── STATS ROW ──
+        // ── STATS ROW (Card 1 — own glassmorphism styling) ──
         var totalForPrayer = plan.totalByPrayer ? (plan.totalByPrayer[activePrayerId] || 0) : 0;
         var completedForPrayer = plan.completedByPrayer ? (plan.completedByPrayer[activePrayerId] || 0) : 0;
         var pctForPrayer = totalForPrayer > 0 ? Math.round((completedForPrayer / totalForPrayer) * 100) : 0;
@@ -252,7 +248,11 @@ window.App.QadaTracker = (function() {
             showJamaah: false,
             dayLabel: 'اليوم'
         });
-        trackerCard.appendChild(statsRow);
+        container.appendChild(statsRow);
+
+        // ── CALENDAR CARD (Card 2 — grid) ──
+        var trackerCard = document.createElement('div');
+        trackerCard.className = 'tracker-card';
 
         // ── SINGLE CALENDAR GRID ──
         var gridWrap = document.createElement('div');

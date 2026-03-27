@@ -372,6 +372,12 @@ window.App.Tracker = (function() {
         var container = document.getElementById(type + 'TrackerPrayersContainer');
         if (!container) return;
         container.innerHTML = '';
+        // Strip outer .prayers-container card so individual cards stand alone
+        container.style.background = 'transparent';
+        container.style.border = 'none';
+        container.style.padding = '0';
+        container.style.boxShadow = 'none';
+        container.style.borderRadius = '0';
 
         var prayers     = Storage.getPrayersArray(type);
         var dataObj     = Storage.getDataObject(type);
@@ -518,11 +524,7 @@ window.App.Tracker = (function() {
             });
         }
 
-        // ── TRACKER CARD (wraps stats + grid + legend) ──
-        var trackerCard = document.createElement('div');
-        trackerCard.className = 'tracker-card';
-
-        // ── STATS ROW ──
+        // ── STATS ROW (Card 1 — own glassmorphism styling) ──
         var activePrayer = null;
         for (var pi = 0; pi < prayers.length; pi++) {
             if (prayers[pi].id === activePrayerId) { activePrayer = prayers[pi]; break; }
@@ -554,7 +556,11 @@ window.App.Tracker = (function() {
             showJamaah: type === 'fard',
             dayLabel: 'الأيام'
         });
-        trackerCard.appendChild(statsRow);
+        container.appendChild(statsRow);
+
+        // ── CALENDAR CARD (Card 2 — grid + legend) ──
+        var trackerCard = document.createElement('div');
+        trackerCard.className = 'tracker-card';
 
         // ── SINGLE CALENDAR GRID ──
         var gridWrap = document.createElement('div');
