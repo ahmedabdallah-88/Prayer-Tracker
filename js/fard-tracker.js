@@ -420,6 +420,19 @@ window.App.Tracker = (function() {
             var todayDay = todayH.day;
             var activeTabEl = null;
 
+            // Track touch to distinguish scroll from tap
+            var touchStartX = 0;
+            var isTouchScrolling = false;
+            scroller.addEventListener('touchstart', function(e) {
+                touchStartX = e.touches[0].clientX;
+                isTouchScrolling = false;
+            }, { passive: true });
+            scroller.addEventListener('touchmove', function(e) {
+                if (Math.abs(e.touches[0].clientX - touchStartX) > 10) {
+                    isTouchScrolling = true;
+                }
+            }, { passive: true });
+
             prayers.forEach(function(prayer) {
                 var isActive = prayer.id === activePrayerId;
                 var isDoneToday = isCurrentMonth && dataObj[hMonth] && dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][todayDay];
@@ -444,6 +457,7 @@ window.App.Tracker = (function() {
 
                 tab.onclick = (function(pid) {
                     return function() {
+                        if (isTouchScrolling) { isTouchScrolling = false; return; }
                         _activeTab[type] = pid;
                         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
                         renderTrackerMonth(type, true);
