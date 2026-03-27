@@ -681,37 +681,104 @@ body {
 .prayer-tab-stats {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: space-around;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 14px 16px;
+    border: 1px solid rgba(0,0,0,0.04);
     margin-bottom: 10px;
-    min-height: 28px;
     transition: opacity 0.2s ease;
 }
 
-.prayer-tab-stats .stat-badge {
-    display: inline-flex;
+.stats-section {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 3px 10px;
-    border-radius: 8px;
-    font-size: 0.7em;
-    font-weight: 700;
+    gap: 4px;
+}
+
+.stats-ring-wrap {
+    position: relative;
+    width: 52px;
+    height: 52px;
+}
+
+.stats-ring-wrap svg {
+    width: 52px;
+    height: 52px;
+    transform: rotate(-90deg);
+}
+
+.stats-ring-pct {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    font-weight: 800;
+    color: #2D6A4F;
     font-family: 'Rubik', sans-serif;
+    line-height: 1;
 }
 
-.prayer-tab-stats .stat-badge.pct {
-    color: var(--primary);
-    background: rgba(var(--primary-rgb),0.1);
+.stats-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
 }
 
-.prayer-tab-stats .stat-badge.cong {
-    color: var(--accent);
-    background: rgba(var(--accent-rgb),0.1);
+.stats-icon-wrap.jamaah {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, rgba(212,160,60,0.15), rgba(212,160,60,0.08));
+    border: 1px solid rgba(212,160,60,0.15);
+    box-shadow: 0 2px 8px rgba(212,160,60,0.12);
 }
 
-.prayer-tab-stats .stat-badge.count {
-    color: var(--text-muted);
-    background: rgba(0,0,0,0.05);
+.stats-icon-wrap.days {
+    width: 36px;
+    height: 36px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 10px;
+}
+
+.stats-value {
+    font-size: 18px;
+    font-weight: 800;
+    font-family: 'Rubik', sans-serif;
+    line-height: 1.2;
+}
+
+.stats-value.jamaah-val {
+    color: #D4A03C;
+}
+
+.stats-value.days-val {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.stats-value.days-val .days-total {
+    font-size: 11px;
+    color: #8D99AE;
+    font-weight: 700;
+}
+
+.stats-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #8D99AE;
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    line-height: 1;
+}
+
+.stats-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(0,0,0,0.06);
 }
 
 /* Calendar fade transition */

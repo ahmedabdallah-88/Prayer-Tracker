@@ -236,12 +236,18 @@ window.App.QadaTracker = (function() {
         // ── STATS ROW ──
         var totalForPrayer = plan.totalByPrayer ? (plan.totalByPrayer[activePrayerId] || 0) : 0;
         var completedForPrayer = plan.completedByPrayer ? (plan.completedByPrayer[activePrayerId] || 0) : 0;
-        var remainForPrayer = totalForPrayer - completedForPrayer;
-        if (remainForPrayer < 0) remainForPrayer = 0;
+        var pctForPrayer = totalForPrayer > 0 ? Math.round((completedForPrayer / totalForPrayer) * 100) : 0;
+        var todayCountForPrayer = isCurrentMonth ? getCount(logData, String(todayH.day), activePrayerId) : 0;
 
         var statsRow = document.createElement('div');
         statsRow.className = 'prayer-tab-stats';
-        statsRow.innerHTML = '<span class="stat-badge count">' + t('qada_remaining_short') + ': ' + remainForPrayer + '</span>';
+        statsRow.innerHTML = window.App.Tracker.buildStatsRow({
+            pct: pctForPrayer,
+            completed: todayCountForPrayer,
+            total: dailyTarget,
+            showJamaah: false,
+            dayLabel: 'اليوم'
+        });
         container.appendChild(statsRow);
 
         // ── SINGLE CALENDAR GRID ──

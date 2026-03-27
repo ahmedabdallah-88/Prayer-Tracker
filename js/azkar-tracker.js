@@ -142,9 +142,13 @@ window.App.Azkar = (function() {
 
         var statsRow = document.createElement('div');
         statsRow.className = 'prayer-tab-stats';
-        var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
-        statsRow.innerHTML = '<span class="stat-badge pct" style="color:' + pctColor + '">' + pct + '%</span>' +
-            '<span class="stat-badge count">' + completed + '/' + daysInMonth + '</span>';
+        statsRow.innerHTML = window.App.Tracker.buildStatsRow({
+            pct: pct,
+            completed: completed,
+            total: daysInMonth,
+            showJamaah: false,
+            dayLabel: 'الأيام'
+        });
         container.appendChild(statsRow);
 
         // ── SINGLE CALENDAR GRID ──

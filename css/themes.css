@@ -201,9 +201,25 @@
     color: #8A8A8E;
 }
 
-[data-theme="dark"] .prayer-tab-stats .stat-badge.count {
+[data-theme="dark"] .prayer-tab-stats {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .stats-ring-pct {
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .stats-icon-wrap.days {
     background: rgba(255,255,255,0.08);
-    color: #8A8A8E;
+}
+
+[data-theme="dark"] .stats-value.days-val {
+    color: #E8E6E1;
+}
+
+[data-theme="dark"] .stats-divider {
+    background: rgba(255,255,255,0.08);
 }
 
 [data-theme="dark"] .prayer-chip {

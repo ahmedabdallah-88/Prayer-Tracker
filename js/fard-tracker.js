@@ -279,6 +279,44 @@ window.App.Tracker = (function() {
         }
     }
 
+    // ==================== STATS ROW BUILDER ====================
+    function _buildProgressRing(pct) {
+        var r = 18, sw = 5, size = 52;
+        var circ = 2 * Math.PI * r;
+        var offset = circ - (pct / 100) * circ;
+        var strokeColor = pct >= 80 ? '#2D6A4F' : pct >= 50 ? '#D4A03C' : '#C1574E';
+        return '<div class="stats-ring-wrap">' +
+            '<svg viewBox="0 0 ' + size + ' ' + size + '">' +
+            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="' + sw + '"/>' +
+            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '"/>' +
+            '</svg>' +
+            '<span class="stats-ring-pct" style="color:' + strokeColor + '">' + pct + '%</span>' +
+            '</div>';
+    }
+
+    function _buildStatsRow(opts) {
+        // opts: { pct, completed, total, congCount, showJamaah, label, dayLabel }
+        var html = '<div class="stats-section">' + _buildProgressRing(opts.pct) + '</div>';
+
+        if (opts.showJamaah) {
+            html += '<div class="stats-divider"></div>' +
+                '<div class="stats-section">' +
+                '<div class="stats-icon-wrap jamaah"><span class="material-symbols-rounded" style="font-size:22px;color:#D4A03C;font-variation-settings:\'FILL\' 1,\'wght\' 600">mosque</span></div>' +
+                '<span class="stats-value jamaah-val">' + (opts.congCount || 0) + '</span>' +
+                '<span class="stats-label">جماعة</span>' +
+                '</div>';
+        }
+
+        html += '<div class="stats-divider"></div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-icon-wrap days"><span class="material-symbols-rounded" style="font-size:20px;color:#8D99AE;font-variation-settings:\'FILL\' 1,\'wght\' 500">calendar_today</span></div>' +
+            '<span class="stats-value days-val">' + opts.completed + '<span class="days-total">/' + opts.total + '</span></span>' +
+            '<span class="stats-label">' + (opts.dayLabel || 'الأيام') + '</span>' +
+            '</div>';
+
+        return html;
+    }
+
     // ==================== PRAYER TAB STATE ====================
     var _activeTab = { fard: null, sunnah: null };
 
@@ -506,13 +544,14 @@ window.App.Tracker = (function() {
 
         var statsRow = document.createElement('div');
         statsRow.className = 'prayer-tab-stats';
-        var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : 'var(--danger)';
-        var statsHTML = '<span class="stat-badge pct" style="color:' + pctColor + ';background:' + pctColor.replace('var(--', 'rgba(var(--').replace(')', '-rgb),0.1)') + '">' + pct + '%</span>';
-        if (type === 'fard' && congCount > 0) {
-            statsHTML += '<span class="stat-badge cong"><span class="material-symbols-rounded" style="font-size:12px;">mosque</span> ' + congCount + '</span>';
-        }
-        statsHTML += '<span class="stat-badge count">' + completed + '/' + adjustedTotal + '</span>';
-        statsRow.innerHTML = statsHTML;
+        statsRow.innerHTML = _buildStatsRow({
+            pct: pct,
+            completed: completed,
+            total: adjustedTotal,
+            congCount: congCount,
+            showJamaah: type === 'fard',
+            dayLabel: 'الأيام'
+        });
         container.appendChild(statsRow);
 
         // ── SINGLE CALENDAR GRID ──
@@ -1117,7 +1156,9 @@ window.App.Tracker = (function() {
         batchMarkPrayer:    batchMarkPrayer,
         toggleDay:          toggleDay,
         resetMonth:         resetMonth,
-        renderMonthDetail:  renderMonthDetail
+        renderMonthDetail:  renderMonthDetail,
+        buildStatsRow:      _buildStatsRow,
+        buildProgressRing:  _buildProgressRing
     };
 })();
 
