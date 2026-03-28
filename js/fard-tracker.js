@@ -357,10 +357,38 @@ window.App.Tracker = (function() {
         var hMonth = Hijri.getCurrentHijriMonth();
         if (todayH.year === hYear && todayH.month === hMonth) {
             try {
+                // Try live prayer state first
                 var state = window.getCurrentPrayerState ? window.getCurrentPrayerState() : null;
                 if (state) {
                     if (state.active) return state.active;
                     return 'isha'; // Before fajr — show last prayer
+                }
+                // Fallback: read cached prayer times from localStorage
+                var stored = localStorage.getItem('salah_prayer_times');
+                if (stored) {
+                    var data = JSON.parse(stored);
+                    var todayStr = new Date().toISOString().split('T')[0];
+                    if (data.date === todayStr && data.timings) {
+                        var now = new Date();
+                        var nowMin = now.getHours() * 60 + now.getMinutes();
+                        var ids = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+                        var times = [];
+                        for (var ti = 0; ti < ids.length; ti++) {
+                            var clean = (data.timings[ids[ti]] || '').replace(/\s*\(.*\)/, '').trim();
+                            var parts = clean.split(':');
+                            times.push(parseInt(parts[0] || 0) * 60 + parseInt(parts[1] || 0));
+                        }
+                        var active = null;
+                        for (var tj = 0; tj < ids.length; tj++) {
+                            var end = tj + 1 < ids.length ? times[tj + 1] : 1440;
+                            if (nowMin >= times[tj] && nowMin < end) {
+                                active = ids[tj];
+                                break;
+                            }
+                        }
+                        if (active) return active;
+                        return 'isha'; // Before fajr
+                    }
                 }
             } catch(e) {}
         }
