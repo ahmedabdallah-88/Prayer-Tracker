@@ -4020,3 +4020,108 @@ body::before {
         animation: none;
     }
 }
+
+/* ==================== Crescent Moons ==================== */
+
+.moons-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding: 8px 4px 0;
+    gap: 4px;
+    min-height: 100px;
+}
+
+.moon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.moon-zone-svg {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moon-zone-num {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moon-zone-best {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moon-zone-icon {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moon-zone-name {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moon-body-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes moon-glow-sm-kf {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(200,200,220,0.2)); }
+    50% { filter: drop-shadow(0 0 8px rgba(200,200,220,0.4)); }
+}
+
+@keyframes moon-glow-md-kf {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(220,220,240,0.3)); }
+    50% { filter: drop-shadow(0 0 12px rgba(220,220,240,0.5)); }
+}
+
+@keyframes moon-glow-lg-kf {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255,215,0,0.3)); }
+    50% { filter: drop-shadow(0 0 20px rgba(255,215,0,0.6)); }
+}
+
+@keyframes moon-float-kf {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.moon-glow-sm {
+    animation: moon-glow-sm-kf 3.5s ease-in-out infinite, moon-float-kf 4s ease-in-out infinite;
+}
+
+.moon-glow-md {
+    animation: moon-glow-md-kf 3s ease-in-out infinite, moon-float-kf 3.5s ease-in-out infinite;
+}
+
+.moon-glow-lg {
+    animation: moon-glow-lg-kf 2s ease-in-out infinite, moon-float-kf 3s ease-in-out infinite;
+}
+
+.moon-float {
+    animation: moon-float-kf 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .moon-glow-sm,
+    .moon-glow-md,
+    .moon-glow-lg,
+    .moon-float {
+        animation: none;
+    }
+}

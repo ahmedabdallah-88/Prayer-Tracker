@@ -309,6 +309,7 @@ window.App.Config = {
         'no_period_data': { ar: '\u062d\u062f\u062f\u064a \u0623\u064a\u0627\u0645 \u0627\u0644\u0625\u0639\u0641\u0627\u0621 \u0645\u0646 \u0627\u0644\u0645\u062a\u062a\u0628\u0639 \u0627\u0644\u0634\u0647\u0631\u064a \u0644\u062a\u0638\u0647\u0631 \u0647\u0646\u0627', en: 'Mark exempt days in the monthly tracker to see them here' },
 
         // Chart/dashboard titles
+        'prayer_streaks_title': { ar: '\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0645\u0648\u0627\u0638\u0628\u0629 \u0639\u0644\u0649 \u0627\u0644\u0635\u0644\u0627\u0629', en: 'Prayer Consistency Streaks' },
         'congregation_streak': { ar: '\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0645\u0648\u0627\u0638\u0628\u0629 \u0639\u0644\u0649 \u0627\u0644\u062c\u0645\u0627\u0639\u0629', en: 'Congregation Streaks' },
         'sunnah_streak': { ar: '\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0645\u0648\u0627\u0638\u0628\u0629', en: 'Adherence Streaks' },
         'weekly_congregation_pattern': { ar: '\u0646\u0645\u0637 \u0627\u0644\u062c\u0645\u0627\u0639\u0629 \u0627\u0644\u0623\u0633\u0628\u0648\u0639\u064a', en: 'Weekly Congregation Pattern' },

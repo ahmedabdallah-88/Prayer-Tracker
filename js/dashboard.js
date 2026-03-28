@@ -190,6 +190,14 @@ window.App.Dashboard = (function() {
             }
         }
 
+        // 1b. Prayer Consistency Moons (fard only)
+        if (type === 'fard') {
+            var moonEl = document.getElementById('fardPrayerMoons');
+            if (moonEl && window.App.PrayerStreaks) {
+                window.App.PrayerStreaks.renderMoonSection(moonEl);
+            }
+        }
+
         // 2. Streak Flame Bars
         var streakEl = document.getElementById(type + 'StreakFlame');
         if (streakEl && window.App.Jamaah) {

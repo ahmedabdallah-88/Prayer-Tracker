@@ -586,3 +586,20 @@
 [data-theme="dark"] .lantern-prayer-name {
     color: #9CA3AF !important;
 }
+
+/* Dark mode: crescent moons */
+[data-theme="dark"] .moon-new-circle {
+    stroke: #555555;
+}
+[data-theme="dark"] .moon-cutout {
+    fill: var(--bg-primary, #1a1a2e);
+}
+[data-theme="dark"] .moon-best-num {
+    color: #9CA3AF !important;
+}
+[data-theme="dark"] .moon-prayer-name {
+    color: #9CA3AF !important;
+}
+[data-theme="dark"] .moon-verse {
+    color: rgba(255,255,255,0.3) !important;
+}
