@@ -3785,46 +3785,6 @@ body::before {
 
 .day-box.today-box .day-number { color: var(--primary); }
 
-/* Today dot indicator — always visible below the day number */
-.day-box.today-box::after {
-    content: '';
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--primary);
-    position: absolute;
-    top: auto;
-    right: auto;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    box-shadow: none;
-    display: block;
-    z-index: 3;
-}
-
-/* Today + checked: restore ::after to badge (not today dot) */
-.day-box.today-box.checked::after,
-.day-box.today-box.congregation::after,
-.day-box.today-box.qada::after {
-    content: '';
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    bottom: auto;
-    left: auto;
-    transform: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    z-index: 1;
-}
-
 /* Today + checked/congregation/qada: filled state wins */
 .day-box.today-box.checked {
     background: linear-gradient(135deg, var(--primary-mid), var(--primary-light));
