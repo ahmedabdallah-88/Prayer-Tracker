@@ -1338,27 +1338,6 @@ body {
     display: none !important;
 }
 
-/* === Today === */
-.day-box.today {
-    background: rgba(var(--primary-rgb),0.06);
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.3);
-    position: relative;
-}
-
-.day-box.today .day-number { color: var(--primary); }
-.day-box.today::after {
-    content: '';
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--primary);
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
 /* === Prayed (Munfarid) === */
 .day-box.checked {
     background: linear-gradient(135deg, var(--primary-mid), var(--primary-light));
@@ -3818,6 +3797,83 @@ body::before {
 }
 .day-box.today-box.qada .day-number { color: white; }
 .day-box.today-box.qada .day-greg { color: rgba(255,255,255,0.7); }
+
+/* Today + state badge pseudo-elements (explicit to prevent conflicts) */
+.day-box.today-box.checked::after {
+    content: '';
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 1;
+}
+.day-box.today-box.checked::before {
+    content: 'check';
+    font-family: 'Material Symbols Rounded';
+    font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 14;
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    font-size: 10px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.day-box.today-box.congregation::after {
+    content: '';
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    border-radius: 5px;
+    background: var(--accent);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 1;
+}
+.day-box.today-box.congregation::before {
+    content: 'mosque';
+    font-family: 'Material Symbols Rounded';
+    font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 14;
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    font-size: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.day-box.today-box.qada::after {
+    content: '';
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 1;
+}
+.day-box.today-box.qada::before {
+    content: 'schedule';
+    font-family: 'Material Symbols Rounded';
+    font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 14;
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    font-size: 10px;
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
 
 /* SVG Chart Legend (used by dashboard charts) */
 .svg-chart-legend {
