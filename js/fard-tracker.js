@@ -115,6 +115,7 @@ window.App.Tracker = (function() {
             Storage.setCurrentMonth(hMonth);
             Storage.setCurrentYear(hYear);
             Storage.loadAllData('fard');
+            _activeTab.fard = null; // Reset so auto-select picks current prayer
             updateTrackerView('fard');
         } else {
             // sunnah
@@ -349,11 +350,20 @@ window.App.Tracker = (function() {
 
     function _getDefaultPrayerTab(type) {
         if (type === 'sunnah') return 'sunnah-fajr';
-        // Use current prayer time if available
-        try {
-            var state = window.getCurrentPrayerState ? window.getCurrentPrayerState() : null;
-            if (state && state.active) return state.active;
-        } catch(e) {}
+        // Auto-select based on current prayer time (fard, current month only)
+        var Hijri = _getHijri();
+        var todayH = Hijri.getTodayHijri();
+        var hYear = Hijri.getCurrentHijriYear();
+        var hMonth = Hijri.getCurrentHijriMonth();
+        if (todayH.year === hYear && todayH.month === hMonth) {
+            try {
+                var state = window.getCurrentPrayerState ? window.getCurrentPrayerState() : null;
+                if (state) {
+                    if (state.active) return state.active;
+                    return 'isha'; // Before fajr — show last prayer
+                }
+            } catch(e) {}
+        }
         return 'fajr';
     }
 
