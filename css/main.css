@@ -3803,7 +3803,14 @@ body::before {
     z-index: 3;
 }
 
-/* Today + checked/congregation/qada: filled state wins, dot turns white */
+/* Today + checked: hide the dot indicator — checkmark is enough */
+.day-box.today-box.checked::after,
+.day-box.today-box.congregation::after,
+.day-box.today-box.qada::after {
+    display: none;
+}
+
+/* Today + checked/congregation/qada: filled state wins */
 .day-box.today-box.checked {
     background: linear-gradient(135deg, var(--primary-mid), var(--primary-light));
     border: 2px solid transparent;
@@ -3813,7 +3820,6 @@ body::before {
     animation: today-pulse 1.5s ease-in-out 2;
 }
 .day-box.today-box.checked .day-number { color: white; }
-.day-box.today-box.checked::after { background: white; }
 .day-box.today-box.checked .day-greg { color: rgba(255,255,255,0.7); }
 
 .day-box.today-box.congregation {
@@ -3825,7 +3831,6 @@ body::before {
     animation: today-pulse 1.5s ease-in-out 2;
 }
 .day-box.today-box.congregation .day-number { color: white !important; }
-.day-box.today-box.congregation::after { background: white; }
 .day-box.today-box.congregation .day-greg { color: rgba(255,255,255,0.7) !important; }
 
 .day-box.today-box.qada {
@@ -3837,7 +3842,6 @@ body::before {
     animation: today-pulse 1.5s ease-in-out 2;
 }
 .day-box.today-box.qada .day-number { color: white; }
-.day-box.today-box.qada::after { background: white; }
 .day-box.today-box.qada .day-greg { color: rgba(255,255,255,0.7); }
 
 /* SVG Chart Legend (used by dashboard charts) */
