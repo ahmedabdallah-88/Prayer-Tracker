@@ -3908,6 +3908,57 @@ body::before {
 
 /* ==================== Mosque Lanterns ==================== */
 
+.lanterns-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding: 8px 4px 0;
+    gap: 4px;
+}
+
+.lantern-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.lantern-zone-svg {
+    height: 80px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.lantern-zone-num {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lantern-zone-best {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lantern-zone-icon {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lantern-zone-name {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 @keyframes lantern-sway {
     0%, 100% { transform: rotate(-1.5deg); }
     50% { transform: rotate(1.5deg); }

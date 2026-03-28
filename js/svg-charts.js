@@ -140,10 +140,10 @@ window.App.SVGCharts = (function() {
         }
 
         var tierConfig = {
-            dead:   { w: 36, h: 46, fillTop: '#CCCCCC', fillBot: '#CCCCCC', stroke: 'none', glowOpMin: 0, glowOpMax: 0, glowDur: 0, swayDur: 0, flame: false, flicker: false, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
-            small:  { w: 40, h: 52, fillTop: '#D4C090', fillBot: '#B09840', stroke: 'none', glowOpMin: 0.2, glowOpMax: 0.5, glowDur: 2, swayDur: 3.5, flame: true, flicker: false, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
-            medium: { w: 44, h: 56, fillTop: '#E0C878', fillBot: '#C0A040', stroke: 'none', glowOpMin: 0.3, glowOpMax: 0.6, glowDur: 1.8, swayDur: 3, flame: true, flicker: true, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
-            large:  { w: 54, h: 70, fillTop: '#F0D878', fillBot: '#C09020', stroke: '#D4A03C', glowOpMin: 0.4, glowOpMax: 0.8, glowDur: 1.5, swayDur: 2.5, flame: true, flicker: true, flameBall: true, doubleGlow: true, numSize: 24, stringColor: '#D4A03C' }
+            dead:   { w: 32, h: 42, fillTop: '#CCCCCC', fillBot: '#CCCCCC', stroke: 'none', glowOpMin: 0, glowOpMax: 0, glowDur: 0, swayDur: 0, flame: false, flicker: false, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
+            small:  { w: 36, h: 48, fillTop: '#D4C090', fillBot: '#B09840', stroke: 'none', glowOpMin: 0.2, glowOpMax: 0.5, glowDur: 2, swayDur: 3.5, flame: true, flicker: false, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
+            medium: { w: 40, h: 52, fillTop: '#E0C878', fillBot: '#C0A040', stroke: 'none', glowOpMin: 0.3, glowOpMax: 0.6, glowDur: 1.8, swayDur: 3, flame: true, flicker: true, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
+            large:  { w: 48, h: 62, fillTop: '#F0D878', fillBot: '#C09020', stroke: '#D4A03C', glowOpMin: 0.4, glowOpMax: 0.8, glowDur: 1.5, swayDur: 2.5, flame: true, flicker: true, flameBall: true, doubleGlow: true, numSize: 24, stringColor: '#D4A03C' }
         };
 
         // Dark mode dead overrides applied via CSS class
@@ -248,20 +248,27 @@ window.App.SVGCharts = (function() {
             return svgEl;
         }
 
+        var SVG_ZONE_H = 80;
+
         function createLantern(p, index) {
             var tier = getTier(p.current);
             var cfg = tierConfig[tier];
             var uid = 'l' + index + '_' + Date.now();
 
             var cell = document.createElement('div');
-            cell.className = 'lantern-cell';
-            cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;';
+            cell.className = 'lantern-item';
 
-            // String
+            // Zone 1: SVG zone (fixed 80px height, lantern at bottom, string fills gap above)
+            var zoneSvg = document.createElement('div');
+            zoneSvg.className = 'lantern-zone-svg';
+            zoneSvg.style.position = 'relative';
+
+            // String — fills gap from top of zone to top of lantern
+            var stringH = SVG_ZONE_H - cfg.h;
             var string = document.createElement('div');
             string.className = 'lantern-string';
-            string.style.cssText = 'width:1px;height:12px;background:' + cfg.stringColor + ';';
-            cell.appendChild(string);
+            string.style.cssText = 'position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:' + stringH + 'px;background:' + cfg.stringColor + ';';
+            zoneSvg.appendChild(string);
 
             // Lantern body wrapper (for sway animation)
             var lanternWrap = document.createElement('div');
@@ -271,7 +278,6 @@ window.App.SVGCharts = (function() {
             }
             if (tier !== 'dead') {
                 lanternWrap.classList.add('lantern-sway');
-                // Vary sway duration per lantern for natural feel
                 var swayDurations = [3.5, 3.0, 2.8, 3.2, 2.5];
                 var swayDelays = [0, 0.5, 1.0, 0.3, 0.7];
                 lanternWrap.style.animationDuration = (cfg.swayDur + (swayDurations[index % 5] - 3) * 0.2) + 's';
@@ -280,11 +286,12 @@ window.App.SVGCharts = (function() {
 
             var svgEl = buildLanternSVG(tier, cfg, uid);
             lanternWrap.appendChild(svgEl);
-            cell.appendChild(lanternWrap);
+            zoneSvg.appendChild(lanternWrap);
+            cell.appendChild(zoneSvg);
 
-            // Current streak number
-            var numDiv = document.createElement('div');
-            numDiv.className = 'lantern-current-num';
+            // Zone 2: Current streak number
+            var zoneNum = document.createElement('div');
+            zoneNum.className = 'lantern-zone-num';
             var numColor;
             if (tier === 'dead') {
                 numColor = '#C1574E';
@@ -293,45 +300,40 @@ window.App.SVGCharts = (function() {
             } else {
                 numColor = p.color;
             }
-            numDiv.style.cssText = 'font-size:' + cfg.numSize + 'px;font-weight:800;font-family:"Rubik",sans-serif;line-height:1;margin-top:6px;color:' + numColor + ';';
-            numDiv.textContent = p.current;
-            cell.appendChild(numDiv);
+            zoneNum.innerHTML = '<span class="lantern-current-num" style="font-size:' + cfg.numSize + 'px;font-weight:800;font-family:Rubik,sans-serif;line-height:1;color:' + numColor + ';">' + p.current + '</span>';
+            cell.appendChild(zoneNum);
 
-            // Best streak
-            var bestDiv = document.createElement('div');
-            bestDiv.className = 'lantern-best-num';
+            // Zone 3: Best streak
+            var zoneBest = document.createElement('div');
+            zoneBest.className = 'lantern-zone-best';
             var isRecord = p.current > 0 && p.current === p.best;
             var bestColor = isRecord ? '#D4A03C' : '#6B7280';
             var bestPrefix = isRecord ? '\uD83C\uDFC6 ' : '';
-            bestDiv.style.cssText = 'font-size:12px;font-weight:700;color:' + bestColor + ';margin-top:4px;white-space:nowrap;';
-            bestDiv.textContent = bestPrefix + (data.legendLabels ? data.legendLabels.best || '\u0627\u0644\u0623\u0641\u0636\u0644' : '\u0627\u0644\u0623\u0641\u0636\u0644') + ' ' + p.best;
-            cell.appendChild(bestDiv);
+            var bestLabel = data.legendLabels ? data.legendLabels.best || '\u0627\u0644\u0623\u0641\u0636\u0644' : '\u0627\u0644\u0623\u0641\u0636\u0644';
+            zoneBest.innerHTML = '<span class="lantern-best-num" style="font-size:11px;font-weight:700;color:' + bestColor + ';white-space:nowrap;">' + bestPrefix + bestLabel + ' ' + p.best + '</span>';
+            cell.appendChild(zoneBest);
 
-            // Prayer icon
+            // Zone 4: Prayer icon
+            var zoneIcon = document.createElement('div');
+            zoneIcon.className = 'lantern-zone-icon';
             var grad = gradients[p.color] || ('linear-gradient(135deg, ' + p.color + ', ' + p.color + ')');
-            var iconBg = document.createElement('div');
-            iconBg.style.cssText = 'width:28px;height:28px;border-radius:8px;background:' + grad + ';display:flex;align-items:center;justify-content:center;margin-top:6px;';
-            var icon = document.createElement('span');
-            icon.className = 'material-symbols-rounded';
-            icon.style.cssText = 'font-size:14px;color:#fff;font-variation-settings:"FILL" 1,"wght" 500;';
-            icon.textContent = p.icon;
-            iconBg.appendChild(icon);
-            cell.appendChild(iconBg);
+            zoneIcon.innerHTML = '<div style="width:28px;height:28px;border-radius:8px;background:' + grad + ';display:flex;align-items:center;justify-content:center;">' +
+                '<span class="material-symbols-rounded" style="font-size:14px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + p.icon + '</span></div>';
+            cell.appendChild(zoneIcon);
 
-            // Prayer name
-            var nameSpan = document.createElement('span');
-            nameSpan.className = 'lantern-prayer-name';
+            // Zone 5: Prayer name
+            var zoneName = document.createElement('div');
+            zoneName.className = 'lantern-zone-name';
             var nameColor = tier === 'large' ? '#D4A03C' : '#5A5A6E';
-            nameSpan.style.cssText = 'font-size:11px;font-weight:700;color:' + nameColor + ';margin-top:3px;font-family:"Noto Kufi Arabic",sans-serif;';
-            nameSpan.textContent = p.name;
-            cell.appendChild(nameSpan);
+            zoneName.innerHTML = '<span class="lantern-prayer-name" style="font-size:11px;font-weight:700;color:' + nameColor + ';font-family:\'Noto Kufi Arabic\',sans-serif;">' + p.name + '</span>';
+            cell.appendChild(zoneName);
 
             return cell;
         }
 
         // Single horizontal row of 5 lanterns
         var row = document.createElement('div');
-        row.style.cssText = 'display:flex;justify-content:space-around;align-items:flex-start;';
+        row.className = 'lanterns-row';
         for (var i = 0; i < prayers.length; i++) {
             row.appendChild(createLantern(prayers[i], i));
         }
