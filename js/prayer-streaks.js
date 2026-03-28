@@ -32,10 +32,23 @@ window.App.PrayerStreaks = (function() {
         return profile && profile.gender === 'female' && profile.age >= 12;
     }
 
+    // Per-calculation exempt cache
+    var _exemptCache = {};
+
     function isDayExempt(prayerId, hYear, hMonth, hDay) {
         if (!isFemaleProfile() || !Female) return false;
-        var exemptData = Female.getExemptDays(hYear, hMonth);
-        return Female.isPrayerExempt(exemptData, prayerId, hDay);
+        try {
+            var ck = hYear + '_' + hMonth;
+            if (!_exemptCache[ck]) {
+                _exemptCache[ck] = Female.getExemptDays(hYear, hMonth);
+            }
+            var exemptData = _exemptCache[ck];
+            var dayStr = String(hDay);
+            return (exemptData[dayStr] && exemptData[dayStr][prayerId]) ||
+                   (exemptData[hDay] && exemptData[hDay][prayerId]);
+        } catch(e) {
+            return false;
+        }
     }
 
     // Per-calculation cache to avoid redundant localStorage reads
@@ -45,12 +58,12 @@ window.App.PrayerStreaks = (function() {
         var cacheKey = hYear + '_' + hMonth;
         if (_monthCache[cacheKey]) return _monthCache[cacheKey];
 
-        var prefix = Storage.getProfilePrefix();
-        var fardKey = 'salah_tracker_' + prefix + 'fard_h' + hYear + '_' + hMonth;
+        // Use Storage key generators to guarantee format consistency
+        var fardKey = Storage.getStorageKey('fard', hMonth, hYear);
         var stored = localStorage.getItem(fardKey);
         var fardData = stored ? JSON.parse(stored) : {};
 
-        var congKey = 'salah_cong_' + prefix + 'h' + hYear + '_' + hMonth;
+        var congKey = Storage.getCongregationKey(hYear, hMonth);
         var congStored = localStorage.getItem(congKey);
         var congData = congStored ? JSON.parse(congStored) : {};
 
@@ -62,13 +75,17 @@ window.App.PrayerStreaks = (function() {
         var monthData = _getMonthData(hYear, hMonth);
         var dayStr = String(hDay);
 
-        // Check fard data
-        if (monthData.fard[prayerId] && monthData.fard[prayerId][dayStr]) {
-            return true;
+        // Check fard data (both string and numeric keys for safety)
+        if (monthData.fard[prayerId]) {
+            if (monthData.fard[prayerId][dayStr] || monthData.fard[prayerId][hDay]) {
+                return true;
+            }
         }
         // Check congregation data
-        if (monthData.cong[prayerId] && monthData.cong[prayerId][dayStr]) {
-            return true;
+        if (monthData.cong[prayerId]) {
+            if (monthData.cong[prayerId][dayStr] || monthData.cong[prayerId][hDay]) {
+                return true;
+            }
         }
         return false;
     }
@@ -147,6 +164,7 @@ window.App.PrayerStreaks = (function() {
 
     function calculateAllStreaks() {
         _monthCache = {}; // Clear cache for fresh calculation
+        _exemptCache = {}; // Clear exempt cache too
         var prayers = Config.fardPrayers;
         var result = { current: {}, best: {} };
         var todayH = Hijri.getTodayHijri();
