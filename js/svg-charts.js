@@ -114,13 +114,14 @@ window.App.SVGCharts = (function() {
         container.appendChild(wrapper);
     }
 
-    // ==================== 2. STREAK FLAME BARS ====================
+    // ==================== 2. MOSQUE LANTERNS (Jamaah Streaks) ====================
 
     function streakFlameBars(container, data) {
         container.innerHTML = '';
         var prayers = data.prayers || [];
         if (prayers.length === 0) return;
-        var maxBest = Math.max.apply(null, prayers.map(function(p) { return Math.max(p.best, 1); }));
+
+        var SVG_NS = 'http://www.w3.org/2000/svg';
 
         var gradients = {
             '#D4A0A7': 'linear-gradient(135deg, #E8B4B8, #D4A0A7)',
@@ -130,141 +131,219 @@ window.App.SVGCharts = (function() {
             '#4A5A7A': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)'
         };
 
-        var SVG_NS = 'http://www.w3.org/2000/svg';
+        // Tier definitions based on current streak
+        function getTier(current) {
+            if (current >= 30) return 'large';
+            if (current >= 10) return 'medium';
+            if (current >= 1) return 'small';
+            return 'dead';
+        }
 
-        function createGauge(p) {
-            var cell = document.createElement('div');
-            cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+        var tierConfig = {
+            dead:   { w: 36, h: 46, fillTop: '#CCCCCC', fillBot: '#CCCCCC', stroke: 'none', glowOpMin: 0, glowOpMax: 0, glowDur: 0, swayDur: 0, flame: false, flicker: false, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
+            small:  { w: 40, h: 52, fillTop: '#D4C090', fillBot: '#B09840', stroke: 'none', glowOpMin: 0.2, glowOpMax: 0.5, glowDur: 2, swayDur: 3.5, flame: true, flicker: false, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
+            medium: { w: 44, h: 56, fillTop: '#E0C878', fillBot: '#C0A040', stroke: 'none', glowOpMin: 0.3, glowOpMax: 0.6, glowDur: 1.8, swayDur: 3, flame: true, flicker: true, flameBall: false, doubleGlow: false, numSize: 20, stringColor: '#A0966E' },
+            large:  { w: 54, h: 70, fillTop: '#F0D878', fillBot: '#C09020', stroke: '#D4A03C', glowOpMin: 0.4, glowOpMax: 0.8, glowDur: 1.5, swayDur: 2.5, flame: true, flicker: true, flameBall: true, doubleGlow: true, numSize: 24, stringColor: '#D4A03C' }
+        };
 
-            var svgW = 90, svgH = 55;
-            var cx = 45, cy = 48, R = 32;
-            var halfCirc = Math.PI * R;
+        // Dark mode dead overrides applied via CSS class
 
-            var currentPct = maxBest > 0 ? Math.min((p.current / maxBest) * 100, 100) : 0;
-            var bestPct = maxBest > 0 ? Math.min((p.best / maxBest) * 100, 100) : 0;
-
+        function buildLanternSVG(tier, cfg, uid) {
+            var w = cfg.w, h = cfg.h;
             var svgEl = document.createElementNS(SVG_NS, 'svg');
-            svgEl.setAttribute('width', svgW);
-            svgEl.setAttribute('height', svgH);
-            svgEl.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
-            svgEl.style.overflow = 'hidden';
+            svgEl.setAttribute('width', w);
+            svgEl.setAttribute('height', h);
+            svgEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+            svgEl.style.overflow = 'visible';
             svgEl.style.display = 'block';
 
-            var arcD = 'M ' + (cx - R) + ' ' + cy + ' A ' + R + ' ' + R + ' 0 0 1 ' + (cx + R) + ' ' + cy;
+            // Gradient definition
+            var defs = document.createElementNS(SVG_NS, 'defs');
+            var grad = document.createElementNS(SVG_NS, 'linearGradient');
+            grad.setAttribute('id', 'lanternGrad' + uid);
+            grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+            grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+            var stop1 = document.createElementNS(SVG_NS, 'stop');
+            stop1.setAttribute('offset', '0%'); stop1.setAttribute('stop-color', cfg.fillTop);
+            var stop2 = document.createElementNS(SVG_NS, 'stop');
+            stop2.setAttribute('offset', '100%'); stop2.setAttribute('stop-color', cfg.fillBot);
+            grad.appendChild(stop1); grad.appendChild(stop2);
+            defs.appendChild(grad);
+            svgEl.appendChild(defs);
 
-            // Background track
-            var track = document.createElementNS(SVG_NS, 'path');
-            track.setAttribute('d', arcD);
-            track.setAttribute('fill', 'none');
-            track.setAttribute('stroke', 'rgba(0,0,0,0.06)');
-            track.setAttribute('stroke-width', '5');
-            track.setAttribute('stroke-linecap', 'round');
-            svgEl.appendChild(track);
+            // Lantern body path (scaled to viewBox)
+            var sx = w / 40, sy = h / 52;
+            var bodyPath = document.createElementNS(SVG_NS, 'path');
+            // Cap + body shape
+            var d = 'M' + (17 * sx) + ' ' + (2 * sy) + ' L' + (23 * sx) + ' ' + (2 * sy) +
+                    ' L' + (23 * sx) + ' ' + (6 * sy) +
+                    ' Q' + (28 * sx) + ' ' + (6 * sy) + ' ' + (30 * sx) + ' ' + (10 * sy) +
+                    ' L' + (32 * sx) + ' ' + (38 * sy) +
+                    ' Q' + (32 * sx) + ' ' + (48 * sy) + ' ' + (20 * sx) + ' ' + (50 * sy) +
+                    ' Q' + (8 * sx) + ' ' + (48 * sy) + ' ' + (8 * sx) + ' ' + (38 * sy) +
+                    ' L' + (10 * sx) + ' ' + (10 * sy) +
+                    ' Q' + (12 * sx) + ' ' + (6 * sy) + ' ' + (17 * sx) + ' ' + (6 * sy) + ' Z';
+            bodyPath.setAttribute('d', d);
+            bodyPath.setAttribute('fill', 'url(#lanternGrad' + uid + ')');
+            if (cfg.stroke !== 'none') {
+                bodyPath.setAttribute('stroke', cfg.stroke);
+                bodyPath.setAttribute('stroke-width', '1');
+            }
+            svgEl.appendChild(bodyPath);
 
-            // Best ghost arc (semi-transparent, behind current)
-            if (p.best > 0 && bestPct > 0) {
-                var bestArc = document.createElementNS(SVG_NS, 'path');
-                bestArc.setAttribute('d', arcD);
-                bestArc.setAttribute('fill', 'none');
-                bestArc.setAttribute('stroke', p.color);
-                bestArc.setAttribute('stroke-opacity', '0.18');
-                bestArc.setAttribute('stroke-width', '5');
-                bestArc.setAttribute('stroke-linecap', 'round');
-                bestArc.setAttribute('stroke-dasharray', halfCirc.toFixed(1) + ' ' + halfCirc.toFixed(1));
-                bestArc.setAttribute('stroke-dashoffset', (halfCirc * (1 - bestPct / 100)).toFixed(1));
-                svgEl.appendChild(bestArc);
+            var cx = w / 2, cy = h * 0.55;
+
+            // Inner glow ellipse(s)
+            if (tier !== 'dead') {
+                var glow = document.createElementNS(SVG_NS, 'ellipse');
+                glow.setAttribute('cx', cx);
+                glow.setAttribute('cy', cy);
+                glow.setAttribute('rx', w * 0.22);
+                glow.setAttribute('ry', h * 0.22);
+                glow.setAttribute('fill', '#FFFDE0');
+                glow.setAttribute('opacity', String(cfg.glowOpMin));
+                glow.classList.add('lantern-glow');
+                glow.style.animationDuration = cfg.glowDur + 's';
+                svgEl.appendChild(glow);
+
+                if (cfg.doubleGlow) {
+                    var innerGlow = document.createElementNS(SVG_NS, 'ellipse');
+                    innerGlow.setAttribute('cx', cx);
+                    innerGlow.setAttribute('cy', cy);
+                    innerGlow.setAttribute('rx', w * 0.12);
+                    innerGlow.setAttribute('ry', h * 0.19);
+                    innerGlow.setAttribute('fill', '#FFF8C0');
+                    innerGlow.setAttribute('opacity', '0.6');
+                    innerGlow.classList.add('lantern-glow-core');
+                    svgEl.appendChild(innerGlow);
+                }
             }
 
-            // Current progress arc (solid, on top)
-            if (p.current > 0 && currentPct > 0) {
-                var progArc = document.createElementNS(SVG_NS, 'path');
-                progArc.setAttribute('d', arcD);
-                progArc.setAttribute('fill', 'none');
-                progArc.setAttribute('stroke', p.color);
-                progArc.setAttribute('stroke-width', '6');
-                progArc.setAttribute('stroke-linecap', 'round');
-                progArc.setAttribute('stroke-dasharray', halfCirc.toFixed(1) + ' ' + halfCirc.toFixed(1));
-                progArc.setAttribute('stroke-dashoffset', (halfCirc * (1 - currentPct / 100)).toFixed(1));
-                svgEl.appendChild(progArc);
+            // Flame line inside
+            if (cfg.flame) {
+                var flameLine = document.createElementNS(SVG_NS, 'line');
+                flameLine.setAttribute('x1', cx); flameLine.setAttribute('y1', cy - h * 0.12);
+                flameLine.setAttribute('x2', cx); flameLine.setAttribute('y2', cy + h * 0.05);
+                flameLine.setAttribute('stroke', '#FFD700');
+                flameLine.setAttribute('stroke-width', '1.5');
+                flameLine.setAttribute('stroke-linecap', 'round');
+                if (cfg.flicker) {
+                    flameLine.classList.add('lantern-flame-flicker');
+                }
+                svgEl.appendChild(flameLine);
             }
 
-            // Best number (inside gauge, near top of arc)
-            if (p.best > 0) {
-                var bestText = document.createElementNS(SVG_NS, 'text');
-                bestText.setAttribute('x', cx);
-                bestText.setAttribute('y', cy - R + 14);
-                bestText.setAttribute('text-anchor', 'middle');
-                bestText.setAttribute('font-size', '8');
-                bestText.setAttribute('font-weight', '600');
-                bestText.setAttribute('font-family', 'Rubik, sans-serif');
-                bestText.setAttribute('fill', p.color);
-                bestText.setAttribute('fill-opacity', '0.45');
-                bestText.textContent = p.best;
-                svgEl.appendChild(bestText);
+            // Flame ball at top (large tier)
+            if (cfg.flameBall) {
+                var fb = document.createElementNS(SVG_NS, 'circle');
+                fb.setAttribute('cx', cx);
+                fb.setAttribute('cy', cy - h * 0.14);
+                fb.setAttribute('r', '2');
+                fb.setAttribute('fill', '#FFD700');
+                fb.setAttribute('opacity', '0.7');
+                fb.classList.add('lantern-flame-ball');
+                svgEl.appendChild(fb);
             }
 
-            // Current number (centered, large)
-            var numText = document.createElementNS(SVG_NS, 'text');
-            numText.setAttribute('x', cx);
-            numText.setAttribute('y', cy - 10);
-            numText.setAttribute('text-anchor', 'middle');
-            numText.setAttribute('dominant-baseline', 'middle');
-            numText.setAttribute('font-size', '17');
-            numText.setAttribute('font-weight', '800');
-            numText.setAttribute('font-family', 'Rubik, sans-serif');
-            numText.setAttribute('fill', p.current > 0 ? p.color : tv('--text-muted'));
-            numText.textContent = p.current;
-            svgEl.appendChild(numText);
+            return svgEl;
+        }
 
-            cell.appendChild(svgEl);
+        function createLantern(p, index) {
+            var tier = getTier(p.current);
+            var cfg = tierConfig[tier];
+            var uid = 'l' + index + '_' + Date.now();
 
-            // Gradient icon below gauge
+            var cell = document.createElement('div');
+            cell.className = 'lantern-cell';
+            cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;';
+
+            // String
+            var string = document.createElement('div');
+            string.className = 'lantern-string';
+            string.style.cssText = 'width:1px;height:12px;background:' + cfg.stringColor + ';';
+            cell.appendChild(string);
+
+            // Lantern body wrapper (for sway animation)
+            var lanternWrap = document.createElement('div');
+            lanternWrap.className = 'lantern-body-wrap';
+            if (tier === 'dead') {
+                lanternWrap.classList.add('lantern-dead');
+            }
+            if (tier !== 'dead') {
+                lanternWrap.classList.add('lantern-sway');
+                // Vary sway duration per lantern for natural feel
+                var swayDurations = [3.5, 3.0, 2.8, 3.2, 2.5];
+                var swayDelays = [0, 0.5, 1.0, 0.3, 0.7];
+                lanternWrap.style.animationDuration = (cfg.swayDur + (swayDurations[index % 5] - 3) * 0.2) + 's';
+                lanternWrap.style.animationDelay = swayDelays[index % 5] + 's';
+            }
+
+            var svgEl = buildLanternSVG(tier, cfg, uid);
+            lanternWrap.appendChild(svgEl);
+            cell.appendChild(lanternWrap);
+
+            // Current streak number
+            var numDiv = document.createElement('div');
+            numDiv.className = 'lantern-current-num';
+            var numColor;
+            if (tier === 'dead') {
+                numColor = '#C1574E';
+            } else if (tier === 'large') {
+                numColor = '#D4A03C';
+            } else {
+                numColor = p.color;
+            }
+            numDiv.style.cssText = 'font-size:' + cfg.numSize + 'px;font-weight:800;font-family:"Rubik",sans-serif;line-height:1;margin-top:6px;color:' + numColor + ';';
+            numDiv.textContent = p.current;
+            cell.appendChild(numDiv);
+
+            // Best streak
+            var bestDiv = document.createElement('div');
+            bestDiv.className = 'lantern-best-num';
+            var isRecord = p.current > 0 && p.current === p.best;
+            var bestColor = isRecord ? '#D4A03C' : '#6B7280';
+            var bestPrefix = isRecord ? '\uD83C\uDFC6 ' : '';
+            bestDiv.style.cssText = 'font-size:12px;font-weight:700;color:' + bestColor + ';margin-top:4px;white-space:nowrap;';
+            bestDiv.textContent = bestPrefix + (data.legendLabels ? data.legendLabels.best || '\u0627\u0644\u0623\u0641\u0636\u0644' : '\u0627\u0644\u0623\u0641\u0636\u0644') + ' ' + p.best;
+            cell.appendChild(bestDiv);
+
+            // Prayer icon
             var grad = gradients[p.color] || ('linear-gradient(135deg, ' + p.color + ', ' + p.color + ')');
             var iconBg = document.createElement('div');
-            iconBg.style.cssText = 'width:22px;height:22px;border-radius:6px;background:' + grad + ';display:flex;align-items:center;justify-content:center;margin-top:2px;';
+            iconBg.style.cssText = 'width:28px;height:28px;border-radius:8px;background:' + grad + ';display:flex;align-items:center;justify-content:center;margin-top:6px;';
             var icon = document.createElement('span');
             icon.className = 'material-symbols-rounded';
-            icon.style.cssText = 'font-size:12px;color:#fff;font-variation-settings:"FILL" 1,"wght" 500;';
+            icon.style.cssText = 'font-size:14px;color:#fff;font-variation-settings:"FILL" 1,"wght" 500;';
             icon.textContent = p.icon;
             iconBg.appendChild(icon);
             cell.appendChild(iconBg);
 
             // Prayer name
             var nameSpan = document.createElement('span');
-            nameSpan.style.cssText = 'font-size:8px;font-weight:700;color:var(--text-primary);font-family:"Noto Kufi Arabic",sans-serif;margin-top:1px;';
+            nameSpan.className = 'lantern-prayer-name';
+            var nameColor = tier === 'large' ? '#D4A03C' : '#5A5A6E';
+            nameSpan.style.cssText = 'font-size:11px;font-weight:700;color:' + nameColor + ';margin-top:3px;font-family:"Noto Kufi Arabic",sans-serif;';
             nameSpan.textContent = p.name;
             cell.appendChild(nameSpan);
 
             return cell;
         }
 
-        // Row 1: first 3 prayers
-        var row1 = document.createElement('div');
-        row1.style.cssText = 'display:flex;justify-content:center;gap:6px;';
-        for (var i = 0; i < Math.min(3, prayers.length); i++) {
-            row1.appendChild(createGauge(prayers[i]));
+        // Single horizontal row of 5 lanterns
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;justify-content:space-around;align-items:flex-start;';
+        for (var i = 0; i < prayers.length; i++) {
+            row.appendChild(createLantern(prayers[i], i));
         }
-        container.appendChild(row1);
-
-        // Row 2: remaining prayers, centered
-        if (prayers.length > 3) {
-            var row2 = document.createElement('div');
-            row2.style.cssText = 'display:flex;justify-content:center;gap:6px;margin-top:6px;';
-            for (var j = 3; j < prayers.length; j++) {
-                var gaugeCell = createGauge(prayers[j]);
-                gaugeCell.style.maxWidth = '60%';
-                row2.appendChild(gaugeCell);
-            }
-            container.appendChild(row2);
-        }
+        container.appendChild(row);
 
         // Legend
         if (data.legendLabels) {
             var leg = document.createElement('div');
-            leg.style.cssText = 'display:flex;justify-content:center;gap:14px;margin-top:8px;padding:4px 0;';
+            leg.style.cssText = 'display:flex;justify-content:center;gap:16px;margin-top:12px;';
             leg.innerHTML =
-                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:4px;border-radius:2px;background:var(--primary-mid);"></div><span style="font-size:9px;color:var(--text-muted);font-weight:600;">' + (data.legendLabels.current || 'الحالية') + '</span></div>' +
-                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:4px;border-radius:2px;border:1px dashed rgba(0,0,0,0.15);background:rgba(0,0,0,0.04);"></div><span style="font-size:9px;color:var(--text-muted);font-weight:600;">' + (data.legendLabels.best || 'الأفضل') + '</span></div>';
+                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#4CAF50;"></div><span style="font-size:10px;color:#8D99AE;font-weight:600;">' + (data.legendLabels.current || '\u0627\u0644\u062D\u0627\u0644\u064A\u0629') + '</span></div>' +
+                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:3px;border-radius:2px;background:#8D99AE;"></div><span style="font-size:10px;color:#8D99AE;font-weight:600;">' + (data.legendLabels.best || '\u0627\u0644\u0623\u0641\u0636\u0644') + '</span></div>';
             container.appendChild(leg);
         }
     }

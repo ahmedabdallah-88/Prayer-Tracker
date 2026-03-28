@@ -574,3 +574,15 @@
 [data-theme="dark"] .shawwal-banner {
     border-color: rgba(212,160,60,0.2);
 }
+
+/* Dark mode: mosque lanterns */
+[data-theme="dark"] .lantern-dead path {
+    fill: #444444;
+    stroke: #555555;
+}
+[data-theme="dark"] .lantern-best-num {
+    color: #9CA3AF !important;
+}
+[data-theme="dark"] .lantern-prayer-name {
+    color: #9CA3AF !important;
+}

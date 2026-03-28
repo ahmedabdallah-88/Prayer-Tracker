@@ -3905,3 +3905,67 @@ body::before {
     50% { transform: scale(1.15); }
     100% { transform: scale(1); }
 }
+
+/* ==================== Mosque Lanterns ==================== */
+
+@keyframes lantern-sway {
+    0%, 100% { transform: rotate(-1.5deg); }
+    50% { transform: rotate(1.5deg); }
+}
+
+@keyframes lantern-glow-pulse {
+    0%, 100% { opacity: var(--glow-min, 0.2); }
+    50% { opacity: var(--glow-max, 0.5); }
+}
+
+@keyframes lantern-glow-core-pulse {
+    0%, 100% { ry: 10; opacity: 0.5; }
+    50% { ry: 14; opacity: 0.8; }
+}
+
+@keyframes lantern-flame-flicker {
+    0%, 100% { opacity: 0.7; transform: scaleY(1); }
+    25% { opacity: 1; transform: scaleY(1.1); }
+    50% { opacity: 0.8; transform: scaleY(0.9); }
+    75% { opacity: 1; transform: scaleY(1.05); }
+}
+
+@keyframes lantern-flame-ball-pulse {
+    0%, 100% { r: 2; opacity: 0.7; }
+    50% { r: 3; opacity: 1; }
+}
+
+.lantern-body-wrap {
+    transform-origin: top center;
+}
+
+.lantern-sway {
+    animation: lantern-sway 3s ease-in-out infinite;
+}
+
+.lantern-glow {
+    animation: lantern-glow-pulse 2s ease-in-out infinite;
+}
+
+.lantern-glow-core {
+    animation: lantern-glow-core-pulse 1.5s ease-in-out infinite;
+}
+
+.lantern-flame-flicker {
+    transform-origin: center bottom;
+    animation: lantern-flame-flicker 1.2s ease-in-out infinite;
+}
+
+.lantern-flame-ball {
+    animation: lantern-flame-ball-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lantern-sway,
+    .lantern-glow,
+    .lantern-glow-core,
+    .lantern-flame-flicker,
+    .lantern-flame-ball {
+        animation: none;
+    }
+}
