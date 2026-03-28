@@ -38,17 +38,36 @@ window.App.PrayerStreaks = (function() {
         return Female.isPrayerExempt(exemptData, prayerId, hDay);
     }
 
+    // Per-calculation cache to avoid redundant localStorage reads
+    var _monthCache = {};
+
+    function _getMonthData(hYear, hMonth) {
+        var cacheKey = hYear + '_' + hMonth;
+        if (_monthCache[cacheKey]) return _monthCache[cacheKey];
+
+        var prefix = Storage.getProfilePrefix();
+        var fardKey = 'salah_tracker_' + prefix + 'fard_h' + hYear + '_' + hMonth;
+        var stored = localStorage.getItem(fardKey);
+        var fardData = stored ? JSON.parse(stored) : {};
+
+        var congKey = 'salah_cong_' + prefix + 'h' + hYear + '_' + hMonth;
+        var congStored = localStorage.getItem(congKey);
+        var congData = congStored ? JSON.parse(congStored) : {};
+
+        _monthCache[cacheKey] = { fard: fardData, cong: congData };
+        return _monthCache[cacheKey];
+    }
+
     function isDayPrayed(prayerId, hYear, hMonth, hDay) {
+        var monthData = _getMonthData(hYear, hMonth);
+        var dayStr = String(hDay);
+
         // Check fard data
-        Storage.setCurrentYear(hYear);
-        Storage.loadAllData('fard');
-        var fardData = Storage.getDataObject('fard');
-        if (fardData && fardData[hMonth] && fardData[hMonth][prayerId] && fardData[hMonth][prayerId][hDay]) {
+        if (monthData.fard[prayerId] && monthData.fard[prayerId][dayStr]) {
             return true;
         }
         // Check congregation data
-        var congData = Storage.getCongregationData(hYear, hMonth);
-        if (congData && congData[prayerId] && (congData[prayerId][String(hDay)] === true || congData[prayerId][hDay] === true)) {
+        if (monthData.cong[prayerId] && monthData.cong[prayerId][dayStr]) {
             return true;
         }
         return false;
@@ -127,6 +146,7 @@ window.App.PrayerStreaks = (function() {
     }
 
     function calculateAllStreaks() {
+        _monthCache = {}; // Clear cache for fresh calculation
         var prayers = Config.fardPrayers;
         var result = { current: {}, best: {} };
         var todayH = Hijri.getTodayHijri();
@@ -149,15 +169,7 @@ window.App.PrayerStreaks = (function() {
     }
 
     function getStreaks() {
-        var stored = localStorage.getItem(getStreakKey());
-        if (stored) {
-            var parsed = JSON.parse(stored);
-            var todayH = Hijri.getTodayHijri();
-            var todayStr = todayH.year + '-' + todayH.month + '-' + todayH.day;
-            if (parsed.lastCalculated === todayStr) {
-                return parsed;
-            }
-        }
+        // Always recalculate to pick up latest prayer data
         return calculateAllStreaks();
     }
 
