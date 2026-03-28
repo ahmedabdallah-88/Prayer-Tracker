@@ -17,6 +17,9 @@ window.App.Tracker = (function() {
     function _getUI()       { return window.App.UI; }
     function _getI18n()     { return window.App.I18n; }
 
+    // Track whether today-pulse animation has been shown (once per session)
+    var _todayPulseShown = {};
+
     // ==================== PRIVATE HELPERS ====================
 
     function createDualDayNum(hijriDay, hYear, hMonth) {
@@ -468,12 +471,36 @@ window.App.Tracker = (function() {
                 if (isActive) activeTabEl = tab;
             });
 
-            container.appendChild(scroller);
+            // Wrap scroller in fade-affordance wrapper
+            var scrollWrapper = document.createElement('div');
+            scrollWrapper.className = 'sunnah-scroll-wrapper';
+            scrollWrapper.appendChild(scroller);
+            container.appendChild(scrollWrapper);
+
+            // Fade edges based on scroll position
+            scroller.addEventListener('scroll', function() {
+                var wrapper = scroller.parentElement;
+                if (!wrapper) return;
+                var maxScroll = scroller.scrollWidth - scroller.clientWidth;
+                var scrollPos = Math.abs(scroller.scrollLeft);
+
+                var hasLeft = scrollPos < maxScroll - 5;
+                var hasRight = scrollPos > 5;
+
+                wrapper.classList.toggle('fade-left', hasLeft);
+                wrapper.classList.toggle('fade-right', hasRight);
+            }, { passive: true });
 
             // Scroll active tab into view after DOM append
             if (activeTabEl) {
                 requestAnimationFrame(function() {
                     activeTabEl.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'instant' });
+                    // Trigger scroll handler to set initial fade state
+                    scroller.dispatchEvent(new Event('scroll'));
+                });
+            } else {
+                requestAnimationFrame(function() {
+                    scroller.dispatchEvent(new Event('scroll'));
                 });
             }
         } else {
@@ -599,7 +626,12 @@ window.App.Tracker = (function() {
             } catch(e) {}
 
             var isDayToday = isCurrentMonth && todayH.day === day;
-            if (isDayToday) dayBox.classList.add('today-box');
+            if (isDayToday) {
+                dayBox.classList.add('today-box');
+                if (!_todayPulseShown[type]) {
+                    dayBox.classList.add('today-pulse');
+                }
+            }
 
             if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
                 dayBox.classList.add('disabled');
@@ -629,6 +661,9 @@ window.App.Tracker = (function() {
 
             grid.appendChild(dayBox);
         }
+
+        // Mark pulse as shown for this type after first render
+        if (isCurrentMonth) _todayPulseShown[type] = true;
 
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);

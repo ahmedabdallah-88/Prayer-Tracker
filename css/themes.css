@@ -250,6 +250,28 @@
     box-shadow: 0 3px 12px rgba(0,0,0,0.3);
     color: #E8E6E1;
 }
+[data-theme="dark"] .sunnah-scroll-wrapper::before {
+    background: linear-gradient(to right, var(--bg), transparent);
+}
+[data-theme="dark"] .sunnah-scroll-wrapper::after {
+    background: linear-gradient(to left, var(--bg), transparent);
+}
+
+/* Dark mode today pulse */
+@keyframes today-pulse-dark {
+    0% { box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(82, 183, 136, 0.15); }
+    100% { box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.3); }
+}
+[data-theme="dark"] .day-box.today-box {
+    box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.3);
+}
+[data-theme="dark"] .day-box.today-box.today-pulse {
+    animation: today-pulse-dark 1.5s ease-in-out 2;
+}
+[data-theme="dark"] .day-box.today {
+    box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.3);
+}
 [data-theme="dark"] .prayer-section,
 [data-theme="dark"] .controls,
 [data-theme="dark"] .stat-item,

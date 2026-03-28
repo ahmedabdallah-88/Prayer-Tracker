@@ -14,6 +14,7 @@ window.App = window.App || {};
 window.App.QadaTracker = (function() {
     'use strict';
 
+    var _qadaPulseShown = false;
     var PRAYER_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
     var PRAYER_KEYS = {
         fajr: 'prayer_fajr', dhuhr: 'prayer_dhuhr', asr: 'prayer_asr',
@@ -293,7 +294,10 @@ window.App.QadaTracker = (function() {
             var isDayToday = isCurrentMonth && todayH.day === day;
             var isFuture = Hijri.isFutureDateHijri(day, hMonth, hYear);
 
-            if (isDayToday) dayBox.classList.add('today-box');
+            if (isDayToday) {
+                dayBox.classList.add('today-box');
+                if (!_qadaPulseShown) dayBox.classList.add('today-pulse');
+            }
             dayBox.appendChild(Hijri.createDualDayNum(day, hYear, hMonth));
 
             if (isFuture) {
@@ -315,6 +319,7 @@ window.App.QadaTracker = (function() {
             }
             grid.appendChild(dayBox);
         }
+        if (isCurrentMonth) _qadaPulseShown = true;
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
         container.appendChild(trackerCard);

@@ -930,6 +930,44 @@ body {
 }
 
 
+/* ==================== SUNNAH SCROLL WRAPPER (fade affordance) ==================== */
+.sunnah-scroll-wrapper {
+    position: relative;
+}
+
+.sunnah-scroll-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(to right, var(--bg, #F5F3EF), transparent);
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 20px 0 0 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sunnah-scroll-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(to left, var(--bg, #F5F3EF), transparent);
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 0 20px 20px 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sunnah-scroll-wrapper.fade-left::before { opacity: 1; }
+.sunnah-scroll-wrapper.fade-right::after { opacity: 1; }
+
 /* ==================== MONTH NAVIGATION ==================== */
 .controls {
     display: flex;
@@ -1304,17 +1342,21 @@ body {
 .day-box.today {
     background: rgba(var(--primary-rgb),0.06);
     border-color: var(--primary);
-    box-shadow: 0 0 0 2.5px var(--primary);
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.3);
+    position: relative;
 }
 
 .day-box.today .day-number { color: var(--primary); }
-.day-box.today .day-number::after {
+.day-box.today::after {
     content: '';
-    display: block;
-    width: 4px; height: 4px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     background: var(--primary);
-    margin: 2px auto 0;
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* === Prayed (Munfarid) === */
@@ -3724,30 +3766,54 @@ body::before {
 }
 
 /* ==================== TODAY BOX VARIANT ==================== */
+@keyframes today-pulse {
+    0% { box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(45, 106, 79, 0.15); }
+    100% { box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.3); }
+}
+
 .day-box.today-box {
     background: rgba(var(--primary-rgb),0.06);
     border-color: var(--primary);
-    box-shadow: 0 0 0 2.5px var(--primary);
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.3);
+    position: relative;
+}
+
+.day-box.today-box.today-pulse {
+    animation: today-pulse 1.5s ease-in-out 2;
 }
 
 .day-box.today-box .day-number { color: var(--primary); }
-.day-box.today-box .day-number::after {
+
+/* Today dot indicator — always visible below the day number */
+.day-box.today-box::after {
     content: '';
-    display: block;
-    width: 4px; height: 4px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     background: var(--primary);
-    margin: 2px auto 0;
+    position: absolute;
+    top: auto;
+    right: auto;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: none;
+    display: block;
+    z-index: 3;
 }
 
-/* Today + checked/congregation/qada: filled state wins, hide dot */
+/* Today + checked/congregation/qada: filled state wins, dot turns white */
 .day-box.today-box.checked {
     background: linear-gradient(135deg, var(--primary-mid), var(--primary-light));
     border: 2px solid transparent;
     box-shadow: 0 2px 8px rgba(var(--primary-mid-rgb),0.35);
 }
+.day-box.today-box.checked.today-pulse {
+    animation: today-pulse 1.5s ease-in-out 2;
+}
 .day-box.today-box.checked .day-number { color: white; }
-.day-box.today-box.checked .day-number::after { background: rgba(255,255,255,0.7); }
+.day-box.today-box.checked::after { background: white; }
 .day-box.today-box.checked .day-greg { color: rgba(255,255,255,0.7); }
 
 .day-box.today-box.congregation {
@@ -3755,8 +3821,11 @@ body::before {
     border: 2.5px solid var(--accent) !important;
     box-shadow: 0 2px 10px rgba(var(--accent-rgb),0.4), 0 2px 8px rgba(var(--primary-mid-rgb),0.2);
 }
+.day-box.today-box.congregation.today-pulse {
+    animation: today-pulse 1.5s ease-in-out 2;
+}
 .day-box.today-box.congregation .day-number { color: white !important; }
-.day-box.today-box.congregation .day-number::after { background: rgba(255,255,255,0.7); }
+.day-box.today-box.congregation::after { background: white; }
 .day-box.today-box.congregation .day-greg { color: rgba(255,255,255,0.7) !important; }
 
 .day-box.today-box.qada {
@@ -3764,8 +3833,11 @@ body::before {
     border: 2px solid transparent;
     box-shadow: 0 2px 8px rgba(var(--danger-rgb),0.35);
 }
+.day-box.today-box.qada.today-pulse {
+    animation: today-pulse 1.5s ease-in-out 2;
+}
 .day-box.today-box.qada .day-number { color: white; }
-.day-box.today-box.qada .day-number::after { background: rgba(255,255,255,0.7); }
+.day-box.today-box.qada::after { background: white; }
 .day-box.today-box.qada .day-greg { color: rgba(255,255,255,0.7); }
 
 /* SVG Chart Legend (used by dashboard charts) */

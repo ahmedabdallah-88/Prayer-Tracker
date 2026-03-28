@@ -8,6 +8,7 @@ window.App.Azkar = (function() {
     var Hijri = null;
     var I18n = null;
     var Config = null;
+    var _azkarPulseShown = false;
 
     function _init() {
         Storage = window.App.Storage;
@@ -168,6 +169,7 @@ window.App.Azkar = (function() {
 
             if (isCurrentMonth && todayH.day === day) {
                 dayBox.classList.add('today-box');
+                if (!_azkarPulseShown) dayBox.classList.add('today-pulse');
             }
 
             if (Storage.isFutureDate(day, month, year)) {
@@ -192,6 +194,7 @@ window.App.Azkar = (function() {
             }
             grid.appendChild(dayBox);
         }
+        if (isCurrentMonth) _azkarPulseShown = true;
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
 
