@@ -166,9 +166,8 @@ window.App.QadaCalc = (function() {
                 if (p.prayerId && p.prayerId !== 'all') {
                     byPrayer[p.prayerId] = (byPrayer[p.prayerId] || 0) + p.count;
                 } else {
-                    var each = Math.ceil(p.count / 5);
                     PRAYER_IDS.forEach(function(id) {
-                        byPrayer[id] = (byPrayer[id] || 0) + each;
+                        byPrayer[id] = (byPrayer[id] || 0) + p.count;
                     });
                 }
             }
@@ -617,8 +616,11 @@ window.App.QadaCalc = (function() {
                 '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_already_deduction') + ' (' + alreadyPrayedPeriods.length + ')</div>';
             alreadyPrayedPeriods.forEach(function(p) {
                 var prayerName = p.prayerId === 'all' ? t('qada_all_prayers') : t(PRAYER_KEYS[p.prayerId]);
-                html += '<div style="color:#dc2626;font-weight:500;margin-top:2px;">-' + p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
-                alreadyTotal += p.count;
+                if (p.prayerId === 'all') {
+                    html += '<div style="color:#dc2626;font-weight:500;margin-top:2px;">-' + p.count + ' × 5 = ' + (p.count * 5) + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
+                } else {
+                    html += '<div style="color:#dc2626;font-weight:500;margin-top:2px;">-' + p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
+                }
             });
             html += '</div>';
         }
@@ -631,7 +633,13 @@ window.App.QadaCalc = (function() {
                 var label = '';
                 if (p.type === 'A') label = t(PRAYER_KEYS[p.prayerId]) + ': +' + p.count;
                 else if (p.type === 'B') label = t('qada_all_prayers') + ': +' + (p.count * 5);
-                else if (p.type === 'C') label = t('qada_type_estimate') + ': +' + p.count;
+                else if (p.type === 'C') {
+                    if (!p.prayerId || p.prayerId === 'all') {
+                        label = t('qada_all_prayers') + ': +' + p.count + ' × 5 = ' + (p.count * 5);
+                    } else {
+                        label = t(PRAYER_KEYS[p.prayerId]) + ': +' + p.count;
+                    }
+                }
                 html += '<div style="color:var(--text-primary);font-weight:500;margin-top:2px;">' + label + ' ' + t('qada_period_prayers') + '</div>';
             });
             html += '</div>';
@@ -729,7 +737,11 @@ window.App.QadaCalc = (function() {
                 detailHtml = p.count + ' ' + t('qada_period_days') + ' × 5 = ' + (p.count * 5) + ' ' + t('qada_period_prayers');
             } else if (p.type === 'C') {
                 var target = p.prayerId && p.prayerId !== 'all' ? t(PRAYER_KEYS[p.prayerId]) : t('qada_all_prayers');
-                detailHtml = p.count + ' ' + t('qada_period_prayers') + ' — ' + target;
+                if (!p.prayerId || p.prayerId === 'all') {
+                    detailHtml = target + ': ' + p.count + ' × 5 = ' + (p.count * 5) + ' ' + t('qada_period_prayers');
+                } else {
+                    detailHtml = target + ': ' + p.count + ' ' + t('qada_period_prayers');
+                }
             }
 
             card.innerHTML =
@@ -769,7 +781,12 @@ window.App.QadaCalc = (function() {
             card.style.cssText = 'background:var(--card-bg);border:1px solid var(--border,rgba(0,0,0,0.08));border-radius:12px;padding:12px;margin-bottom:8px;position:relative;';
 
             var prayerName = p.prayerId === 'all' ? t('qada_all_prayers') : t(PRAYER_KEYS[p.prayerId]);
-            var detailHtml = p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName;
+            var detailHtml;
+            if (p.prayerId === 'all') {
+                detailHtml = prayerName + ': ' + p.count + ' × 5 = ' + (p.count * 5) + ' ' + t('qada_period_prayers');
+            } else {
+                detailHtml = prayerName + ': ' + p.count + ' ' + t('qada_period_prayers');
+            }
 
             card.innerHTML =
                 '<div style="display:flex;justify-content:space-between;align-items:start;">' +
@@ -996,9 +1013,8 @@ window.App.QadaCalc = (function() {
         // Deduct already prayed periods
         alreadyPrayedPeriods.forEach(function(p) {
             if (p.prayerId === 'all') {
-                var each = Math.ceil(p.count / 5);
                 PRAYER_IDS.forEach(function(id) {
-                    byPrayer[id] = Math.max(0, byPrayer[id] - each);
+                    byPrayer[id] = Math.max(0, byPrayer[id] - p.count);
                 });
             } else {
                 byPrayer[p.prayerId] = Math.max(0, byPrayer[p.prayerId] - p.count);
@@ -1123,9 +1139,8 @@ window.App.QadaCalc = (function() {
                 wizardData.alreadyPrayedPeriods = JSON.parse(JSON.stringify(alreadyPrayedPeriods));
                 alreadyPrayedPeriods.forEach(function(p) {
                     if (p.prayerId === 'all') {
-                        var each = Math.ceil(p.count / 5);
                         PRAYER_IDS.forEach(function(id) {
-                            wizardData.totalByPrayer[id] = Math.max(0, wizardData.totalByPrayer[id] - each);
+                            wizardData.totalByPrayer[id] = Math.max(0, wizardData.totalByPrayer[id] - p.count);
                         });
                     } else {
                         wizardData.totalByPrayer[p.prayerId] = Math.max(0, wizardData.totalByPrayer[p.prayerId] - p.count);
