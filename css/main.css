@@ -4025,11 +4025,11 @@ body::before {
 
 .moons-row {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: flex-start;
-    padding: 8px 4px 0;
-    gap: 4px;
-    min-height: 100px;
+    padding: 8px 8px 0;
+    gap: 2px;
+    overflow: visible;
 }
 
 .moon-item {
@@ -4038,38 +4038,39 @@ body::before {
     align-items: center;
     flex: 1;
     min-width: 0;
+    max-width: 72px;
 }
 
 .moon-zone-svg {
-    height: 56px;
+    height: 60px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
 }
 
 .moon-zone-num {
-    height: 28px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .moon-zone-best {
-    height: 20px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .moon-zone-icon {
-    height: 36px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .moon-zone-name {
-    height: 20px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -172,12 +172,20 @@ window.App.PrayerStreaks = (function() {
     }
 
     var tierConfig = {
-        'new':      { size: 30, numSize: 18, glowAnim: '', floatAnim: '' },
-        'crescent': { size: 34, numSize: 18, glowAnim: 'moon-glow-sm', floatAnim: 'moon-float' },
-        'half':     { size: 38, numSize: 18, glowAnim: 'moon-glow-sm', floatAnim: 'moon-float' },
-        'gibbous':  { size: 42, numSize: 20, glowAnim: 'moon-glow-md', floatAnim: 'moon-float' },
-        'full':     { size: 48, numSize: 22, glowAnim: 'moon-glow-lg', floatAnim: 'moon-float' }
+        'new':      { size: 24, glowAnim: '', floatAnim: '' },
+        'crescent': { size: 30, glowAnim: 'moon-glow-sm', floatAnim: 'moon-float' },
+        'half':     { size: 36, glowAnim: 'moon-glow-sm', floatAnim: 'moon-float' },
+        'gibbous':  { size: 42, glowAnim: 'moon-glow-md', floatAnim: 'moon-float' },
+        'full':     { size: 50, glowAnim: 'moon-glow-lg', floatAnim: 'moon-float' }
     };
+
+    function getDynamicFontSize(num) {
+        var len = String(num).length;
+        if (len >= 4) return '13px';
+        if (len === 3) return '15px';
+        if (len === 2) return '18px';
+        return '20px';
+    }
 
     function buildMoonSVG(tier, cfg, uid) {
         var s = cfg.size;
@@ -322,7 +330,8 @@ window.App.PrayerStreaks = (function() {
         } else {
             numColor = prayer.color;
         }
-        zoneNum.innerHTML = '<span class="moon-current-num" style="font-size:' + cfg.numSize + 'px;font-weight:800;font-family:Rubik,sans-serif;line-height:1;color:' + numColor + ';">' + current + '</span>';
+        var fontSize = getDynamicFontSize(current);
+        zoneNum.innerHTML = '<span class="moon-current-num" style="font-size:' + fontSize + ';font-weight:800;font-family:Rubik,sans-serif;line-height:1;color:' + numColor + ';">' + current + '</span>';
         cell.appendChild(zoneNum);
 
         // Zone 3: Best streak
@@ -332,7 +341,7 @@ window.App.PrayerStreaks = (function() {
         var bestColor = isRecord ? '#D4A03C' : '#6B7280';
         var bestPrefix = isRecord ? '\uD83C\uDFC6 ' : '';
         var bestLabel = currentLang === 'ar' ? '\u0627\u0644\u0623\u0641\u0636\u0644' : 'Best';
-        zoneBest.innerHTML = '<span class="moon-best-num" style="font-size:12px;font-weight:700;color:' + bestColor + ';white-space:nowrap;">' + bestPrefix + bestLabel + ' ' + best + '</span>';
+        zoneBest.innerHTML = '<span class="moon-best-num" style="font-size:9px;font-weight:600;color:' + bestColor + ';white-space:nowrap;">' + bestPrefix + bestLabel + ' ' + best + '</span>';
         cell.appendChild(zoneBest);
 
         // Zone 4: Prayer icon
@@ -360,7 +369,6 @@ window.App.PrayerStreaks = (function() {
 
         var streaks = getStreaks();
         var prayers = Config.fardPrayers;
-        var currentLang = I18n ? I18n.getCurrentLang() : 'ar';
 
         // Moons row
         var row = document.createElement('div');
@@ -369,16 +377,6 @@ window.App.PrayerStreaks = (function() {
             row.appendChild(createMoonItem(prayers[i], streaks, i));
         }
         container.appendChild(row);
-
-        // Verse
-        var verse = document.createElement('div');
-        verse.className = 'moon-verse';
-        verse.style.cssText = 'font-size:9px;color:#8D99AE;text-align:center;margin-top:10px;font-family:"Amiri",serif;';
-        var verseText = currentLang === 'ar' ? '\u0647\u0648 \u0627\u0644\u0630\u064A \u062C\u0639\u0644 \u0627\u0644\u0634\u0645\u0633 \u0636\u064A\u0627\u0621\u064B \u0648\u0627\u0644\u0642\u0645\u0631 \u0646\u0648\u0631\u0627\u064B' : '';
-        if (verseText) {
-            verse.textContent = verseText;
-            container.appendChild(verse);
-        }
     }
 
     return {
