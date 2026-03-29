@@ -684,6 +684,16 @@
     color: #E8E6E1;
 }
 
+/* Sunnah streak chips dark mode */
+[data-theme="dark"] .sunnah-streak-chip {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.06);
+}
+[data-theme="dark"] .sunnah-streak-chip.top-streak {
+    border-color: rgba(212,160,60,0.2);
+    background: rgba(212,160,60,0.08);
+}
+
 /* Prayer times: unselected boxes dark mode */
 [data-theme="dark"] .pt-item {
     background: rgba(255,255,255,0.08);

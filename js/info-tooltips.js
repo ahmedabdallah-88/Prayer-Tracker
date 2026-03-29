@@ -87,6 +87,27 @@ window.App.InfoTooltips = (function() {
         activeBtn = null;
     }
 
+    function _positionTooltip(tooltip, arrow, wrapper) {
+        requestAnimationFrame(function() {
+            var rect = tooltip.getBoundingClientRect();
+            var wrapRect = wrapper.getBoundingClientRect();
+            if (rect.left < 8 || rect.right > window.innerWidth - 8) {
+                tooltip.style.position = 'fixed';
+                tooltip.style.top = (wrapRect.bottom + 4) + 'px';
+                var tw = rect.width;
+                var cx = wrapRect.left + wrapRect.width / 2;
+                var idealLeft = cx - tw / 2;
+                idealLeft = Math.max(8, Math.min(idealLeft, window.innerWidth - tw - 8));
+                tooltip.style.left = idealLeft + 'px';
+                tooltip.style.right = 'auto';
+                var arrowLeft = cx - idealLeft - 6;
+                arrowLeft = Math.max(8, Math.min(arrowLeft, tw - 20));
+                arrow.style.left = arrowLeft + 'px';
+                arrow.style.right = 'auto';
+            }
+        });
+    }
+
     function createInfoButton(reportId, container) {
         if (!container) return null;
 
@@ -189,6 +210,7 @@ window.App.InfoTooltips = (function() {
             tooltip.appendChild(text);
 
             wrapper.appendChild(tooltip);
+            _positionTooltip(tooltip, arrow, wrapper);
             activeTooltip = tooltip;
             activeBtn = btn;
         });
@@ -283,6 +305,7 @@ window.App.InfoTooltips = (function() {
             tooltip.appendChild(text);
 
             wrapper.appendChild(tooltip);
+            _positionTooltip(tooltip, arrow, wrapper);
             activeTooltip = tooltip;
             activeBtn = btn;
         });

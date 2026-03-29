@@ -4096,6 +4096,84 @@ body::before {
     }
 }
 
+/* ==================== Sunnah Streak Chips ==================== */
+
+.sunnah-streak-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+.sunnah-streak-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(0,0,0,0.04);
+    min-width: calc(50% - 3px);
+    max-width: calc(50% - 3px);
+    box-sizing: border-box;
+}
+
+.sunnah-streak-chip.top-streak {
+    border-color: rgba(212,160,60,0.2);
+    background: rgba(212,160,60,0.06);
+}
+
+.sunnah-streak-chip.zero-streak {
+    opacity: 0.5;
+}
+
+.sunnah-streak-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sunnah-streak-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sunnah-streak-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sunnah-streak-best {
+    font-size: 7.5px;
+    color: #8D99AE;
+    font-family: 'Noto Kufi Arabic', sans-serif;
+}
+
+.sunnah-streak-num {
+    font-size: 18px;
+    font-weight: 800;
+    font-family: 'Rubik', sans-serif;
+    color: var(--text-primary);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.sunnah-streak-legend {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
 /* ==================== Crescent Moons ==================== */
 
 .moons-row {

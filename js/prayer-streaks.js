@@ -20,7 +20,10 @@ window.App.PrayerStreaks = (function() {
         '#E8B84A': 'linear-gradient(135deg, #F0C75E, #E8B84A)',
         '#D4943A': 'linear-gradient(135deg, #E8A849, #D4943A)',
         '#B0664A': 'linear-gradient(135deg, #C47A5A, #B0664A)',
-        '#4A5A7A': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)'
+        '#4A5A7A': 'linear-gradient(135deg, #5B6B8A, #4A5A7A)',
+        '#f59e0b': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+        '#8b4789': 'linear-gradient(135deg, #7C6DAF, #5A4B8A)',
+        '#1e3a8a': 'linear-gradient(135deg, #2e4482, #1e3a8a)'
     };
 
     function getStreakKey() {
@@ -469,11 +472,201 @@ window.App.PrayerStreaks = (function() {
         container.appendChild(row);
     }
 
+    // ==================== SUNNAH STREAK CALCULATION ====================
+
+    var SUNNAH_STREAK_KEY_PREFIX = 'salah_sunnah_streaks_';
+    var _sunnahMonthCache = {};
+    var _sunnahMonthExists = {};
+
+    function getSunnahStreakKey() {
+        return SUNNAH_STREAK_KEY_PREFIX + Storage.getProfilePrefix().replace(/_$/, '');
+    }
+
+    function _getSunnahMonthData(hYear, hMonth) {
+        var cacheKey = hYear + '_' + hMonth;
+        if (_sunnahMonthCache[cacheKey]) return _sunnahMonthCache[cacheKey];
+        var sunnahKey = Storage.getStorageKey('sunnah', hMonth, hYear);
+        var stored = localStorage.getItem(sunnahKey);
+        _sunnahMonthExists[cacheKey] = !!stored;
+        _sunnahMonthCache[cacheKey] = stored ? JSON.parse(stored) : {};
+        return _sunnahMonthCache[cacheKey];
+    }
+
+    function isSunnahDayPrayed(prayerId, hYear, hMonth, hDay) {
+        var data = _getSunnahMonthData(hYear, hMonth);
+        var dayStr = String(hDay);
+        return !!(data[prayerId] && data[prayerId][dayStr]);
+    }
+
+    function isSunnahDayExempt(hYear, hMonth, hDay) {
+        if (!_isFemale) return false;
+        var exemptData = _getExemptData(hYear, hMonth);
+        if (!exemptData) return false;
+        var dayStr = String(hDay);
+        return !!(exemptData[dayStr] && Object.keys(exemptData[dayStr]).length > 0);
+    }
+
+    function _hasNoSunnahDataForMonth(hYear, hMonth) {
+        var cacheKey = hYear + '_' + hMonth;
+        _getSunnahMonthData(hYear, hMonth);
+        return !_sunnahMonthExists[cacheKey];
+    }
+
+    function calculateSunnahCurrentStreak(prayerId) {
+        var today = new Date();
+        var checkDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+        var todayH = Hijri.gregorianToHijri(checkDate);
+        var startFromToday = false;
+        var maxDays = Hijri.getHijriDaysInMonth(todayH.year, todayH.month);
+        if (todayH.day <= maxDays) {
+            startFromToday = isSunnahDayPrayed(prayerId, todayH.year, todayH.month, todayH.day);
+        }
+        if (!startFromToday) {
+            checkDate = new Date(checkDate.getTime() - 86400000);
+        }
+        var currentStreak = 0;
+        var emptyMonthCount = 0;
+        for (var i = 0; i < 730; i++) {
+            var hDate = Hijri.gregorianToHijri(checkDate);
+            var daysInMonth = Hijri.getHijriDaysInMonth(hDate.year, hDate.month);
+            if (hDate.day > daysInMonth) { checkDate = new Date(checkDate.getTime() - 86400000); continue; }
+            if (hDate.day === 1 || i === 0) {
+                if (_hasNoSunnahDataForMonth(hDate.year, hDate.month)) {
+                    emptyMonthCount++;
+                    if (emptyMonthCount >= 2) break;
+                } else { emptyMonthCount = 0; }
+            }
+            if (isSunnahDayExempt(hDate.year, hDate.month, hDate.day)) {
+                checkDate = new Date(checkDate.getTime() - 86400000);
+                continue;
+            }
+            if (isSunnahDayPrayed(prayerId, hDate.year, hDate.month, hDate.day)) {
+                currentStreak++;
+                checkDate = new Date(checkDate.getTime() - 86400000);
+            } else { break; }
+        }
+        return currentStreak;
+    }
+
+    function calculateSunnahBestStreak(prayerId) {
+        var today = new Date();
+        var todayNoon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+        var currentHijriYear = Hijri.getCurrentHijriYear();
+        var scanStartG = Hijri.hijriToGregorianDay1(currentHijriYear, 1);
+        var scanDate = new Date(scanStartG.getFullYear(), scanStartG.getMonth(), scanStartG.getDate(), 12, 0, 0);
+        var bestStreak = 0;
+        var tempStreak = 0;
+        while (scanDate <= todayNoon) {
+            var hScan = Hijri.gregorianToHijri(scanDate);
+            var daysInMonth = Hijri.getHijriDaysInMonth(hScan.year, hScan.month);
+            if (hScan.day > daysInMonth) { scanDate = new Date(scanDate.getTime() + 86400000); continue; }
+            if (isSunnahDayExempt(hScan.year, hScan.month, hScan.day)) { scanDate = new Date(scanDate.getTime() + 86400000); continue; }
+            if (isSunnahDayPrayed(prayerId, hScan.year, hScan.month, hScan.day)) {
+                tempStreak++;
+                bestStreak = Math.max(bestStreak, tempStreak);
+            } else { tempStreak = 0; }
+            scanDate = new Date(scanDate.getTime() + 86400000);
+        }
+        return bestStreak;
+    }
+
+    function calculateAllSunnahStreaks() {
+        _sunnahMonthCache = {};
+        _sunnahMonthExists = {};
+        _exemptCache = {};
+        var profile = Storage.getActiveProfile();
+        _isFemale = !!(profile && profile.gender === 'female' && profile.age >= 12);
+        var prayers = Config.sunnahPrayers;
+        var result = { current: {}, best: {} };
+        var todayH = Hijri.getTodayHijri();
+        prayers.forEach(function(prayer) {
+            result.current[prayer.id] = calculateSunnahCurrentStreak(prayer.id);
+            result.best[prayer.id] = calculateSunnahBestStreak(prayer.id);
+            if (result.current[prayer.id] > result.best[prayer.id]) {
+                result.best[prayer.id] = result.current[prayer.id];
+            }
+        });
+        result.lastCalculated = todayH.year + '-' + todayH.month + '-' + todayH.day;
+        try { localStorage.setItem(getSunnahStreakKey(), JSON.stringify(result)); } catch(e) {}
+        return result;
+    }
+
+    // ==================== SUNNAH STREAK CHIPS RENDERING ====================
+
+    function renderSunnahStreakChips(container) {
+        if (!container) return;
+        container.innerHTML = '';
+        var streaks = calculateAllSunnahStreaks();
+        var prayers = Config.sunnahPrayers;
+        var currentLang = I18n ? I18n.getCurrentLang() : 'ar';
+
+        var chipsWrap = document.createElement('div');
+        chipsWrap.className = 'sunnah-streak-chips';
+
+        prayers.forEach(function(prayer) {
+            var current = streaks.current[prayer.id] || 0;
+            var best = streaks.best[prayer.id] || 0;
+            var isTopStreak = current > 0 && current === best && best > 0;
+            var isZero = current === 0;
+
+            var chip = document.createElement('div');
+            chip.className = 'sunnah-streak-chip';
+            if (isTopStreak) chip.classList.add('top-streak');
+            if (isZero) chip.classList.add('zero-streak');
+
+            var iconGrad = gradients[prayer.color] || ('linear-gradient(135deg, ' + prayer.color + ', ' + prayer.color + ')');
+            var iconDiv = document.createElement('div');
+            iconDiv.className = 'sunnah-streak-icon';
+            iconDiv.style.background = iconGrad;
+            iconDiv.innerHTML = '<span class="material-symbols-rounded" style="font-size:12px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 500;">' + prayer.icon + '</span>';
+
+            var infoDiv = document.createElement('div');
+            infoDiv.className = 'sunnah-streak-info';
+            var prayerName = I18n ? I18n.getPrayerName(prayer.id) : prayer.name;
+            var nameEl = document.createElement('div');
+            nameEl.className = 'sunnah-streak-name';
+            if (isTopStreak) nameEl.style.color = '#D4A03C';
+            nameEl.textContent = prayerName;
+
+            var bestEl = document.createElement('div');
+            bestEl.className = 'sunnah-streak-best';
+            var bestPrefix = isTopStreak ? '\uD83C\uDFC6 ' : '';
+            var bestLabel = currentLang === 'ar' ? '\u0627\u0644\u0623\u0641\u0636\u0644' : 'Best';
+            if (isTopStreak) bestEl.style.color = '#D4A03C';
+            bestEl.textContent = bestPrefix + bestLabel + ' ' + best;
+
+            infoDiv.appendChild(nameEl);
+            infoDiv.appendChild(bestEl);
+
+            var numDiv = document.createElement('div');
+            numDiv.className = 'sunnah-streak-num';
+            if (isTopStreak) numDiv.style.color = '#D4A03C';
+            if (isZero) numDiv.style.color = '#C1574E';
+            numDiv.textContent = current;
+
+            chip.appendChild(iconDiv);
+            chip.appendChild(infoDiv);
+            chip.appendChild(numDiv);
+            chipsWrap.appendChild(chip);
+        });
+
+        container.appendChild(chipsWrap);
+
+        var legend = document.createElement('div');
+        legend.className = 'sunnah-streak-legend';
+        var currentLabel = currentLang === 'ar' ? '\u0627\u0644\u062D\u0627\u0644\u064A\u0629' : 'Current';
+        var bestLabel2 = currentLang === 'ar' ? '\u0627\u0644\u0623\u0641\u0636\u0644' : 'Best';
+        legend.innerHTML = '<span style="color:var(--text-primary);font-size:10px;font-weight:700;">\u25CF ' + currentLabel + '</span>' +
+            '<span style="color:var(--text-muted);font-size:10px;">\u2014 ' + bestLabel2 + '</span>';
+        container.appendChild(legend);
+    }
+
     return {
         calculateCurrentStreak: calculateCurrentStreak,
         calculateBestStreak: calculateBestStreak,
         calculateAllStreaks: calculateAllStreaks,
         getStreaks: getStreaks,
-        renderMoonSection: renderMoonSection
+        renderMoonSection: renderMoonSection,
+        renderSunnahStreakChips: renderSunnahStreakChips
     };
 })();

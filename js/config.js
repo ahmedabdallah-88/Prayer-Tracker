@@ -151,6 +151,7 @@ window.App.Config = {
         // Streaks
         'fard_streaks': { ar: '\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0645\u0648\u0627\u0638\u0628\u0629 \u0639\u0644\u0649 \u0635\u0644\u0627\u0629 \u0627\u0644\u062c\u0645\u0627\u0639\u0629', en: 'Congregation Prayer Streaks' },
         'sunnah_streaks': { ar: '\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0645\u0648\u0627\u0638\u0628\u0629 \u0639\u0644\u0649 \u0627\u0644\u0633\u0646\u0646', en: 'Sunnah Prayer Streaks' },
+        'sunnah_streaks_title': { ar: '\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0645\u0648\u0627\u0638\u0628\u0629', en: 'Consistency Streaks' },
         'consecutive_days': { ar: '\u064a\u0648\u0645 \u0645\u062a\u062a\u0627\u0644\u064a', en: 'consecutive days' },
         'best_streak': { ar: '\u0623\u0641\u0636\u0644 \u0633\u0644\u0633\u0644\u0629:', en: 'Best streak:' },
         'days_word': { ar: '\u064a\u0648\u0645', en: 'days' },

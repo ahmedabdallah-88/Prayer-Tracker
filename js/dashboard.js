@@ -198,6 +198,14 @@ window.App.Dashboard = (function() {
             }
         }
 
+        // 1c. Sunnah Prayer Streak Chips (sunnah only)
+        if (type === 'sunnah') {
+            var sunnahStreakEl = document.getElementById('sunnahPrayerStreaks');
+            if (sunnahStreakEl && window.App.PrayerStreaks) {
+                window.App.PrayerStreaks.renderSunnahStreakChips(sunnahStreakEl);
+            }
+        }
+
         // 2. Streak Flame Bars
         var streakEl = document.getElementById(type + 'StreakFlame');
         if (streakEl && window.App.Jamaah) {
