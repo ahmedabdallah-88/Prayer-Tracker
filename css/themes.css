@@ -342,6 +342,15 @@
     background: #1A1A1E;
 }
 
+[data-theme="dark"] .ps-close-btn {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .ps-close-btn:hover {
+    background: rgba(255,255,255,0.15);
+}
+
 [data-theme="dark"] .ps-profile-card {
     background: linear-gradient(135deg, #2A2A2E, #3A3A3E);
 }
