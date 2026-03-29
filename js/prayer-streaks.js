@@ -27,68 +27,112 @@ window.App.PrayerStreaks = (function() {
         return STREAK_STORAGE_KEY_PREFIX + Storage.getProfilePrefix().replace(/_$/, '');
     }
 
+    var _isFemale = false;
+
     function isFemaleProfile() {
-        var profile = Storage.getActiveProfile();
-        return profile && profile.gender === 'female' && profile.age >= 12;
+        return _isFemale;
     }
 
-    // Per-calculation exempt cache
-    var _exemptCache = {};
-
-    function isDayExempt(prayerId, hYear, hMonth, hDay) {
-        if (!isFemaleProfile() || !Female) return false;
-        try {
-            var ck = hYear + '_' + hMonth;
-            if (!_exemptCache[ck]) {
-                _exemptCache[ck] = Female.getExemptDays(hYear, hMonth);
-            }
-            var exemptData = _exemptCache[ck];
-            var dayStr = String(hDay);
-            return (exemptData[dayStr] && exemptData[dayStr][prayerId]) ||
-                   (exemptData[hDay] && exemptData[hDay][prayerId]);
-        } catch(e) {
-            return false;
-        }
-    }
-
-    // Per-calculation cache to avoid redundant localStorage reads
+    // ==================== MONTH DATA CACHE ====================
+    // Per-calculation caches — cleared at start of each calculateAllStreaks
     var _monthCache = {};
+    var _exemptCache = {};
+    var _monthExists = {}; // tracks whether ANY data exists for a month
 
     function _getMonthData(hYear, hMonth) {
         var cacheKey = hYear + '_' + hMonth;
         if (_monthCache[cacheKey]) return _monthCache[cacheKey];
 
-        // Use Storage key generators to guarantee format consistency
+        // Use Storage key generators to guarantee exact same key format as save
         var fardKey = Storage.getStorageKey('fard', hMonth, hYear);
-        var stored = localStorage.getItem(fardKey);
-        var fardData = stored ? JSON.parse(stored) : {};
+        var fardStored = localStorage.getItem(fardKey);
 
         var congKey = Storage.getCongregationKey(hYear, hMonth);
         var congStored = localStorage.getItem(congKey);
+
+        // Track whether this month has ANY stored data at all
+        _monthExists[cacheKey] = !!(fardStored || congStored);
+
+        var fardData = fardStored ? JSON.parse(fardStored) : {};
         var congData = congStored ? JSON.parse(congStored) : {};
 
         _monthCache[cacheKey] = { fard: fardData, cong: congData };
         return _monthCache[cacheKey];
     }
 
+    function _getExemptData(hYear, hMonth) {
+        var cacheKey = hYear + '_' + hMonth;
+        if (_exemptCache.hasOwnProperty(cacheKey)) return _exemptCache[cacheKey];
+
+        // Read exempt data directly from localStorage using Storage.getExemptKey
+        try {
+            var exemptKey = Storage.getExemptKey(hYear, hMonth);
+            var stored = localStorage.getItem(exemptKey);
+            if (!stored) {
+                _exemptCache[cacheKey] = null;
+                return null;
+            }
+            var parsed = JSON.parse(stored);
+            // Handle old boolean format migration inline
+            var keys = Object.keys(parsed);
+            if (keys.length > 0 && typeof parsed[keys[0]] === 'boolean') {
+                var newData = {};
+                var fardPrayers = Config.fardPrayers;
+                keys.forEach(function(day) {
+                    if (parsed[day]) {
+                        newData[day] = {};
+                        fardPrayers.forEach(function(p) { newData[day][p.id] = true; });
+                    }
+                });
+                _exemptCache[cacheKey] = newData;
+                // Also mark month as having data
+                _monthExists[cacheKey] = true;
+                return newData;
+            }
+            _exemptCache[cacheKey] = parsed;
+            _monthExists[cacheKey] = true;
+            return parsed;
+        } catch(e) {
+            _exemptCache[cacheKey] = null;
+            return null;
+        }
+    }
+
+    // ==================== DAY STATE CHECKS ====================
+
+    function isDayExempt(prayerId, hYear, hMonth, hDay) {
+        if (!_isFemale) return false;
+        var exemptData = _getExemptData(hYear, hMonth);
+        if (!exemptData) return false;
+        var dayStr = String(hDay);
+        return !!(exemptData[dayStr] && exemptData[dayStr][prayerId]);
+    }
+
     function isDayPrayed(prayerId, hYear, hMonth, hDay) {
         var monthData = _getMonthData(hYear, hMonth);
         var dayStr = String(hDay);
 
-        // Check fard data (both string and numeric keys for safety)
-        if (monthData.fard[prayerId]) {
-            if (monthData.fard[prayerId][dayStr] || monthData.fard[prayerId][hDay]) {
-                return true;
-            }
+        // Check fard data
+        if (monthData.fard[prayerId] && monthData.fard[prayerId][dayStr]) {
+            return true;
         }
         // Check congregation data
-        if (monthData.cong[prayerId]) {
-            if (monthData.cong[prayerId][dayStr] || monthData.cong[prayerId][hDay]) {
-                return true;
-            }
+        if (monthData.cong[prayerId] && monthData.cong[prayerId][dayStr]) {
+            return true;
         }
         return false;
     }
+
+    // Returns true if we have never seen ANY data for this month
+    function _hasNoDataForMonth(hYear, hMonth) {
+        var cacheKey = hYear + '_' + hMonth;
+        // Ensure data is loaded first
+        _getMonthData(hYear, hMonth);
+        if (_isFemale) _getExemptData(hYear, hMonth);
+        return !_monthExists[cacheKey];
+    }
+
+    // ==================== STREAK CALCULATION ====================
 
     function calculateCurrentStreak(prayerId) {
         var today = new Date();
@@ -107,6 +151,7 @@ window.App.PrayerStreaks = (function() {
             checkDate = new Date(checkDate.getTime() - 86400000);
         }
 
+        var emptyMonthCount = 0;
         for (var i = 0; i < 730; i++) {
             var hDate = Hijri.gregorianToHijri(checkDate);
             var daysInMonth = Hijri.getHijriDaysInMonth(hDate.year, hDate.month);
@@ -114,8 +159,18 @@ window.App.PrayerStreaks = (function() {
                 checkDate = new Date(checkDate.getTime() - 86400000);
                 continue;
             }
+
+            // Stop if we hit a month with zero data (user wasn't tracking yet)
+            if (hDate.day === 1 || i === 0) {
+                if (_hasNoDataForMonth(hDate.year, hDate.month)) {
+                    emptyMonthCount++;
+                    if (emptyMonthCount >= 2) break;
+                } else {
+                    emptyMonthCount = 0;
+                }
+            }
+
             if (isDayExempt(prayerId, hDate.year, hDate.month, hDate.day)) {
-                // Exempt day — skip, don't break streak
                 checkDate = new Date(checkDate.getTime() - 86400000);
                 continue;
             }
@@ -147,7 +202,6 @@ window.App.PrayerStreaks = (function() {
                 continue;
             }
             if (isDayExempt(prayerId, hScan.year, hScan.month, hScan.day)) {
-                // Exempt — skip, streak continues
                 scanDate = new Date(scanDate.getTime() + 86400000);
                 continue;
             }
@@ -163,8 +217,15 @@ window.App.PrayerStreaks = (function() {
     }
 
     function calculateAllStreaks() {
-        _monthCache = {}; // Clear cache for fresh calculation
-        _exemptCache = {}; // Clear exempt cache too
+        // Clear all caches for fresh calculation
+        _monthCache = {};
+        _exemptCache = {};
+        _monthExists = {};
+
+        // Cache female check once — avoids calling Storage.getActiveProfile() thousands of times
+        var profile = Storage.getActiveProfile();
+        _isFemale = !!(profile && profile.gender === 'female' && profile.age >= 12);
+
         var prayers = Config.fardPrayers;
         var result = { current: {}, best: {} };
         var todayH = Hijri.getTodayHijri();
@@ -187,7 +248,6 @@ window.App.PrayerStreaks = (function() {
     }
 
     function getStreaks() {
-        // Always recalculate to pick up latest prayer data
         return calculateAllStreaks();
     }
 
