@@ -3942,6 +3942,41 @@ body::before {
     100% { transform: scale(1); }
 }
 
+@keyframes hourglass-breathe-flip {
+    0%, 35% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.9;
+    }
+    40% {
+        transform: rotate(0deg) scale(1.15);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.15);
+        opacity: 1;
+    }
+    55% {
+        transform: rotate(180deg) scale(1);
+        opacity: 0.9;
+    }
+    90%, 100% {
+        transform: rotate(180deg) scale(1);
+        opacity: 0.9;
+    }
+}
+
+.hourglass-animated {
+    animation: hourglass-breathe-flip 5s ease-in-out infinite;
+    display: inline-block;
+    transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hourglass-animated {
+        animation: none !important;
+    }
+}
+
 /* ==================== Mosque Lanterns ==================== */
 
 .lanterns-row {

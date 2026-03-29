@@ -421,6 +421,10 @@ window.App.PrayerTimes = (function() {
 
         el.style.display = 'flex';
 
+        // Add continuous hourglass animation
+        var hgIcon = el.querySelector('.material-symbols-rounded');
+        if (hgIcon) hgIcon.classList.add('hourglass-animated');
+
         // Clear previous interval
         if (countdownInterval) clearInterval(countdownInterval);
 
@@ -459,12 +463,6 @@ window.App.PrayerTimes = (function() {
             wave.className = 'breathe-wave';
             cdEl.appendChild(wave);
             setTimeout(function() { wave.remove(); }, 1000);
-            // Pulse the hourglass icon
-            var icon = cdEl.querySelector('.material-symbols-rounded');
-            if (icon) {
-                icon.classList.add('icon-pulse');
-                setTimeout(function() { icon.classList.remove('icon-pulse'); }, 1000);
-            }
         }, 3000);
     }
 

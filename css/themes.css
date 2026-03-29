@@ -212,6 +212,46 @@
     color: #A0A0A4 !important;
 }
 
+/* Per-prayer dark mode icon colors (unselected — filled + dimmed identity color) */
+[data-theme="dark"] .prayer-tab[data-prayer="fajr"] .prayer-tab-icon .material-symbols-rounded {
+    color: rgba(232, 180, 184, 0.5) !important;
+    font-variation-settings: 'FILL' 1, 'wght' 300 !important;
+}
+[data-theme="dark"] .prayer-tab[data-prayer="dhuhr"] .prayer-tab-icon .material-symbols-rounded {
+    color: rgba(240, 199, 94, 0.5) !important;
+    font-variation-settings: 'FILL' 1, 'wght' 300 !important;
+}
+[data-theme="dark"] .prayer-tab[data-prayer="asr"] .prayer-tab-icon .material-symbols-rounded {
+    color: rgba(232, 168, 76, 0.5) !important;
+    font-variation-settings: 'FILL' 1, 'wght' 300 !important;
+}
+[data-theme="dark"] .prayer-tab[data-prayer="maghrib"] .prayer-tab-icon .material-symbols-rounded {
+    color: rgba(196, 120, 80, 0.5) !important;
+    font-variation-settings: 'FILL' 1, 'wght' 300 !important;
+}
+[data-theme="dark"] .prayer-tab[data-prayer="isha"] .prayer-tab-icon .material-symbols-rounded {
+    color: rgba(140, 150, 180, 0.6) !important;
+    font-variation-settings: 'FILL' 1, 'wght' 300 !important;
+}
+
+/* Active tab icon stays white in dark mode (must come after per-prayer rules) */
+[data-theme="dark"] .prayer-tab.active .prayer-tab-icon .material-symbols-rounded {
+    color: #fff !important;
+    font-variation-settings: 'FILL' 1, 'wght' 500 !important;
+}
+
+/* Per-prayer dark mode tab name colors */
+[data-theme="dark"] .prayer-tab[data-prayer="fajr"] .prayer-tab-name { color: rgba(232, 180, 184, 0.5) !important; }
+[data-theme="dark"] .prayer-tab[data-prayer="dhuhr"] .prayer-tab-name { color: rgba(240, 199, 94, 0.5) !important; }
+[data-theme="dark"] .prayer-tab[data-prayer="asr"] .prayer-tab-name { color: rgba(232, 168, 76, 0.5) !important; }
+[data-theme="dark"] .prayer-tab[data-prayer="maghrib"] .prayer-tab-name { color: rgba(196, 120, 80, 0.5) !important; }
+[data-theme="dark"] .prayer-tab[data-prayer="isha"] .prayer-tab-name { color: rgba(140, 150, 180, 0.6) !important; }
+
+/* Active tab name stays bright in dark mode (must come after per-prayer rules) */
+[data-theme="dark"] .prayer-tab.active .prayer-tab-name {
+    color: #E8E6E1 !important;
+}
+
 [data-theme="dark"] .prayer-tab-stats {
     border-bottom-color: rgba(255,255,255,0.06);
 }
