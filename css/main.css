@@ -3309,6 +3309,10 @@ body {
     padding: 0 4px;
 }
 
+[dir="ltr"] .month-nav-compact {
+    flex-direction: row-reverse;
+}
+
 .nav-circle {
     width: 30px; height: 30px;
     border-radius: 10px;

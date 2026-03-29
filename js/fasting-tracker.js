@@ -268,7 +268,9 @@ window.App.Fasting = (function() {
         if (monthLabel) {
             monthLabel.classList.remove('slide-from-left', 'slide-from-right');
             void monthLabel.offsetWidth;
-            monthLabel.classList.add(delta > 0 ? 'slide-from-left' : 'slide-from-right');
+            var isRTL = document.documentElement.dir === 'rtl';
+            var slideDir = (delta > 0) === isRTL ? 'slide-from-left' : 'slide-from-right';
+            monthLabel.classList.add(slideDir);
             setTimeout(function() { monthLabel.classList.remove('slide-from-left', 'slide-from-right'); }, 250);
         }
 
