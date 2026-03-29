@@ -548,6 +548,9 @@ body {
     white-space: nowrap;
     position: relative;
     z-index: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    overflow: visible;
 }
 
 .sub-tab.active {

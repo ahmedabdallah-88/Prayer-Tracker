@@ -532,9 +532,11 @@ window.App.QadaTracker = (function() {
         var tabs = subTabs.querySelectorAll('.sub-tab');
         var dashTab = tabs[tabs.length - 1]; // dashboard is last
 
-        var qadaTab = document.createElement('button');
+        var qadaTab = document.createElement('div');
         qadaTab.className = 'sub-tab';
         qadaTab.id = 'fardQadaSubTab';
+        qadaTab.setAttribute('role', 'button');
+        qadaTab.setAttribute('tabindex', '0');
         qadaTab.onclick = function() { switchView('fard', 'qada'); };
         qadaTab.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">history</span> <span data-t="qada_tab">' + t('qada_tab') + '</span>';
 
