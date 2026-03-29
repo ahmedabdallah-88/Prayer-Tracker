@@ -635,6 +635,21 @@
     color: #E8E6E1;
 }
 
+/* Prayer times: unselected boxes dark mode */
+[data-theme="dark"] .pt-item {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.06);
+}
+[data-theme="dark"] .pt-item .pt-icon .material-symbols-rounded {
+    color: rgba(255,255,255,0.5);
+}
+[data-theme="dark"] .pt-item .pt-name {
+    color: rgba(255,255,255,0.7);
+}
+[data-theme="dark"] .pt-item .pt-time {
+    color: rgba(255,255,255,0.9);
+}
+
 /* Prayer times: passed prayers need higher opacity */
 [data-theme="dark"] .pt-item.passed-prayer {
     opacity: 0.65;
