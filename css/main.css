@@ -495,7 +495,10 @@ body {
 
 /* ==================== SEGMENTED CONTROL (Sub Tabs) ==================== */
 .sub-tabs {
-    display: flex;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 40px;
     background: rgba(43,45,66,0.06);
     border-radius: 12px;
     padding: 3px;

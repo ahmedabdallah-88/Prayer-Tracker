@@ -120,6 +120,28 @@ window.App.I18n = (function() {
             }
         } catch(e) { console.error('Lang re-render:', e); }
 
+        // Fix sub-tabs pill position after direction change
+        setTimeout(function() {
+            var isRTL = document.documentElement.dir === 'rtl';
+            document.querySelectorAll('.sub-tabs-pill').forEach(function(pill) {
+                if (isRTL) {
+                    pill.style.right = '3px';
+                    pill.style.left = 'auto';
+                } else {
+                    pill.style.left = '3px';
+                    pill.style.right = 'auto';
+                }
+            });
+            // Also force sub-tab text color
+            document.querySelectorAll('.sub-tab').forEach(function(tab) {
+                if (tab.classList.contains('active')) {
+                    tab.style.color = 'var(--text-primary)';
+                } else {
+                    tab.style.color = 'var(--text-muted)';
+                }
+            });
+        }, 50);
+
         if (typeof window.updateShellBar === 'function') window.updateShellBar();
     }
 
