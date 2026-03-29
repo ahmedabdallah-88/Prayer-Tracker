@@ -391,8 +391,8 @@ window.App.Azkar = (function() {
             if (isFuture) card.style.opacity = '0.35';
 
             var barColor = avgPct >= 90 ? 'var(--primary)' : avgPct >= 70 ? 'var(--accent)' : 'var(--danger, #dc2626)';
-            var pctColor = avgPct >= 80 ? 'var(--primary)' : avgPct >= 50 ? 'var(--accent)' : avgPct > 0 ? 'var(--danger)' : '#8D99AE';
-            var accentColor = avgPct >= 80 ? 'var(--primary)' : avgPct >= 50 ? 'var(--accent)' : avgPct > 0 ? 'var(--danger)' : '#8D99AE';
+            var pctColor = avgPct >= 80 ? 'var(--primary)' : avgPct >= 50 ? 'var(--accent)' : avgPct > 0 ? 'var(--danger)' : 'var(--text-muted)';
+            var accentColor = avgPct >= 80 ? 'var(--primary)' : avgPct >= 50 ? 'var(--accent)' : avgPct > 0 ? 'var(--danger)' : 'var(--text-muted)';
             var hijriLabel = Hijri.getHijriMonthName(month - 1);
             var gregSpan = Hijri.getGregorianSpanForHijriMonth(yearVal, month);
 

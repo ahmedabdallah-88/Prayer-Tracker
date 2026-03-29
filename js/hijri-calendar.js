@@ -383,8 +383,8 @@ window.App.Hijri = (function() {
                 ' + (currentOverride ? '<p style="font-size:0.75em;color:var(--primary);"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle;">edit</span> ' + (currentLang === 'ar' ? 'تم تعديل هذا الشهر مسبقاً' : 'This month has a manual override') + '</p>' : '') + '\
                 <div style="display:flex;gap:8px;margin-top:8px;">\
                     <button type="button" id="hijriOverrideSaveBtn" style="flex:1;padding:10px;background:var(--primary);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif;">' + (currentLang === 'ar' ? 'حفظ' : 'Save') + '</button>\
-                    ' + (currentOverride ? '<button type="button" id="hijriOverrideResetBtn" style="padding:10px 16px;background:#fee2e2;color:#dc2626;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif;">' + (currentLang === 'ar' ? 'إعادة تعيين' : 'Reset') + '</button>' : '') + '\
-                    <button type="button" id="hijriOverrideCancelBtn" style="padding:10px 16px;background:#f3f4f6;color:var(--text-secondary);border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:\'Cairo\',sans-serif;">' + (currentLang === 'ar' ? 'إلغاء' : 'Cancel') + '</button>\
+                    ' + (currentOverride ? '<button type="button" id="hijriOverrideResetBtn" style="padding:10px 16px;background:rgba(var(--danger-rgb),0.1);color:var(--danger);border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif;">' + (currentLang === 'ar' ? 'إعادة تعيين' : 'Reset') + '</button>' : '') + '\
+                    <button type="button" id="hijriOverrideCancelBtn" style="padding:10px 16px;background:rgba(128,128,128,0.1);color:var(--text-secondary);border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:\'Cairo\',sans-serif;">' + (currentLang === 'ar' ? 'إلغاء' : 'Cancel') + '</button>\
                 </div>\
             </div>\
         ';

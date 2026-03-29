@@ -70,7 +70,7 @@ window.App.YearOverview = (function() {
             var avgCong = type === 'fard' ? Math.round(totalCong / 12) : 0;
             var bestName = bestMonthIdx > 0 ? Hijri.getHijriMonthName(bestMonthIdx - 1) : '-';
 
-            var html = '<div style="background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;border:1px solid rgba(0,0,0,0.04);margin-bottom:14px;">';
+            var html = '<div style="background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;border:1px solid var(--border, rgba(0,0,0,0.04));margin-bottom:14px;">';
 
             // ROW 1: two cards side by side
             html += '<div style="display:flex;gap:10px;">';
@@ -154,8 +154,8 @@ window.App.YearOverview = (function() {
             // Dynamic colors based on percentage
             var pct = ms.stats.percentage;
             var barColor = pct >= 90 ? 'linear-gradient(90deg, var(--primary-mid), var(--primary-light))' : pct >= 70 ? 'linear-gradient(90deg, var(--accent), var(--accent-light))' : pct > 0 ? 'linear-gradient(90deg, var(--danger), var(--danger-light))' : 'transparent';
-            var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : pct > 0 ? 'var(--danger)' : '#8D99AE';
-            var accentColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : pct > 0 ? 'var(--danger)' : '#8D99AE';
+            var pctColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : pct > 0 ? 'var(--danger)' : 'var(--text-muted)';
+            var accentColor = pct >= 80 ? 'var(--primary)' : pct >= 50 ? 'var(--accent)' : pct > 0 ? 'var(--danger)' : 'var(--text-muted)';
 
             var congBadge = '';
             if (type === 'fard' && ms.congRate > 0) {

@@ -131,6 +131,7 @@
     --text-secondary: #A3A3A3;
     --text-faint: #525252;
     --border: rgba(255,255,255,0.06);
+    --popup-bg: #2A2A2E;
     --tab-bg: rgba(26,26,30,0.95);
 }
 
@@ -176,8 +177,18 @@
     background: rgba(255,255,255,0.06);
 }
 
+[data-theme="dark"] .sub-tab {
+    color: #A0A0A4 !important;
+}
+[data-theme="dark"] .sub-tab .material-symbols-rounded {
+    color: #A0A0A4 !important;
+}
 [data-theme="dark"] .sub-tab.active {
     background: rgba(255,255,255,0.1);
+    color: #E8E6E1 !important;
+}
+[data-theme="dark"] .sub-tab.active .material-symbols-rounded {
+    color: var(--primary) !important;
 }
 
 [data-theme="dark"] .prayer-tabs-container {
@@ -190,15 +201,15 @@
 }
 
 [data-theme="dark"] .prayer-tab-name {
-    color: #8A8A8E;
+    color: #A0A0A4 !important;
 }
 
 [data-theme="dark"] .prayer-tab.active .prayer-tab-name {
-    color: #E8E6E1;
+    color: #E8E6E1 !important;
 }
 
 [data-theme="dark"] .prayer-tab-icon .material-symbols-rounded {
-    color: #8A8A8E;
+    color: #A0A0A4 !important;
 }
 
 [data-theme="dark"] .prayer-tab-stats {
@@ -596,4 +607,106 @@
 }
 [data-theme="dark"] .moon-prayer-name {
     color: #9CA3AF !important;
+}
+
+/* ─── Dark theme: comprehensive visibility fixes ─── */
+
+/* Sub-tabs sliding pill */
+[data-theme="dark"] .sub-tabs-pill {
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Prayer tab stats row */
+[data-theme="dark"] .prayer-tab-stats {
+    background: rgba(255,255,255,0.08);
+}
+
+/* Stats labels */
+[data-theme="dark"] .stats-label {
+    color: #8A8A8E;
+}
+[data-theme="dark"] .stats-value.days-val .days-total {
+    color: #8A8A8E;
+}
+
+/* Sunnah tab active name */
+[data-theme="dark"] .sunnah-tab.active .sunnah-tab-name {
+    color: #E8E6E1;
+}
+
+/* Prayer times: passed prayers need higher opacity */
+[data-theme="dark"] .pt-item.passed-prayer {
+    opacity: 0.65;
+}
+
+/* Fasting hero label */
+[data-theme="dark"] .vol-fasting-hero-label {
+    color: #8A8A8E;
+}
+
+/* Onboarding tooltips */
+[data-theme="dark"] .onboard-tooltip-title {
+    color: #E8E6E1;
+}
+[data-theme="dark"] .onboard-tooltip-body {
+    color: #8A8A8E;
+}
+[data-theme="dark"] .onboard-tooltip-btn {
+    color: #8A8A8E;
+}
+
+/* Info tooltip popup (overrides inline styles) */
+[data-theme="dark"] .info-tooltip-popup {
+    background: #2A2A2E !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+[data-theme="dark"] .info-tooltip-popup > div {
+    background: #2A2A2E !important;
+    color: #E8E6E1 !important;
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Info tooltip button inactive state */
+[data-theme="dark"] .info-tooltip-btn {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Month/Year picker popup */
+[data-theme="dark"] #monthYearPickerOverlay > div {
+    background: #2A2A2E !important;
+}
+
+/* Streak cards */
+[data-theme="dark"] .streak-card {
+    background: rgba(40,40,44,0.8);
+    border-color: rgba(255,255,255,0.06);
+}
+
+/* Legend text */
+[data-theme="dark"] .prayer-legend {
+    color: var(--text-muted);
+}
+[data-theme="dark"] .legend-item span {
+    color: #8A8A8E;
+}
+
+/* Shell bar buttons */
+[data-theme="dark"] .shell-btn {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.06);
+    color: #E8E6E1;
+}
+
+/* Bottom tab bar items */
+[data-theme="dark"] .tab-item {
+    color: #A0A0A4;
+}
+[data-theme="dark"] .tab-item.active {
+    color: var(--primary);
+}
+[data-theme="dark"] .tab-bar {
+    border-top-color: rgba(255,255,255,0.06);
 }

@@ -241,7 +241,7 @@ window.App.PrayerTimes = (function() {
                     nextInfo.textContent = currentLang === 'ar'
                         ? '\u062A\u0639\u0630\u0631 \u062A\u062D\u0645\u064A\u0644 \u0627\u0644\u0645\u0648\u0627\u0642\u064A\u062A \u2014 \u0627\u0636\u063A\u0637 \u0623\u0648 \u0641\u0639\u0651\u0644 \u0627\u0644\u0645\u0648\u0642\u0639'
                         : 'Could not load times \u2014 tap refresh or enable location';
-                    nextInfo.style.color = '#dc2626';
+                    nextInfo.style.color = 'var(--danger)';
                 }
             }
         });

@@ -167,7 +167,7 @@ window.App.QadaDashboard = (function() {
         // Create sub-toggle pill
         var wrapper = document.createElement('div');
         wrapper.id = 'qadaDashSubToggle';
-        wrapper.style.cssText = 'display:flex;position:relative;background:rgba(0,0,0,0.04);border-radius:12px;padding:3px;margin-bottom:14px;';
+        wrapper.style.cssText = 'display:flex;position:relative;background:rgba(128,128,128,0.08);border-radius:12px;padding:3px;margin-bottom:14px;';
 
         var fardBtn = document.createElement('button');
         fardBtn.id = 'qadaDashSubFard';
@@ -303,7 +303,7 @@ window.App.QadaDashboard = (function() {
 
         // Large progress bar
         var barWrap = document.createElement('div');
-        barWrap.style.cssText = 'width:100%;height:24px;background:rgba(0,0,0,0.05);border-radius:12px;overflow:hidden;position:relative;';
+        barWrap.style.cssText = 'width:100%;height:24px;background:rgba(128,128,128,0.1);border-radius:12px;overflow:hidden;position:relative;';
         var fill = document.createElement('div');
         fill.style.cssText = 'height:100%;border-radius:12px;background:' + pctColor + ';width:' + Math.min(pct, 100) + '%;transition:width 0.6s ease;';
         barWrap.appendChild(fill);
@@ -368,7 +368,7 @@ window.App.QadaDashboard = (function() {
 
             // Bar
             var barWrap = document.createElement('div');
-            barWrap.style.cssText = 'flex:1;height:8px;background:rgba(0,0,0,0.05);border-radius:4px;overflow:hidden;';
+            barWrap.style.cssText = 'flex:1;height:8px;background:rgba(128,128,128,0.1);border-radius:4px;overflow:hidden;';
             var barFill = document.createElement('div');
             barFill.style.cssText = 'height:100%;border-radius:4px;background:' + color + ';width:' + Math.min(pct, 100) + '%;transition:width 0.6s ease;';
             barWrap.appendChild(barFill);
@@ -684,7 +684,7 @@ window.App.QadaDashboard = (function() {
         for (var g = 0; g <= ySteps; g++) {
             var gY = padTop + (g / ySteps) * chartH;
             var gVal = Math.round(maxVal * (1 - g / ySteps));
-            svg += '<line x1="' + padL + '" y1="' + gY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gY.toFixed(1) + '" stroke="rgba(0,0,0,0.04)" stroke-width="0.5"/>';
+            svg += '<line x1="' + padL + '" y1="' + gY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gY.toFixed(1) + '" stroke="rgba(128,128,128,0.08)" stroke-width="0.5"/>';
             var shortVal = gVal >= 1000 ? (gVal / 1000).toFixed(0) + 'k' : gVal;
             svg += '<text x="' + (padL - 4) + '" y="' + (gY + 3).toFixed(1) + '" text-anchor="end" font-family="Rubik,sans-serif" font-size="7" fill="' + _textMuted + '">' + shortVal + '</text>';
         }

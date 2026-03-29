@@ -74,12 +74,12 @@ window.App.InfoTooltips = (function() {
             activeTooltip.parentNode.removeChild(activeTooltip);
         }
         if (activeBtn) {
-            activeBtn.style.background = 'rgba(0,0,0,0.05)';
-            activeBtn.style.border = '1px solid rgba(0,0,0,0.08)';
+            activeBtn.style.background = 'rgba(128,128,128,0.1)';
+            activeBtn.style.border = '1px solid rgba(128,128,128,0.15)';
             var icon = activeBtn.querySelector('.material-symbols-rounded');
             if (icon) {
                 icon.textContent = 'info';
-                icon.style.color = '#8D99AE';
+                icon.style.color = 'var(--text-muted)';
                 icon.style.fontVariationSettings = "'FILL' 0";
             }
         }
@@ -121,13 +121,13 @@ window.App.InfoTooltips = (function() {
         btn.className = 'info-tooltip-btn';
         btn.setAttribute('aria-label', 'Info');
         btn.setAttribute('data-report-id', reportId);
-        btn.style.cssText = 'width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);' +
+        btn.style.cssText = 'width:22px;height:22px;border-radius:50%;background:rgba(128,128,128,0.1);border:1px solid rgba(128,128,128,0.15);' +
             'display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;outline:none;' +
             'transition:all 0.2s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;';
 
         var icon = document.createElement('span');
         icon.className = 'material-symbols-rounded';
-        icon.style.cssText = "font-size:13px;color:#8D99AE;line-height:1;font-variation-settings:'FILL' 0;";
+        icon.style.cssText = "font-size:13px;color:var(--text-muted);line-height:1;font-variation-settings:'FILL' 0;";
         icon.textContent = 'info';
         btn.appendChild(icon);
 
@@ -145,8 +145,8 @@ window.App.InfoTooltips = (function() {
             closeActiveTooltip();
 
             // Activate button
-            btn.style.background = '#2D6A4F';
-            btn.style.border = '1px solid #2D6A4F';
+            btn.style.background = 'var(--primary)';
+            btn.style.border = '1px solid var(--primary)';
             icon.textContent = 'close';
             icon.style.color = '#fff';
             icon.style.fontVariationSettings = "'FILL' 1";
@@ -155,7 +155,7 @@ window.App.InfoTooltips = (function() {
             var tooltip = document.createElement('div');
             tooltip.className = 'info-tooltip-popup';
             tooltip.style.cssText = 'position:absolute;top:30px;width:260px;padding:14px 16px;' +
-                'background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.08);' +
+                'background:var(--popup-bg, #fff);border-radius:16px;border:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'box-shadow:0 8px 30px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);' +
                 'z-index:1000;animation:tooltipIn 0.2s ease;';
 
@@ -171,8 +171,8 @@ window.App.InfoTooltips = (function() {
 
             // Arrow
             var arrow = document.createElement('div');
-            arrow.style.cssText = 'position:absolute;top:-6px;width:12px;height:12px;background:#FFFFFF;' +
-                'border-top:1px solid rgba(0,0,0,0.08);border-left:1px solid rgba(0,0,0,0.08);' +
+            arrow.style.cssText = 'position:absolute;top:-6px;width:12px;height:12px;background:var(--popup-bg, #fff);' +
+                'border-top:1px solid var(--border, rgba(0,0,0,0.08));border-left:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'transform:rotate(45deg);';
             if (isRtl) {
                 arrow.style.right = '6px';
@@ -183,7 +183,7 @@ window.App.InfoTooltips = (function() {
 
             // Text
             var text = document.createElement('div');
-            text.style.cssText = 'font-size:12px;font-weight:500;color:#2B2D42;line-height:1.7;position:relative;z-index:1;' +
+            text.style.cssText = 'font-size:12px;font-weight:500;color:var(--text-primary);line-height:1.7;position:relative;z-index:1;' +
                 'font-family:"Noto Kufi Arabic",sans-serif;-webkit-user-select:text;user-select:text;';
             text.textContent = getDescription(reportId);
             tooltip.appendChild(text);
@@ -222,13 +222,13 @@ window.App.InfoTooltips = (function() {
         btn.className = 'info-tooltip-btn';
         btn.setAttribute('aria-label', 'Info');
         btn.setAttribute('data-report-id', reportId);
-        btn.style.cssText = 'width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);' +
+        btn.style.cssText = 'width:22px;height:22px;border-radius:50%;background:rgba(128,128,128,0.1);border:1px solid rgba(128,128,128,0.15);' +
             'display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;outline:none;' +
             'transition:all 0.2s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;';
 
         var icon = document.createElement('span');
         icon.className = 'material-symbols-rounded';
-        icon.style.cssText = "font-size:13px;color:#8D99AE;line-height:1;font-variation-settings:'FILL' 0;";
+        icon.style.cssText = "font-size:13px;color:var(--text-muted);line-height:1;font-variation-settings:'FILL' 0;";
         icon.textContent = 'info';
         btn.appendChild(icon);
 
@@ -243,8 +243,8 @@ window.App.InfoTooltips = (function() {
 
             closeActiveTooltip();
 
-            btn.style.background = '#2D6A4F';
-            btn.style.border = '1px solid #2D6A4F';
+            btn.style.background = 'var(--primary)';
+            btn.style.border = '1px solid var(--primary)';
             icon.textContent = 'close';
             icon.style.color = '#fff';
             icon.style.fontVariationSettings = "'FILL' 1";
@@ -252,7 +252,7 @@ window.App.InfoTooltips = (function() {
             var tooltip = document.createElement('div');
             tooltip.className = 'info-tooltip-popup';
             tooltip.style.cssText = 'position:absolute;top:30px;width:260px;padding:14px 16px;' +
-                'background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.08);' +
+                'background:var(--popup-bg, #fff);border-radius:16px;border:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'box-shadow:0 8px 30px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);' +
                 'z-index:1000;animation:tooltipIn 0.2s ease;';
 
@@ -266,8 +266,8 @@ window.App.InfoTooltips = (function() {
             }
 
             var arrow = document.createElement('div');
-            arrow.style.cssText = 'position:absolute;top:-6px;width:12px;height:12px;background:#FFFFFF;' +
-                'border-top:1px solid rgba(0,0,0,0.08);border-left:1px solid rgba(0,0,0,0.08);' +
+            arrow.style.cssText = 'position:absolute;top:-6px;width:12px;height:12px;background:var(--popup-bg, #fff);' +
+                'border-top:1px solid var(--border, rgba(0,0,0,0.08));border-left:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'transform:rotate(45deg);';
             if (isRtl) {
                 arrow.style.right = '6px';
@@ -277,7 +277,7 @@ window.App.InfoTooltips = (function() {
             tooltip.appendChild(arrow);
 
             var text = document.createElement('div');
-            text.style.cssText = 'font-size:12px;font-weight:500;color:#2B2D42;line-height:1.7;position:relative;z-index:1;' +
+            text.style.cssText = 'font-size:12px;font-weight:500;color:var(--text-primary);line-height:1.7;position:relative;z-index:1;' +
                 'font-family:"Noto Kufi Arabic",sans-serif;-webkit-user-select:text;user-select:text;';
             text.textContent = getDescription(reportId);
             tooltip.appendChild(text);
@@ -333,8 +333,8 @@ window.App.InfoTooltips = (function() {
         var hdr = document.createElement('div');
         hdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:10px;position:relative;';
         var lang = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
-        hdr.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;color:#8D99AE;">info</span>' +
-            '<span style="font-size:11px;font-weight:600;color:#8D99AE;">' +
+        hdr.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;color:var(--text-muted);">info</span>' +
+            '<span style="font-size:11px;font-weight:600;color:var(--text-muted);">' +
             (lang === 'ar' ? 'ملخص الأداء' : 'Performance Summary') + '</span>';
         attachToHeader(reportId, hdr);
         node.insertBefore(hdr, node.firstChild);
@@ -381,7 +381,7 @@ window.App.InfoTooltips = (function() {
                 rHdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;';
                 var lang = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
                 rHdr.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;color:#059669;">nights_stay</span>' +
-                    '<span style="font-size:12px;font-weight:700;color:#2B2D42;">' +
+                    '<span style="font-size:12px;font-weight:700;color:var(--text-primary);">' +
                     (lang === 'ar' ? 'إحصائيات رمضان' : 'Ramadan Stats') + '</span>';
                 attachToHeader(12, rHdr);
                 ramadanStats.parentNode.insertBefore(rHdr, ramadanStats);
@@ -397,7 +397,7 @@ window.App.InfoTooltips = (function() {
                 vHdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;';
                 var lang2 = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
                 vHdr.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;color:#059669;">restaurant</span>' +
-                    '<span style="font-size:12px;font-weight:700;color:#2B2D42;">' +
+                    '<span style="font-size:12px;font-weight:700;color:var(--text-primary);">' +
                     (lang2 === 'ar' ? 'صيام التطوع' : 'Voluntary Fasting') + '</span>';
                 attachToHeader(13, vHdr);
                 volStats.parentNode.insertBefore(vHdr, volStats);
@@ -413,7 +413,7 @@ window.App.InfoTooltips = (function() {
                 fHdr.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;';
                 var lang3 = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
                 fHdr.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;color:#059669;">analytics</span>' +
-                    '<span style="font-size:12px;font-weight:700;color:#2B2D42;">' +
+                    '<span style="font-size:12px;font-weight:700;color:var(--text-primary);">' +
                     (lang3 === 'ar' ? 'ملخص الصيام' : 'Fasting Summary') + '</span>';
                 attachToHeader(13, fHdr);
                 dashGrid.parentNode.insertBefore(fHdr, dashGrid);

@@ -596,7 +596,7 @@ window.App.QadaCalc = (function() {
         if (wizardData.menstrualTotalDays > 0) {
             html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border,rgba(0,0,0,0.06));font-size:0.85em;">' +
                 '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_menstrual_deduction') + '</div>' +
-                '<div style="color:#dc2626;font-weight:600;">-' + wizardData.menstrualTotalDays + ' ' + t('qada_period_days') +
+                '<div style="color:var(--danger);font-weight:600;">-' + wizardData.menstrualTotalDays + ' ' + t('qada_period_days') +
                 ' (' + wizardData.menstrualDaysPerCycle + ' ' + t('qada_period_days') + '/' + t('qada_months') + ')</div>' +
             '</div>';
         }
@@ -605,7 +605,7 @@ window.App.QadaCalc = (function() {
         if (wizardData.nifasTotalDays > 0) {
             html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border,rgba(0,0,0,0.06));font-size:0.85em;">' +
                 '<div style="color:var(--text-muted);margin-bottom:4px;">' + t('qada_nifas_deduction') + '</div>' +
-                '<div style="color:#dc2626;font-weight:600;">-' + wizardData.nifasTotalDays + ' ' + t('qada_period_days') + '</div>' +
+                '<div style="color:var(--danger);font-weight:600;">-' + wizardData.nifasTotalDays + ' ' + t('qada_period_days') + '</div>' +
             '</div>';
         }
 
@@ -617,9 +617,9 @@ window.App.QadaCalc = (function() {
             alreadyPrayedPeriods.forEach(function(p) {
                 var prayerName = p.prayerId === 'all' ? t('qada_all_prayers') : t(PRAYER_KEYS[p.prayerId]);
                 if (p.prayerId === 'all') {
-                    html += '<div style="color:#dc2626;font-weight:500;margin-top:2px;">-' + p.count + ' × 5 = ' + (p.count * 5) + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
+                    html += '<div style="color:var(--danger);font-weight:500;margin-top:2px;">-' + p.count + ' × 5 = ' + (p.count * 5) + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
                 } else {
-                    html += '<div style="color:#dc2626;font-weight:500;margin-top:2px;">-' + p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
+                    html += '<div style="color:var(--danger);font-weight:500;margin-top:2px;">-' + p.count + ' ' + t('qada_period_prayers') + ' — ' + prayerName + '</div>';
                 }
             });
             html += '</div>';
@@ -750,7 +750,7 @@ window.App.QadaCalc = (function() {
                         '<div style="font-size:0.75em;color:var(--text-muted);margin-bottom:2px;">' + typeLabel + '</div>' +
                         '<div style="font-size:0.85em;color:var(--text-primary);">' + detailHtml + '</div>' +
                     '</div>' +
-                    '<button class="qada-del-period" data-idx="' + idx + '" style="background:none;border:none;color:#dc2626;cursor:pointer;padding:4px;">' +
+                    '<button class="qada-del-period" data-idx="' + idx + '" style="background:none;border:none;color:var(--danger);cursor:pointer;padding:4px;">' +
                         '<span class="material-symbols-rounded" style="font-size:18px;">delete</span>' +
                     '</button>' +
                 '</div>';
@@ -794,7 +794,7 @@ window.App.QadaCalc = (function() {
                         '<div style="font-size:0.75em;color:var(--text-muted);margin-bottom:2px;">' + t('qada_already_deduction') + '</div>' +
                         '<div style="font-size:0.85em;color:var(--text-primary);">' + detailHtml + '</div>' +
                     '</div>' +
-                    '<button class="qada-del-already" data-idx="' + idx + '" style="background:none;border:none;color:#dc2626;cursor:pointer;padding:4px;">' +
+                    '<button class="qada-del-already" data-idx="' + idx + '" style="background:none;border:none;color:var(--danger);cursor:pointer;padding:4px;">' +
                         '<span class="material-symbols-rounded" style="font-size:18px;">delete</span>' +
                     '</button>' +
                 '</div>';
@@ -1045,7 +1045,7 @@ window.App.QadaCalc = (function() {
 
         if (days <= 0) {
             preview.style.display = '';
-            preview.innerHTML = '<span style="color:#dc2626;">' + t('qada_invalid_dates') + '</span>';
+            preview.innerHTML = '<span style="color:var(--danger);">' + t('qada_invalid_dates') + '</span>';
             return;
         }
 

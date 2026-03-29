@@ -445,7 +445,7 @@ window.App.PrayerStreaks = (function() {
         // Zone 5: Prayer name
         var zoneName = document.createElement('div');
         zoneName.className = 'moon-zone-name';
-        var nameColor = tier === 'full' ? '#D4A03C' : '#5A5A6E';
+        var nameColor = tier === 'full' ? 'var(--accent)' : 'var(--text-secondary)';
         var prayerName = I18n ? I18n.getPrayerName(prayer.id) : prayer.name;
         zoneName.innerHTML = '<span class="moon-prayer-name" style="font-size:11px;font-weight:700;color:' + nameColor + ';font-family:\'Noto Kufi Arabic\',sans-serif;">' + prayerName + '</span>';
         cell.appendChild(zoneName);

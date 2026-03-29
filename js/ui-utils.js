@@ -350,7 +350,7 @@ window.App.UI = (function() {
         overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;';
 
         var popup = document.createElement('div');
-        popup.style.cssText = 'width:320px;background:#FFFFFF;border-radius:24px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.15);font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;direction:' + (isAr ? 'rtl' : 'ltr') + ';transform:scale(0.9);opacity:0;transition:transform 0.25s ease,opacity 0.25s ease;';
+        popup.style.cssText = 'width:320px;background:var(--popup-bg, #fff);border-radius:24px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.15);font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;direction:' + (isAr ? 'rtl' : 'ltr') + ';transform:scale(0.9);opacity:0;transition:transform 0.25s ease,opacity 0.25s ease;';
         overlay.appendChild(popup);
 
         // Animate in
@@ -384,11 +384,11 @@ window.App.UI = (function() {
 
             // Section 1: Year selector
             html += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;">';
-            html += '<button id="myp_prevYear" style="width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,0.05);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
-                '<span class="material-symbols-rounded" style="font-size:18px;color:#2B2D42;">' + (isAr ? 'chevron_right' : 'chevron_left') + '</span></button>';
-            html += '<span id="myp_yearLabel" style="font-size:24px;font-weight:800;color:#2B2D42;font-family:Rubik,sans-serif;min-width:60px;text-align:center;">' + pickerYear + '</span>';
-            html += '<button id="myp_nextYear" style="width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,0.05);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
-                '<span class="material-symbols-rounded" style="font-size:18px;color:#2B2D42;">' + (isAr ? 'chevron_left' : 'chevron_right') + '</span></button>';
+            html += '<button id="myp_prevYear" style="width:36px;height:36px;border-radius:10px;background:rgba(128,128,128,0.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
+                '<span class="material-symbols-rounded" style="font-size:18px;color:var(--text-primary);">' + (isAr ? 'chevron_right' : 'chevron_left') + '</span></button>';
+            html += '<span id="myp_yearLabel" style="font-size:24px;font-weight:800;color:var(--text-primary);font-family:Rubik,sans-serif;min-width:60px;text-align:center;">' + pickerYear + '</span>';
+            html += '<button id="myp_nextYear" style="width:36px;height:36px;border-radius:10px;background:rgba(128,128,128,0.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
+                '<span class="material-symbols-rounded" style="font-size:18px;color:var(--text-primary);">' + (isAr ? 'chevron_left' : 'chevron_right') + '</span></button>';
             html += '</div>';
 
             // Section 2: Month grid
@@ -399,21 +399,21 @@ window.App.UI = (function() {
                 var isFuture = (pickerYear === todayH.year && m > todayH.month) || (pickerYear > todayH.year);
                 var hasData = hasDataForMonth(pickerYear, m);
 
-                var bg = 'rgba(0,0,0,0.03)';
-                var color = '#2B2D42';
+                var bg = 'rgba(128,128,128,0.06)';
+                var color = 'var(--text-primary)';
                 var fontW = '600';
                 var border = 'none';
                 var opacity = '1';
                 var cursor = 'pointer';
 
                 if (isCurrent) {
-                    bg = '#2D6A4F';
+                    bg = 'var(--primary)';
                     color = '#fff';
                     fontW = '800';
                 } else if (isSelected && !isCurrent) {
-                    bg = 'rgba(45,106,79,0.125)';
-                    border = '2px solid #2D6A4F';
-                    color = '#2D6A4F';
+                    bg = 'rgba(var(--primary-rgb),0.125)';
+                    border = '2px solid var(--primary)';
+                    color = 'var(--primary)';
                 }
                 if (isFuture) {
                     opacity = '0.3';
@@ -427,7 +427,7 @@ window.App.UI = (function() {
                     (isFuture ? 'pointer-events:none;' : '') + '">';
                 html += monthNames[m - 1];
                 if (hasData && !isCurrent) {
-                    html += '<div style="width:4px;height:4px;border-radius:50%;background:#2D6A4F;margin:4px auto 0;"></div>';
+                    html += '<div style="width:4px;height:4px;border-radius:50%;background:var(--primary);margin:4px auto 0;"></div>';
                 }
                 html += '</div>';
             }
@@ -435,14 +435,14 @@ window.App.UI = (function() {
 
             // Section 3: Quick actions
             html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px;">';
-            html += '<button id="myp_today" style="font-size:13px;font-weight:700;color:#2D6A4F;background:rgba(45,106,79,0.08);border:none;border-radius:10px;padding:8px 20px;cursor:pointer;font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;">' +
+            html += '<button id="myp_today" style="font-size:13px;font-weight:700;color:var(--primary);background:rgba(var(--primary-rgb),0.08);border:none;border-radius:10px;padding:8px 20px;cursor:pointer;font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;">' +
                 (isAr ? '\u0627\u0644\u064a\u0648\u0645' : 'Today') + '</button>';
-            html += '<button id="myp_cancel" style="font-size:13px;font-weight:600;color:#8D99AE;background:none;border:none;cursor:pointer;padding:8px 12px;font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;">' +
+            html += '<button id="myp_cancel" style="font-size:13px;font-weight:600;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:8px 12px;font-family:Rubik,\'Noto Kufi Arabic\',sans-serif;">' +
                 (isAr ? '\u0625\u0644\u063a\u0627\u0621' : 'Cancel') + '</button>';
             html += '</div>';
 
             // Section 4: Info text
-            html += '<p style="font-size:10px;color:#8D99AE;text-align:center;margin:8px 0 0;">' +
+            html += '<p style="font-size:10px;color:var(--text-muted);text-align:center;margin:8px 0 0;">' +
                 (isAr ? '\u064a\u0645\u0643\u0646\u0643 \u0627\u062e\u062a\u064a\u0627\u0631 \u0623\u064a \u0634\u0647\u0631 \u0648\u0633\u0646\u0629 \u0644\u062a\u0633\u062c\u064a\u0644 \u0635\u0644\u0648\u0627\u062a \u0627\u0644\u0642\u0636\u0627\u0621'
                      : 'Select any month and year to log Qada prayers') + '</p>';
 

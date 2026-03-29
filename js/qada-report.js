@@ -86,7 +86,7 @@ window.App.QadaReport = (function() {
             var count = qadaByPrayer[p.id];
             var row = document.createElement('div');
             row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;' +
-                (i < prayers.length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.03);' : '');
+                (i < prayers.length - 1 ? 'border-bottom:1px solid rgba(128,128,128,0.06);' : '');
 
             // Color dot
             var dot = document.createElement('div');
@@ -101,7 +101,7 @@ window.App.QadaReport = (function() {
 
             // Mini progress bar
             var barWrap = document.createElement('div');
-            barWrap.style.cssText = 'width:80px;height:4px;border-radius:2px;background:rgba(0,0,0,0.04);overflow:hidden;';
+            barWrap.style.cssText = 'width:80px;height:4px;border-radius:2px;background:rgba(128,128,128,0.08);overflow:hidden;';
             var barFill = document.createElement('div');
             barFill.style.cssText = 'width:' + ((count / maxCount) * 100) + '%;height:100%;border-radius:2px;background:' + p.color + ';transition:width 0.6s ease;';
             barWrap.appendChild(barFill);

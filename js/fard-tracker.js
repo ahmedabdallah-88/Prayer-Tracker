@@ -291,7 +291,7 @@ window.App.Tracker = (function() {
         var strokeColor = pct >= 80 ? '#2D6A4F' : pct >= 50 ? '#D4A03C' : '#C1574E';
         return '<div class="stats-ring-wrap">' +
             '<svg viewBox="0 0 ' + size + ' ' + size + '">' +
-            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="' + sw + '"/>' +
+            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="' + sw + '"/>' +
             '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '"/>' +
             '</svg>' +
             '<span class="stats-ring-pct" style="color:' + strokeColor + '">' + pct + '%</span>' +
@@ -305,14 +305,14 @@ window.App.Tracker = (function() {
         if (opts.showJamaah) {
             html += '<div class="stats-divider"></div>' +
                 '<div class="stats-section">' +
-                '<div class="stats-icon-wrap jamaah"><span class="material-symbols-rounded" style="font-size:22px;color:#D4A03C;font-variation-settings:\'FILL\' 1,\'wght\' 600">mosque</span></div>' +
+                '<div class="stats-icon-wrap jamaah"><span class="material-symbols-rounded" style="font-size:22px;color:var(--accent);font-variation-settings:\'FILL\' 1,\'wght\' 600">mosque</span></div>' +
                 '<span class="stats-value jamaah-val">' + (opts.congCount || 0) + '</span>' +
                 '</div>';
         }
 
         html += '<div class="stats-divider"></div>' +
             '<div class="stats-section">' +
-            '<div class="stats-icon-wrap days"><span class="material-symbols-rounded" style="font-size:20px;color:#8D99AE;font-variation-settings:\'FILL\' 1,\'wght\' 500">calendar_today</span></div>' +
+            '<div class="stats-icon-wrap days"><span class="material-symbols-rounded" style="font-size:20px;color:var(--text-muted);font-variation-settings:\'FILL\' 1,\'wght\' 500">calendar_today</span></div>' +
             '<span class="stats-value days-val">' + opts.completed + '<span class="days-total">/' + opts.total + '</span></span>' +
             '</div>';
 
@@ -485,7 +485,7 @@ window.App.Tracker = (function() {
                 var iconWrap = document.createElement('div');
                 iconWrap.className = 'sunnah-tab-icon';
                 var iconSize = isActive ? '22px' : '18px';
-                var iconColor = isActive ? '#fff' : '#8D99AE';
+                var iconColor = isActive ? '#fff' : 'var(--text-muted)';
                 var iconFill = isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400";
                 iconWrap.innerHTML = '<span class="material-symbols-rounded" style="font-size:' + iconSize + ';color:' + iconColor + ';font-variation-settings:' + iconFill + '">' + prayer.icon + '</span>';
 

@@ -42,10 +42,10 @@ window.App.SVGCharts = (function() {
         var children = [];
 
         // Outer track (الإنجاز)
-        children.push(el('circle', { cx: cx, cy: cy, r: 72, fill: 'none', stroke: 'rgba(0,0,0,0.03)', 'stroke-width': 10 }));
+        children.push(el('circle', { cx: cx, cy: cy, r: 72, fill: 'none', stroke: 'rgba(128,128,128,0.06)', 'stroke-width': 10 }));
         // Inner track (الجماعة)
         if (data.isFard) {
-            children.push(el('circle', { cx: cx, cy: cy, r: 56, fill: 'none', stroke: 'rgba(0,0,0,0.03)', 'stroke-width': 8 }));
+            children.push(el('circle', { cx: cx, cy: cy, r: 56, fill: 'none', stroke: 'rgba(128,128,128,0.06)', 'stroke-width': 8 }));
         }
 
         // Outer ring (الإنجاز): r=72, strokeWidth=10, green
@@ -324,7 +324,7 @@ window.App.SVGCharts = (function() {
             // Zone 5: Prayer name
             var zoneName = document.createElement('div');
             zoneName.className = 'lantern-zone-name';
-            var nameColor = tier === 'large' ? '#D4A03C' : '#5A5A6E';
+            var nameColor = tier === 'large' ? 'var(--accent)' : 'var(--text-secondary)';
             zoneName.innerHTML = '<span class="lantern-prayer-name" style="font-size:11px;font-weight:700;color:' + nameColor + ';font-family:\'Noto Kufi Arabic\',sans-serif;">' + p.name + '</span>';
             cell.appendChild(zoneName);
 
@@ -344,8 +344,8 @@ window.App.SVGCharts = (function() {
             var leg = document.createElement('div');
             leg.style.cssText = 'display:flex;justify-content:center;gap:16px;margin-top:12px;';
             leg.innerHTML =
-                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#4CAF50;"></div><span style="font-size:10px;color:#8D99AE;font-weight:600;">' + (data.legendLabels.current || '\u0627\u0644\u062D\u0627\u0644\u064A\u0629') + '</span></div>' +
-                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:3px;border-radius:2px;background:#8D99AE;"></div><span style="font-size:10px;color:#8D99AE;font-weight:600;">' + (data.legendLabels.best || '\u0627\u0644\u0623\u0641\u0636\u0644') + '</span></div>';
+                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#4CAF50;"></div><span style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (data.legendLabels.current || '\u0627\u0644\u062D\u0627\u0644\u064A\u0629') + '</span></div>' +
+                '<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:3px;border-radius:2px;background:var(--text-muted);"></div><span style="font-size:10px;color:var(--text-muted);font-weight:600;">' + (data.legendLabels.best || '\u0627\u0644\u0623\u0641\u0636\u0644') + '</span></div>';
             container.appendChild(leg);
         }
     }
@@ -549,7 +549,7 @@ window.App.SVGCharts = (function() {
 
         // Card container
         var card = document.createElement('div');
-        card.style.cssText = 'background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;border:1px solid rgba(0,0,0,0.04);padding:16px 14px;';
+        card.style.cssText = 'background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;border:1px solid var(--border, rgba(0,0,0,0.04));padding:16px 14px;';
 
         // Header
         var hdr = document.createElement('div');
@@ -602,7 +602,7 @@ window.App.SVGCharts = (function() {
             row2.appendChild(lbl2);
 
             var track2 = document.createElement('div');
-            track2.style.cssText = 'flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,0.04);overflow:hidden;';
+            track2.style.cssText = 'flex:1;height:8px;border-radius:4px;background:rgba(128,128,128,0.08);overflow:hidden;';
             var fill2 = document.createElement('div');
             fill2.style.cssText = 'width:' + (p.completion || 0) + '%;height:100%;border-radius:4px;background:linear-gradient(270deg,' + p.color + ',' + p.color + 'aa);';
             track2.appendChild(fill2);
@@ -621,7 +621,7 @@ window.App.SVGCharts = (function() {
                 row3.appendChild(lbl3);
 
                 var track3 = document.createElement('div');
-                track3.style.cssText = 'flex:1;height:6px;border-radius:3px;background:rgba(0,0,0,0.03);overflow:hidden;';
+                track3.style.cssText = 'flex:1;height:6px;border-radius:3px;background:rgba(128,128,128,0.06);overflow:hidden;';
                 var fill3 = document.createElement('div');
                 fill3.style.cssText = 'width:' + (p.congregation || 0) + '%;height:100%;border-radius:3px;background:linear-gradient(270deg,var(--accent),var(--accent-light));';
                 track3.appendChild(fill3);
@@ -657,7 +657,7 @@ window.App.SVGCharts = (function() {
 
         // Card
         var card = document.createElement('div');
-        card.style.cssText = 'background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;border:1px solid rgba(0,0,0,0.04);padding:16px 14px;';
+        card.style.cssText = 'background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;border:1px solid var(--border, rgba(0,0,0,0.04));padding:16px 14px;';
 
         // Header
         var hdr = document.createElement('div');
@@ -697,7 +697,7 @@ window.App.SVGCharts = (function() {
 
             // Bar track
             var track = document.createElement('div');
-            track.style.cssText = 'flex:1;height:12px;border-radius:6px;background:rgba(0,0,0,0.03);overflow:hidden;';
+            track.style.cssText = 'flex:1;height:12px;border-radius:6px;background:rgba(128,128,128,0.06);overflow:hidden;';
             var fill = document.createElement('div');
             fill.style.cssText = 'width:' + d.value + '%;height:100%;border-radius:6px;background:linear-gradient(270deg,' + color + ',' + color + 'bb);';
             track.appendChild(fill);

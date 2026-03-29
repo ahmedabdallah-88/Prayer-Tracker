@@ -347,22 +347,70 @@ window.App.Profiles = (function() {
         el = document.getElementById('sunnahDashboardYear');      if (el) el.value = hYear;
         el = document.getElementById('sunnahYearlyYear');         if (el) el.value = hYear;
 
-        window.App.Storage.loadAllData('fard');
-        window.App.Storage.loadAllData('sunnah');
-        if (window.updateTrackerView) {
-            window.updateTrackerView('fard');
-            window.updateTrackerView('sunnah');
+        // Detect active section + sub-view BEFORE modal close animation
+        var _activeSection = 'fard';
+        var _activeSectionEl = document.querySelector('.section.active');
+        if (_activeSectionEl) {
+            if (_activeSectionEl.id === 'sunnahSection') _activeSection = 'sunnah';
+            else if (_activeSectionEl.id === 'fastingSection') _activeSection = 'fasting';
+            else if (_activeSectionEl.id === 'azkarSection') _activeSection = 'azkar';
         }
-        if (window.switchSection) window.switchSection('fard');
-        if (window.App.QadaTracker) window.App.QadaTracker.injectTab();
-        if (window.startPrayerTimesMonitor) setTimeout(window.startPrayerTimesMonitor, 500);
+        var _activeSubView = 'tracker';
+        if (_activeSectionEl) {
+            var _activeViewEl = _activeSectionEl.querySelector('.view.active');
+            if (_activeViewEl && _activeViewEl.id) {
+                var _vid = _activeViewEl.id;
+                if (_vid.indexOf('Dashboard') !== -1) _activeSubView = 'dashboard';
+                else if (_vid.indexOf('Yearly') !== -1) _activeSubView = 'yearly';
+                else if (_vid.indexOf('Qada') !== -1) _activeSubView = 'qada';
+                else if (_vid.indexOf('Ramadan') !== -1) _activeSubView = 'ramadan';
+                else if (_vid.indexOf('Voluntary') !== -1) _activeSubView = 'voluntary';
+            }
+        }
 
-        // Trigger onboarding AFTER profile loaded and UI rendered (500ms for render)
+        // Wait for profile modal close animation to finish, then re-render
+        setTimeout(function() {
+            window.App.Storage.loadAllData('fard');
+            window.App.Storage.loadAllData('sunnah');
+
+            if (_activeSection === 'fard' || _activeSection === 'sunnah') {
+                if (window.updateTrackerView) window.updateTrackerView(_activeSection);
+                if (_activeSubView === 'dashboard' && window.updateDashboard) {
+                    window.updateDashboard(_activeSection);
+                } else if (_activeSubView === 'yearly' && window.updateYearlyView) {
+                    window.updateYearlyView(_activeSection);
+                } else if (_activeSubView === 'qada' && window.App.QadaTracker) {
+                    window.App.QadaTracker.render();
+                }
+            } else if (_activeSection === 'fasting') {
+                if (_activeSubView === 'dashboard' && window.App.Fasting) {
+                    window.App.Fasting.updateFastingDashboard();
+                } else if (_activeSubView === 'ramadan' && window.updateFastingView) {
+                    window.updateFastingView();
+                } else if (window.updateVoluntaryFasting) {
+                    window.updateVoluntaryFasting();
+                }
+            } else if (_activeSection === 'azkar') {
+                if (_activeSubView === 'dashboard' && window.updateAzkarDashboard) {
+                    window.updateAzkarDashboard();
+                } else if (_activeSubView === 'yearly' && window.updateAzkarYearly) {
+                    window.updateAzkarYearly();
+                } else if (window.switchAzkarView) {
+                    window.switchAzkarView('tracker');
+                }
+            }
+
+            if (typeof window.updateShellBar === 'function') window.updateShellBar();
+            if (window.App.QadaTracker) window.App.QadaTracker.injectTab();
+            if (window.startPrayerTimesMonitor) window.startPrayerTimesMonitor();
+        }, 300);
+
+        // Trigger onboarding AFTER profile loaded and UI rendered
         setTimeout(function() {
             if (window.App.Onboarding && window.App.Onboarding.shouldShow()) {
                 window.App.Onboarding.start();
             }
-        }, 800);
+        }, 1200);
     }
 
     // --------------- MERGED applyProfileUI ---------------
