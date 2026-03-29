@@ -518,8 +518,8 @@ body {
     pointer-events: none;
 }
 
-[dir="rtl"] .sub-tabs-pill { right: 3px; }
-[dir="ltr"] .sub-tabs-pill { left: 3px; }
+[dir="rtl"] .sub-tabs-pill { right: 3px; left: auto; }
+[dir="ltr"] .sub-tabs-pill { left: 3px; right: auto; }
 
 [dir="rtl"] .sub-tabs-pill[data-pos="0"] { transform: translateX(0); }
 [dir="rtl"] .sub-tabs-pill[data-pos="1"] { transform: translateX(calc(-100% - 2px)); }
