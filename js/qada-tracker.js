@@ -423,6 +423,10 @@ window.App.QadaTracker = (function() {
             _updateBannerInPlace();
             _updateHeaderInPlace(prayerId);
             resetPopupTimer();
+            dayBox.classList.remove('tap-bounce');
+            void dayBox.offsetWidth;
+            dayBox.classList.add('tap-bounce');
+            setTimeout(function() { dayBox.classList.remove('tap-bounce'); }, 350);
         };
 
         document.getElementById('qadaPopMinus').onclick = function(e) {
@@ -438,6 +442,10 @@ window.App.QadaTracker = (function() {
             _updateBannerInPlace();
             _updateHeaderInPlace(prayerId);
             resetPopupTimer();
+            dayBox.classList.remove('tap-bounce');
+            void dayBox.offsetWidth;
+            dayBox.classList.add('tap-bounce');
+            setTimeout(function() { dayBox.classList.remove('tap-bounce'); }, 350);
         };
 
         // Close on outside click

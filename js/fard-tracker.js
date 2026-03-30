@@ -19,6 +19,8 @@ window.App.Tracker = (function() {
 
     // Track whether today-pulse animation has been shown (once per session)
     var _todayPulseShown = {};
+    // Track whether stats counters have been animated (reset on month change)
+    var _statsAnimated = {};
 
     // ==================== PRIVATE HELPERS ====================
 
@@ -293,9 +295,9 @@ window.App.Tracker = (function() {
         return '<div class="stats-ring-wrap">' +
             '<svg viewBox="0 0 ' + size + ' ' + size + '">' +
             '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="' + sw + '"/>' +
-            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '"/>' +
+            '<circle class="stats-ring-arc" cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + circ.toFixed(2) + '" data-target-offset="' + offset.toFixed(2) + '" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)"/>' +
             '</svg>' +
-            '<span class="stats-ring-pct" style="color:' + strokeColor + '">' + pct + '%</span>' +
+            '<span class="stats-ring-pct" style="color:' + strokeColor + '">0%</span>' +
             '</div>';
     }
 
@@ -729,6 +731,56 @@ window.App.Tracker = (function() {
         }
         trackerCard.appendChild(legend);
         container.appendChild(trackerCard);
+
+        // ── Feature #7: Animate stats counters on first render ──
+        if (!_statsAnimated[type]) {
+            _statsAnimated[type] = true;
+            requestAnimationFrame(function() {
+                // Animate ring stroke
+                var ringArc = statsRow.querySelector('.stats-ring-arc');
+                if (ringArc) {
+                    ringArc.setAttribute('stroke-dashoffset', ringArc.getAttribute('data-target-offset'));
+                }
+                // Animate percentage text
+                var pctEl = statsRow.querySelector('.stats-ring-pct');
+                if (pctEl && window.App.UI.animateCounter) {
+                    window.App.UI.animateCounter(pctEl, pct, 800, '%');
+                }
+                // Animate jamaah count
+                var jamaahEl = statsRow.querySelector('.jamaah-val');
+                if (jamaahEl && window.App.UI.animateCounter) {
+                    window.App.UI.animateCounter(jamaahEl, congCount, 800, '');
+                }
+                // Animate days count
+                var daysEl = statsRow.querySelector('.days-val');
+                if (daysEl && window.App.UI.animateCounter) {
+                    window.App.UI.animateCounter(daysEl, completed, 800, '');
+                }
+            });
+        } else {
+            // Already animated — set final values directly
+            requestAnimationFrame(function() {
+                var ringArc = statsRow.querySelector('.stats-ring-arc');
+                if (ringArc) {
+                    ringArc.style.transition = 'none';
+                    ringArc.setAttribute('stroke-dashoffset', ringArc.getAttribute('data-target-offset'));
+                }
+                var pctEl = statsRow.querySelector('.stats-ring-pct');
+                if (pctEl) pctEl.textContent = pct + '%';
+            });
+        }
+
+        // ── Feature #10: Stagger fade-in on month change (when scrollToTab is truthy) ──
+        if (scrollToTab) {
+            var allDayBoxes = grid.querySelectorAll('.day-box');
+            var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!reducedMotion) {
+                for (var si = 0; si < allDayBoxes.length; si++) {
+                    allDayBoxes[si].classList.add('day-entering');
+                    allDayBoxes[si].style.animationDelay = (si * 15) + 'ms';
+                }
+            }
+        }
     }
 
     // ==================== _refreshGridAndStats (lightweight re-render without tabs/chips) ====================
@@ -918,6 +970,7 @@ window.App.Tracker = (function() {
 
     function changeTrackerMonth(type, delta) {
         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+        _statsAnimated[type] = false;
         var Hijri   = _getHijri();
         var Storage = _getStorage();
 
@@ -1149,18 +1202,25 @@ window.App.Tracker = (function() {
             glowClass = 'day-glow-green';
         }
 
-        if (glowClass) {
-            requestAnimationFrame(function() {
-                var gridWrap = document.querySelector('#' + type + 'TrackerPrayersContainer .prayer-tab-grid .flow-grid');
-                if (gridWrap) {
-                    var box = gridWrap.children[day - 1];
-                    if (box) {
+        // Tap-bounce + glow animation
+        requestAnimationFrame(function() {
+            var gridWrap = document.querySelector('#' + type + 'TrackerPrayersContainer .prayer-tab-grid .flow-grid');
+            if (gridWrap) {
+                var box = gridWrap.children[day - 1];
+                if (box) {
+                    // Feature #6: tap-bounce
+                    box.classList.remove('tap-bounce');
+                    void box.offsetWidth;
+                    box.classList.add('tap-bounce');
+                    setTimeout(function() { box.classList.remove('tap-bounce'); }, 350);
+                    // Glow
+                    if (glowClass) {
                         box.classList.add(glowClass);
                         setTimeout(function() { box.classList.remove(glowClass); }, 600);
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     // ==================== batchMarkPrayer ====================

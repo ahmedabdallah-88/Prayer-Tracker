@@ -180,8 +180,12 @@ window.App.Azkar = (function() {
                     dayBox.style.background = 'linear-gradient(135deg, #0EA5E9, #38BDF8)';
                     dayBox.style.color = 'white';
                 }
-                (function(d, catId) {
-                    dayBox.onclick = function() {
+                (function(d, catId, box) {
+                    box.onclick = function() {
+                        box.classList.remove('tap-bounce');
+                        void box.offsetWidth;
+                        box.classList.add('tap-bounce');
+                        setTimeout(function() { box.classList.remove('tap-bounce'); }, 350);
                         var azData = getAzkarData(year, month);
                         if (!azData[catId]) azData[catId] = {};
                         azData[catId][d] = !azData[catId][d];
@@ -190,11 +194,22 @@ window.App.Azkar = (function() {
                         saveAzkarData(year, month, azData);
                         updateAzkarTracker();
                     };
-                })(day, activeCatId);
+                })(day, activeCatId, dayBox);
             }
             grid.appendChild(dayBox);
         }
         if (isCurrentMonth) _azkarPulseShown = true;
+
+        // Feature #10: stagger fade-in
+        var reducedMA = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reducedMA) {
+            var allAzBoxes = grid.querySelectorAll('.day-box');
+            for (var ai = 0; ai < allAzBoxes.length; ai++) {
+                allAzBoxes[ai].classList.add('day-entering');
+                allAzBoxes[ai].style.animationDelay = (ai * 15) + 'ms';
+            }
+        }
+
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
 

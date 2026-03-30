@@ -516,7 +516,7 @@ body {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 0;
     pointer-events: none;
 }
@@ -603,7 +603,7 @@ body {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, width 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.3s ease;
     z-index: 0;
     pointer-events: none;
 }
@@ -3908,6 +3908,33 @@ body::before {
 
 @media (prefers-reduced-motion: reduce) {
     .day-glow-green, .day-glow-amber, .day-glow-red { animation: none; }
+}
+
+/* ==================== DAY BOX RUBBER BAND TAP ==================== */
+@keyframes day-tap-bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(0.88); }
+    60% { transform: scale(1.05); }
+    80% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+}
+.day-box.tap-bounce,
+.fasting-day-box.tap-bounce,
+.qada-day-box.tap-bounce { animation: day-tap-bounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ==================== CALENDAR STAGGERED FADE-IN ==================== */
+@keyframes day-stagger-in {
+    from { opacity: 0; transform: scale(0.85) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.day-box.day-entering,
+.fasting-day-box.day-entering,
+.qada-day-box.day-entering { animation: day-stagger-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    .day-box.tap-bounce, .fasting-day-box.tap-bounce, .qada-day-box.tap-bounce { animation: none; }
+    .day-box.day-entering, .fasting-day-box.day-entering, .qada-day-box.day-entering { animation: none; opacity: 1; transform: none; }
+    .prayer-tabs-pill, .sub-tabs-pill { transition: transform 0.2s ease, width 0.2s ease; }
 }
 
 /* SVG Chart Legend (used by dashboard charts) */

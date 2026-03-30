@@ -219,8 +219,12 @@ window.App.Fasting = (function() {
                 }
 
                 if (!dayExempt2) {
-                    (function(d) {
-                        dayBox.onclick = function() {
+                    (function(d, box) {
+                        box.onclick = function() {
+                            box.classList.remove('tap-bounce');
+                            void box.offsetWidth;
+                            box.classList.add('tap-bounce');
+                            setTimeout(function() { box.classList.remove('tap-bounce'); }, 350);
                             var volData = getVolFastingData(fastingYear, fastingMonth);
                             volData[d] = !volData[d];
                             window.App.UI.hapticFeedback(volData[d] ? 'success' : 'light');
@@ -228,7 +232,7 @@ window.App.Fasting = (function() {
                             saveVolFastingData(fastingYear, fastingMonth, volData);
                             updateVoluntaryFasting();
                         };
-                    })(day);
+                    })(day, dayBox);
                 }
             }
 
@@ -240,6 +244,16 @@ window.App.Fasting = (function() {
             }
 
             grid.appendChild(dayBox);
+        }
+
+        // Feature #10: stagger fade-in
+        var reducedM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reducedM) {
+            var allVolBoxes = grid.querySelectorAll('.fasting-day-box');
+            for (var vi = 0; vi < allVolBoxes.length; vi++) {
+                allVolBoxes[vi].classList.add('day-entering');
+                allVolBoxes[vi].style.animationDelay = (vi * 15) + 'ms';
+            }
         }
 
         // Shawwal 6-day banner
@@ -372,10 +386,26 @@ window.App.Fasting = (function() {
             else if (status === 'exempt') { box.classList.add('exempt-fast'); exempt++; }
             else if (status === 'missed') { box.classList.add('missed'); missed++; }
 
-            (function(d) {
-                box.onclick = function() { cycleFastingDay(year, d); };
-            })(day);
+            (function(d, b) {
+                b.onclick = function() {
+                    b.classList.remove('tap-bounce');
+                    void b.offsetWidth;
+                    b.classList.add('tap-bounce');
+                    setTimeout(function() { b.classList.remove('tap-bounce'); }, 350);
+                    cycleFastingDay(year, d);
+                };
+            })(day, box);
             grid.appendChild(box);
+        }
+
+        // Feature #10: stagger fade-in for Ramadan grid
+        var reducedMR = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reducedMR) {
+            var allRamBoxes = grid.querySelectorAll('.fasting-day-box');
+            for (var ri = 0; ri < allRamBoxes.length; ri++) {
+                allRamBoxes[ri].classList.add('day-entering');
+                allRamBoxes[ri].style.animationDelay = (ri * 15) + 'ms';
+            }
         }
 
         var elDaysFasted = document.getElementById('fastingDaysFasted');
