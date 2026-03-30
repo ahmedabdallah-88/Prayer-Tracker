@@ -9,6 +9,7 @@ window.App.InfoTooltips = (function() {
     // Currently open tooltip reference
     var activeTooltip = null;
     var activeBtn = null;
+    var _scrollDismiss = null;
 
     // Report descriptions keyed by ID
     var descriptions = {
@@ -72,6 +73,10 @@ window.App.InfoTooltips = (function() {
     }
 
     function closeActiveTooltip() {
+        if (_scrollDismiss) {
+            window.removeEventListener('scroll', _scrollDismiss, true);
+            _scrollDismiss = null;
+        }
         if (activeTooltip && activeTooltip.parentNode) {
             activeTooltip.parentNode.removeChild(activeTooltip);
         }
@@ -207,6 +212,8 @@ window.App.InfoTooltips = (function() {
             document.body.appendChild(tooltip);
             activeTooltip = tooltip;
             activeBtn = btn;
+            _scrollDismiss = function() { closeActiveTooltip(); };
+            window.addEventListener('scroll', _scrollDismiss, true);
         });
 
         wrapper.appendChild(btn);
@@ -296,6 +303,8 @@ window.App.InfoTooltips = (function() {
             document.body.appendChild(tooltip);
             activeTooltip = tooltip;
             activeBtn = btn;
+            _scrollDismiss = function() { closeActiveTooltip(); };
+            window.addEventListener('scroll', _scrollDismiss, true);
         });
 
         wrapper.appendChild(btn);
