@@ -19,8 +19,6 @@ window.App.Tracker = (function() {
 
     // Track whether today-pulse animation has been shown (once per session)
     var _todayPulseShown = {};
-    // Track whether stats counters have been animated (reset on month change)
-    var _statsAnimated = {};
 
     // ==================== PRIVATE HELPERS ====================
 
@@ -295,7 +293,7 @@ window.App.Tracker = (function() {
         if (offset > circ) offset = circ;
         var strokeColor = pct >= 80 ? '#2D6A4F' : pct >= 50 ? '#D4A03C' : '#C1574E';
         return '<div class="stats-ring-wrap">' +
-            '<svg viewBox="0 0 ' + size + ' ' + size + '" style="overflow:visible;">' +
+            '<svg viewBox="0 0 ' + size + ' ' + size + '">' +
             '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="' + sw + '"/>' +
             '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '"/>' +
             '</svg>' +
@@ -405,34 +403,6 @@ window.App.Tracker = (function() {
             _activeTab[type] = _getDefaultPrayerTab(type);
         }
         return _activeTab[type];
-    }
-
-    // ==================== Golden Week Scanner ====================
-    function _markGoldenWeekRows(grid) {
-        var allBoxes = grid.querySelectorAll('.day-box');
-        var rowSize = 7;
-        for (var rowStart = 0; rowStart < allBoxes.length; rowStart += rowSize) {
-            var rowEnd = Math.min(rowStart + rowSize, allBoxes.length);
-            if (rowEnd - rowStart < rowSize) break;
-
-            var allFilled = true;
-            for (var i = rowStart; i < rowEnd; i++) {
-                var box = allBoxes[i];
-                if (!(box.classList.contains('checked') ||
-                      box.classList.contains('congregation') ||
-                      box.classList.contains('qada')) ||
-                    box.classList.contains('disabled')) {
-                    allFilled = false;
-                    break;
-                }
-            }
-
-            if (allFilled) {
-                for (var j = rowStart; j < rowEnd; j++) {
-                    allBoxes[j].classList.add('golden-week');
-                }
-            }
-        }
     }
 
     // ==================== renderTrackerMonth (Tab-based single calendar) ====================
@@ -733,8 +703,6 @@ window.App.Tracker = (function() {
             grid.appendChild(dayBox);
         }
 
-        _markGoldenWeekRows(grid);
-
         // Mark pulse as shown for this type after first render
         if (isCurrentMonth) _todayPulseShown[type] = true;
 
@@ -763,25 +731,6 @@ window.App.Tracker = (function() {
         }
         trackerCard.appendChild(legend);
         container.appendChild(trackerCard);
-
-        // ── Feature #7: Animate stats text counters on first render ──
-        if (!_statsAnimated[type]) {
-            _statsAnimated[type] = true;
-            requestAnimationFrame(function() {
-                var pctEl = statsRow.querySelector('.stats-ring-pct');
-                if (pctEl && window.App.UI.animateCounter) {
-                    window.App.UI.animateCounter(pctEl, pct, 800, '%');
-                }
-                var jamaahEl = statsRow.querySelector('.jamaah-val');
-                if (jamaahEl && window.App.UI.animateCounter) {
-                    window.App.UI.animateCounter(jamaahEl, congCount, 800, '');
-                }
-                var daysEl = statsRow.querySelector('.days-val');
-                if (daysEl && window.App.UI.animateCounter) {
-                    window.App.UI.animateCounter(daysEl, completed, 800, '');
-                }
-            });
-        }
 
         // ── Feature #10: Stagger fade-in on month change (when scrollToTab is truthy) ──
         if (scrollToTab) {
@@ -903,8 +852,6 @@ window.App.Tracker = (function() {
                 grid.appendChild(dayBox);
             }
 
-            _markGoldenWeekRows(grid);
-
             oldGridWrap.innerHTML = '';
             oldGridWrap.appendChild(grid);
         }
@@ -985,7 +932,6 @@ window.App.Tracker = (function() {
 
     function changeTrackerMonth(type, delta) {
         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
-        _statsAnimated[type] = false;
         var Hijri   = _getHijri();
         var Storage = _getStorage();
 

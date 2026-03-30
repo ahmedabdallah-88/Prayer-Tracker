@@ -51,25 +51,21 @@ window.App.SVGCharts = (function() {
         // Outer ring (الإنجاز): r=72, strokeWidth=10, green
         var outerCirc = 2 * Math.PI * 72;
         var outerOffset = outerCirc * (1 - completionPct / 100);
-        var outerArc = el('circle', { cx: cx, cy: cy, r: 72, fill: 'none', stroke: tv('--primary-mid'), 'stroke-width': 10, 'stroke-linecap': 'round', 'stroke-dasharray': outerCirc, 'stroke-dashoffset': outerCirc, transform: 'rotate(-90 ' + cx + ' ' + cy + ')' });
+        var outerArc = el('circle', { cx: cx, cy: cy, r: 72, fill: 'none', stroke: tv('--primary-mid'), 'stroke-width': 10, 'stroke-linecap': 'round', 'stroke-dasharray': outerCirc, 'stroke-dashoffset': outerOffset, transform: 'rotate(-90 ' + cx + ' ' + cy + ')' });
         outerArc.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
-        outerArc._targetOffset = outerOffset;
         children.push(outerArc);
 
         // Inner ring (الجماعة): r=56, strokeWidth=8, gold
-        var innerArc = null;
         if (data.isFard) {
             var innerCirc = 2 * Math.PI * 56;
             var innerOffset = innerCirc * (1 - congPct / 100);
-            innerArc = el('circle', { cx: cx, cy: cy, r: 56, fill: 'none', stroke: tv('--accent'), 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-dasharray': innerCirc, 'stroke-dashoffset': innerCirc, transform: 'rotate(-90 ' + cx + ' ' + cy + ')' });
+            var innerArc = el('circle', { cx: cx, cy: cy, r: 56, fill: 'none', stroke: tv('--accent'), 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-dasharray': innerCirc, 'stroke-dashoffset': innerOffset, transform: 'rotate(-90 ' + cx + ' ' + cy + ')' });
             innerArc.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
-            innerArc._targetOffset = innerOffset;
             children.push(innerArc);
         }
 
-        // Center text — start at 0, animate later
-        var centerNum = el('text', { x: cx, y: cy - 4, 'text-anchor': 'middle', fill: tv('--text-primary'), 'font-size': '36', 'font-weight': '800', 'font-family': 'Rubik, sans-serif' }, '0');
-        children.push(centerNum);
+        // Center text
+        children.push(el('text', { x: cx, y: cy - 4, 'text-anchor': 'middle', fill: tv('--text-primary'), 'font-size': '36', 'font-weight': '800', 'font-family': 'Rubik, sans-serif' }, completionPct + ''));
         children.push(el('text', { x: cx, y: cy + 14, 'text-anchor': 'middle', fill: tv('--text-muted'), 'font-size': '12', 'font-weight': '600', 'font-family': 'Rubik, sans-serif' }, '%'));
 
         var s = svg(size, size, '0 0 ' + size + ' ' + size, children);
@@ -117,19 +113,6 @@ window.App.SVGCharts = (function() {
         wrapper.appendChild(legend);
         container.appendChild(wrapper);
 
-        // Feature #8: Animate rings + center text after DOM insertion
-        requestAnimationFrame(function() {
-            outerArc.setAttribute('stroke-dashoffset', outerArc._targetOffset);
-            if (innerArc) {
-                innerArc.setAttribute('stroke-dashoffset', innerArc._targetOffset);
-            }
-            // Animate center percentage
-            if (window.App.UI && window.App.UI.animateCounter) {
-                window.App.UI.animateCounter(centerNum, completionPct, 1000, '');
-            } else {
-                centerNum.textContent = completionPct + '';
-            }
-        });
     }
 
     // ==================== 2. MOSQUE LANTERNS (Jamaah Streaks) ====================

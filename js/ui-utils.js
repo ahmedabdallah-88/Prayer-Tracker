@@ -572,38 +572,6 @@ window.App.UI = (function() {
         }
     }
 
-    // ==================== animateCounter (count-up from 0) ====================
-    function animateCounter(element, targetValue, duration, suffix) {
-        if (!element) return;
-        var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reducedMotion) {
-            element.textContent = targetValue + (suffix || '');
-            return;
-        }
-        duration = duration || 800;
-        var start = null;
-        var from = 0;
-        function step(ts) {
-            if (!start) start = ts;
-            var elapsed = ts - start;
-            var progress = Math.min(elapsed / duration, 1);
-            // ease-out cubic
-            var eased = 1 - Math.pow(1 - progress, 3);
-            var current = Math.round(from + (targetValue - from) * eased);
-            element.textContent = current + (suffix || '');
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            } else {
-                element.textContent = targetValue + (suffix || '');
-                // Scale pop at end
-                element.style.transition = 'transform 0.15s ease';
-                element.style.transform = 'scale(1.15)';
-                setTimeout(function() { element.style.transform = 'scale(1)'; }, 150);
-            }
-        }
-        requestAnimationFrame(step);
-    }
-
     return {
         showToast: showToast,
         showConfirm: showConfirm,
@@ -619,7 +587,6 @@ window.App.UI = (function() {
         initInstallBanner: initInstallBanner,
         promptInstall: promptInstall,
         showMonthYearPicker: showMonthYearPicker,
-        animateCounter: animateCounter,
         getDeferredPrompt: function() { return deferredPrompt; }
     };
 })();
@@ -632,4 +599,3 @@ window.dismissReminder = window.App.UI.dismissReminder;
 window.hapticFeedback = window.App.UI.hapticFeedback;
 window.haptic = window.App.UI.haptic;
 window.showMonthYearPicker = window.App.UI.showMonthYearPicker;
-window.animateCounter = window.App.UI.animateCounter;

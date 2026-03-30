@@ -1,112 +1,94 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Prayer Tracker PWA — Project Guide for Claude Code
 
 ## Project Overview
+Islamic Prayer Tracker PWA (سجل الصلوات) — vanilla ES5, localStorage, Hijri calendar, GitHub Pages.
+Two repos: `prayer-tracker` (production — active) and `prayer-tracker-v2` (mirror — not used for now).
 
-Prayer Tracker (متتبع الصلاة) is a PWA for Islamic prayer tracking — fard, sunnah, qada, fasting, azkar. Vanilla ES5 JavaScript, no frameworks, no build step. All data in localStorage. RTL Arabic-first with English support. Hosted on GitHub Pages.
-
-## Development
-
-No build, lint, or test commands. The app is static HTML/CSS/JS served directly. To develop:
-
-1. Edit files directly — changes take effect on reload
-2. For local testing, serve with any static server (e.g. `python -m http.server` or VS Code Live Server)
-3. The service worker caches aggressively — use incognito or clear cache when testing
-
-## Version Bumping (Required on Every Change)
-
-Every code change requires a version bump in **two files**. Current version pattern is `v=NNN`:
-
-1. **`service-worker.js`**: Update `CACHE_NAME` (line 2) and all `?v=NNN` in the ASSETS array
-2. **`index.html`**: Update all `?v=NNN` in `<link>` and `<script>` tags
-
-Use replace-all: `?v=244` → `?v=245` (and `v244` → `v245` for CACHE_NAME). Both files must match.
-
-## Path Conventions
-
-- **Read/Edit/Glob/Grep tools**: Use Windows paths (`C:\Users\Ahassan\.local\bin\prayer-tracker\...`)
-- **Bash tool**: Use WSL paths (`/mnt/c/Users/Ahassan/.local/bin/prayer-tracker/...`)
+## Tech Stack
+- **Language:** ES5 JavaScript only (IIFE pattern, var, no arrow functions, no let/const, no template literals)
+- **CSS:** Vanilla CSS with CSS variables, no preprocessor
+- **Storage:** localStorage only
+- **Calendar:** Hijri (Islamic) calendar
+- **Hosting:** GitHub Pages
+- **No build tools** — plain files served directly
 
 ## Architecture
-
-### Module System
-
-Every JS file is an IIFE on `window.App.*`:
-```javascript
-window.App.ModuleName = (function() {
-    'use strict';
-    // Use var (not let/const) throughout
-    function publicMethod() { ... }
-    return { publicMethod: publicMethod };
-})();
+```
+index.html          — single page app, all sections
+css/main.css        — main styles + animations
+css/themes.css      — dark mode + theme overrides
+css/dashboard.css   — dashboard-specific styles
+css/splash.css      — splash screen styles
+js/app.js           — main init, startup sequence
+js/config.js        — translations (i18n), prayer arrays, constants
+js/storage.js       — localStorage helpers, data keys
+js/hijri-calendar.js — Hijri date calculations
+js/i18n.js          — language switching (AR/EN), applyLang()
+js/ui-utils.js      — toasts, confirms, haptics, reminders
+js/themes.js        — theme management
+js/profiles.js      — multi-profile system
+js/female-features.js — hayd/nifas exempt days
+js/fard-tracker.js  — fard prayer tracking, tabs, calendar grid, handleDayClick()
+js/sunnah-tracker.js — sunnah prayer tracking
+js/jamaah-tracker.js — congregation streaks (lanterns)
+js/prayer-streaks.js — prayer streaks (moons) + sunnah streaks (chips)
+js/prayer-times.js  — Aladhan API, countdown, prayer times bar
+js/fasting-tracker.js — voluntary + Ramadan fasting
+js/azkar-tracker.js — morning/evening azkar tracking
+js/dashboard.js     — analytics dashboard rendering
+js/year-overview.js — yearly overview cards
+js/svg-charts.js    — SVG chart builders
+js/qada-calculator.js — qada prayer calculator
+js/qada-tracker.js  — qada daily tracking
+js/qada-dashboard.js — qada analytics
+js/info-tooltips.js — (i) info tooltip system
+js/data-io.js       — export/import JSON
+js/onboarding.js    — first-time user tour
+js/notifications.js — browser notifications
 ```
 
-Global aliases like `window.switchTab = window.App.Main.switchTab` exist for inline HTML `onclick` handlers.
+## Key Patterns
+- All modules use IIFE: `window.App.ModuleName = (function() { ... })();`
+- Backward compat globals: `window.functionName = window.App.Module.functionName;`
+- Storage keys use profile ID: `salah_tracker_[PID_]fard_hYYYY_MM`
+- Congregation data: `salah_cong_[PID_]hYYYY_MM`
+- Exempt data (female): `salah_exempt_[PID_]hYYYY_MM`
+- Prayer streaks cache: `salah_prayer_streaks_[PID]`
 
-### Load Order (Dependency Chain)
+## Day Click Cycle
+- Male: empty → checked (alone) → congregation → qada → empty
+- Female: empty → checked → exempt → qada → congregation → empty
+- Sunnah: no congregation state
 
-Scripts load in `index.html` in strict dependency order — earlier modules cannot reference later ones:
-```
-config → storage → hijri-calendar → ui-utils → i18n → themes → profiles →
-female-features → fard-tracker → sunnah-tracker → jamaah-tracker →
-weekly-view → fasting-tracker → prayer-times → notifications →
-azkar-tracker → svg-charts → info-tooltips → qada-report →
-qada-calculator → qada-tracker → qada-dashboard → dashboard →
-year-overview → data-io → onboarding → app
-```
+## Sections (Bottom Tab Bar)
+1. الفرائض (Fard) — 5 prayers, tabs layout
+2. السنن (Sunnah) — 8 prayers, scrollable tabs
+3. الصيام (Fasting) — voluntary + Ramadan
+4. الأذكار (Azkar) — morning/evening
 
-### Key Modules
+Each section has sub-tabs: التتبع (Tracker) / السنة (Year) / الإحصائيات (Stats)
 
-- **config.js** — Constants, prayer definitions, ALL translation strings in `Config.T`
-- **storage.js** — localStorage facade. Keys: `salah_tracker_[profileId_]TYPE_hYEAR_MONTH`
-- **hijri-calendar.js** — Hijri↔Gregorian via `Intl.DateTimeFormat('en-u-ca-islamic-umalqura')`
-- **fard-tracker.js** — Largest module. Renders fard AND sunnah prayer grids. Owns `renderTrackerMonth(type)`, `handleDayClick()`, `switchSection()`, `switchView()`, `buildStatsRow()`
-- **sunnah-tracker.js** — Thin wrapper that delegates to fard-tracker
-- **qada-calculator.js** — 3-step wizard for qada plan creation. Uses `wizardData` object + `additionalPeriods` and `alreadyPrayedPeriods` arrays
-- **qada-tracker.js** — Daily qada tracking calendar. Tap increments count, long-press decrements
-- **profiles.js** — Multi-profile management. Gender check: `profile.gender === 'female'`
-- **app.js** — Must load last. Init sequence, tab switching, service worker registration
+## Dashboard Components
+- Orbital Progress Ring (completion %)
+- Prayer Streaks — Crescent Moons (5 fard prayers)
+- Jamaah Streaks — Mosque Lanterns (5 prayers)
+- Sunnah Streaks — Compact Chips (8 prayers)
+- Monthly Progress Chart
+- Prayer Comparison Bars
+- Weekly Pattern
 
-### Data Flow
+## Known Issues / Current State
+- Dark mode: prayer times bar unselected items may need fixing
+- English mode: sub-tabs were hidden behind shell bar (fixed by constraining date text)
+- Service Worker caches aggressively — bump version in sw.js + index.html ?v= params after changes
 
-```
-User taps day → handleDayClick() in fard-tracker.js
-  → Read from Storage.getDataObject() → Cycle state → Storage.saveMonthData()
-  → Re-render: renderTrackerMonth() → Update stats → Haptic feedback
-```
-
-### Storage Key Patterns
-
-All keys are profile-prefixed: `salah_TYPE_[profileId_]hYEAR_MONTH`
-- Prayer data: `salah_tracker_p_123_fard_h1447_9`
-- Congregation: `salah_cong_p_123_h1447_9`
-- Qada plan: `salah_qada_plan_p_123`
-- Qada log: `salah_qada_log_p_123_h1447_9`
-
-### Translations
-
-All UI strings in `config.js` → `Config.T`:
-```javascript
-'key_name': { ar: 'عربي', en: 'English' }
-```
-Access via `t('key_name')` (helper wrapping `window.App.I18n.t()`).
-
-### RTL Layout
-
-`<html lang="ar" dir="rtl">`. All CSS inherits RTL. Tab pill positioning must account for RTL offset calculation. Scroll behavior is reversed.
-
-### CSS Organization
-
-- **main.css** — Core layout, prayer grids, tabs, chips, stats. Design tokens in `:root`
-- **themes.css** — Dark mode via `[data-theme="dark"]` variable overrides
-- **dashboard.css** — Dashboard cards and chart containers
-- **splash.css** — Splash screen animations
-
-### Service Worker
-
-Network-first strategy with cache fallback. API calls (aladhan.com, nominatim) are network-only. Handles push notifications and notification click routing.
-
-## Git Workflow
-
-Push directly to `main` after each change. Repository: `https://github.com/ahmedabdallah-88/Prayer-Tracker.git`
+## Rules
+- ES5 ONLY — no modern JS syntax
+- Apply ALL changes to prayer-tracker repo only (for now)
+- Test in both Arabic and English modes
+- Test in both light and dark modes
+- Use CSS variables for colors (var(--text-primary), var(--card-bg), etc.)
+- Never set inline colors in JS — use CSS variables instead
+- Respect @media (prefers-reduced-motion: reduce) for animations — this is an accessibility feature that disables animations ONLY for users who have "Reduce Motion" enabled in their device settings. Most users will see all animations normally.
+- After CSS/JS changes, bump the ?v= version in index.html script/link tags
+- After changes, bump the cache version in sw.js
