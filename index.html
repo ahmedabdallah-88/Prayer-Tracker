@@ -20,10 +20,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=278">
-    <link rel="stylesheet" href="css/dashboard.css?v=278">
-    <link rel="stylesheet" href="css/themes.css?v=278">
-    <link rel="stylesheet" href="css/splash.css?v=278">
+    <link rel="stylesheet" href="css/main.css?v=279">
+    <link rel="stylesheet" href="css/dashboard.css?v=279">
+    <link rel="stylesheet" href="css/themes.css?v=279">
+    <link rel="stylesheet" href="css/splash.css?v=279">
 </head>
 <body>
 
@@ -529,14 +529,25 @@
 
             <!-- Qada Tracker View -->
             <div id="fardQadaView" class="view">
-                <div class="month-nav-compact">
-                    <button class="nav-circle" onclick="changeQadaMonth(1)"><span class="material-symbols-rounded">chevron_right</span></button>
-                    <div class="month-nav-center">
-                        <span class="month-nav-label" id="qadaTrackerMonthLabel"></span>
-                    </div>
-                    <button class="nav-circle" onclick="changeQadaMonth(-1)"><span class="material-symbols-rounded">chevron_left</span></button>
+                <!-- Sub-toggle: tracker vs dashboard -->
+                <div id="qadaViewSubToggle" style="display:none;position:relative;background:rgba(128,128,128,0.08);border-radius:12px;padding:3px;margin-bottom:14px;">
+                    <button class="qada-dash-sub-btn active" id="qadaViewSubTracker" onclick="switchQadaSubView('tracker')"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle;">grid_view</span> <span data-t="qada_tracker_tab">التتبع</span></button>
+                    <button class="qada-dash-sub-btn" id="qadaViewSubDash" onclick="switchQadaSubView('dashboard')"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle;">analytics</span> <span data-t="qada_stats_tab">الإحصائيات</span></button>
+                    <div class="qada-dash-sub-pill" id="qadaViewSubPill"></div>
                 </div>
-                <div id="qadaTrackerContainer"></div>
+                <!-- Tracker content -->
+                <div id="qadaTrackerContent">
+                    <div class="month-nav-compact">
+                        <button class="nav-circle" onclick="changeQadaMonth(1)"><span class="material-symbols-rounded">chevron_right</span></button>
+                        <div class="month-nav-center">
+                            <span class="month-nav-label" id="qadaTrackerMonthLabel"></span>
+                        </div>
+                        <button class="nav-circle" onclick="changeQadaMonth(-1)"><span class="material-symbols-rounded">chevron_left</span></button>
+                    </div>
+                    <div id="qadaTrackerContainer"></div>
+                </div>
+                <!-- Dashboard content -->
+                <div id="qadaViewDashContent" style="display:none;"></div>
             </div>
 
             <!-- Fard Dashboard View -->
@@ -1054,34 +1065,34 @@
 
     <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImport(event)">
 
-    <script src="js/config.js?v=278"></script>
-    <script src="js/storage.js?v=278"></script>
-    <script src="js/hijri-calendar.js?v=278"></script>
-    <script src="js/ui-utils.js?v=278"></script>
-    <script src="js/i18n.js?v=278"></script>
-    <script src="js/themes.js?v=278"></script>
-    <script src="js/profiles.js?v=278"></script>
-    <script src="js/female-features.js?v=278"></script>
-    <script src="js/fard-tracker.js?v=278"></script>
-    <script src="js/sunnah-tracker.js?v=278"></script>
-    <script src="js/jamaah-tracker.js?v=278"></script>
-    <script src="js/prayer-streaks.js?v=278"></script>
-    <script src="js/weekly-view.js?v=278"></script>
-    <script src="js/fasting-tracker.js?v=278"></script>
-    <script src="js/prayer-times.js?v=278"></script>
-    <script src="js/notifications.js?v=278"></script>
-    <script src="js/azkar-tracker.js?v=278"></script>
-    <script src="js/svg-charts.js?v=278"></script>
-    <script src="js/qada-report.js?v=278"></script>
-    <script src="js/qada-calculator.js?v=278"></script>
-    <script src="js/qada-tracker.js?v=278"></script>
-    <script src="js/qada-dashboard.js?v=278"></script>
-    <script src="js/dashboard.js?v=278"></script>
-    <script src="js/year-overview.js?v=278"></script>
-    <script src="js/info-tooltips.js?v=278"></script>
-    <script src="js/data-io.js?v=278"></script>
-    <script src="js/onboarding.js?v=278"></script>
-    <script src="js/app.js?v=278"></script>
+    <script src="js/config.js?v=279"></script>
+    <script src="js/storage.js?v=279"></script>
+    <script src="js/hijri-calendar.js?v=279"></script>
+    <script src="js/ui-utils.js?v=279"></script>
+    <script src="js/i18n.js?v=279"></script>
+    <script src="js/themes.js?v=279"></script>
+    <script src="js/profiles.js?v=279"></script>
+    <script src="js/female-features.js?v=279"></script>
+    <script src="js/fard-tracker.js?v=279"></script>
+    <script src="js/sunnah-tracker.js?v=279"></script>
+    <script src="js/jamaah-tracker.js?v=279"></script>
+    <script src="js/prayer-streaks.js?v=279"></script>
+    <script src="js/weekly-view.js?v=279"></script>
+    <script src="js/fasting-tracker.js?v=279"></script>
+    <script src="js/prayer-times.js?v=279"></script>
+    <script src="js/notifications.js?v=279"></script>
+    <script src="js/azkar-tracker.js?v=279"></script>
+    <script src="js/svg-charts.js?v=279"></script>
+    <script src="js/qada-report.js?v=279"></script>
+    <script src="js/qada-calculator.js?v=279"></script>
+    <script src="js/qada-tracker.js?v=279"></script>
+    <script src="js/qada-dashboard.js?v=279"></script>
+    <script src="js/dashboard.js?v=279"></script>
+    <script src="js/year-overview.js?v=279"></script>
+    <script src="js/info-tooltips.js?v=279"></script>
+    <script src="js/data-io.js?v=279"></script>
+    <script src="js/onboarding.js?v=279"></script>
+    <script src="js/app.js?v=279"></script>
 
     <!-- Profile Settings Overlay -->
     <div class="profile-settings-overlay" id="profileSettingsOverlay">

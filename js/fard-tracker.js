@@ -198,6 +198,7 @@ window.App.Tracker = (function() {
             var qLabel = document.getElementById('qadaTrackerMonthLabel');
             if (qLabel) qLabel.textContent = Hijri.getHijriMonthName(todayHQ.month - 1) + ' ' + todayHQ.year;
             if (window.App.QadaTracker) window.App.QadaTracker.render();
+            if (window.App.QadaDashboard) window.App.QadaDashboard.initQadaViewToggle();
         } else if (view === 'dashboard') {
             var dshView = document.getElementById(prefix + 'DashboardView');
             if (dshView) dshView.classList.add('active');

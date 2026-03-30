@@ -545,7 +545,24 @@ window.App.Config = {
         'qdr_plan_vs_reality': { ar: 'الخطة والواقع', en: 'Plan vs Reality' },
         'qdr_target_label': { ar: 'الهدف', en: 'Target' },
         'qdr_actual_label': { ar: 'الفعلي', en: 'Actual' },
-        'qdr_monthly_trend': { ar: 'التقدم الشهري', en: 'Monthly Trend' }
+        'qdr_monthly_trend': { ar: 'التقدم الشهري', en: 'Monthly Trend' },
+
+        // Qada View Dashboard (sub-toggle)
+        'qada_tracker_tab': { ar: 'التتبع', en: 'Tracker' },
+        'qada_stats_tab': { ar: 'الإحصائيات', en: 'Statistics' },
+        'qada_hero_title': { ar: 'فاضلي كام؟', en: 'How much left?' },
+        'qada_prayed_of': { ar: 'صليت {0} من {1} صلاة', en: 'Prayed {0} of {1} prayers' },
+        'qada_remaining_count': { ar: 'المتبقي: {0} صلاة', en: 'Remaining: {0} prayers' },
+        'qada_prayer_breakdown': { ar: 'التقدم بالصلوات', en: 'Prayer Breakdown' },
+        'qada_daily_rate': { ar: 'معدل الإنجاز', en: 'Daily Rate' },
+        'qada_actual_rate': { ar: 'المعدل الفعلي', en: 'Actual Rate' },
+        'qada_planned_rate': { ar: 'المعدل المخطط', en: 'Planned Rate' },
+        'qada_prayers_per_day': { ar: 'صلوات/يوم', en: 'prayers/day' },
+        'qada_on_track': { ar: 'ماشي كويس', en: 'On track' },
+        'qada_slightly_behind': { ar: 'متأخر قليلاً', en: 'Slightly behind' },
+        'qada_needs_more': { ar: 'محتاج تزيد', en: 'Needs more effort' },
+        'qada_not_started': { ar: 'لم تبدأ بعد', en: 'Not started yet' },
+        'qada_monthly_chart': { ar: 'صلوات القضاء الشهرية', en: 'Monthly Qada Prayers' }
     }
 
 };

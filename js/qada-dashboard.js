@@ -755,12 +755,381 @@ window.App.QadaDashboard = (function() {
         return n.toLocaleString('ar-EG');
     }
 
+    // ==================== QADA VIEW SUB-TOGGLE ====================
+
+    var _qadaViewSub = 'tracker'; // 'tracker' or 'dashboard'
+
+    function initQadaViewToggle() {
+        var toggle = document.getElementById('qadaViewSubToggle');
+        if (!toggle) return;
+        toggle.style.display = hasPlan() ? 'flex' : 'none';
+        if (hasPlan()) switchQadaSubView(_qadaViewSub);
+    }
+
+    function switchQadaSubView(view) {
+        _qadaViewSub = view;
+        var trackerBtn = document.getElementById('qadaViewSubTracker');
+        var dashBtn = document.getElementById('qadaViewSubDash');
+        var pill = document.getElementById('qadaViewSubPill');
+        var trackerContent = document.getElementById('qadaTrackerContent');
+        var dashContent = document.getElementById('qadaViewDashContent');
+
+        if (trackerBtn) trackerBtn.classList.toggle('active', view === 'tracker');
+        if (dashBtn) dashBtn.classList.toggle('active', view === 'dashboard');
+
+        if (pill) {
+            var isRtl = document.documentElement.getAttribute('dir') === 'rtl';
+            if (view === 'tracker') {
+                pill.style.transform = isRtl ? 'translateX(100%)' : 'translateX(0)';
+            } else {
+                pill.style.transform = isRtl ? 'translateX(0)' : 'translateX(100%)';
+            }
+        }
+
+        if (view === 'tracker') {
+            if (trackerContent) trackerContent.style.display = '';
+            if (dashContent) dashContent.style.display = 'none';
+        } else {
+            if (trackerContent) trackerContent.style.display = 'none';
+            if (dashContent) {
+                dashContent.style.display = '';
+                renderQadaViewDashboard();
+            }
+        }
+    }
+
+    // ==================== QADA VIEW DASHBOARD (4 sections) ====================
+
+    function renderQadaViewDashboard() {
+        var container = document.getElementById('qadaViewDashContent');
+        if (!container) return;
+        container.innerHTML = '';
+
+        var plan = _loadPlan();
+        if (!plan) {
+            container.innerHTML =
+                '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);">' +
+                    '<span class="material-symbols-rounded" style="font-size:48px;opacity:0.3;display:block;margin-bottom:12px;">calculate</span>' +
+                    '<div style="font-weight:700;margin-bottom:4px;">' + t('qada_no_plan') + '</div>' +
+                '</div>';
+            return;
+        }
+
+        var logInfo = gatherAllLogData(plan);
+
+        _renderHeroProgress(container, plan);
+        _renderPrayerBreakdown(container, plan);
+        _renderDailyRate(container, plan, logInfo);
+        _renderMonthlyBarChart(container, plan, logInfo);
+    }
+
+    // ---- Section 1: Hero Progress Card ----
+
+    function _renderHeroProgress(parent, plan) {
+        var card = _createCard('qadaViewHero');
+        var header = _createHeader('donut_large', t('qada_hero_title'));
+        card.appendChild(header);
+
+        var completedAll = plan.completedAll || 0;
+        var totalAll = plan.totalAll || 1;
+        var remaining = totalAll - completedAll;
+        if (remaining < 0) remaining = 0;
+        var pct = Math.round((completedAll / totalAll) * 100);
+        if (pct > 100) pct = 100;
+        var pctColor = _pctColor(pct);
+
+        var isAr = lang() === 'ar';
+
+        // Ring SVG
+        var ringSize = 140, cx = 70, cy = 70, r = 56;
+        var circ = 2 * Math.PI * r;
+        var offset = circ * (1 - pct / 100);
+        var style = getComputedStyle(document.documentElement);
+        var primaryMid = style.getPropertyValue('--primary-mid').trim() || '#52B788';
+        var textPrimary = style.getPropertyValue('--text-primary').trim() || '#2B2D42';
+        var textMuted = style.getPropertyValue('--text-muted').trim() || '#8D99AE';
+
+        var ringSvg =
+            '<svg width="' + ringSize + '" height="' + ringSize + '" viewBox="0 0 ' + ringSize + ' ' + ringSize + '">' +
+                '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="rgba(128,128,128,0.08)" stroke-width="12"/>' +
+                '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + primaryMid + '" stroke-width="12" stroke-linecap="round"' +
+                    ' stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '"' +
+                    ' transform="rotate(-90 ' + cx + ' ' + cy + ')" style="transition:stroke-dashoffset 1s ease;"/>' +
+                '<text x="' + cx + '" y="' + (cy - 2) + '" text-anchor="middle" fill="' + textPrimary + '" font-size="28" font-weight="800" font-family="Rubik,sans-serif">' + pct + '</text>' +
+                '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="' + textMuted + '" font-size="11" font-weight="600" font-family="Rubik,sans-serif">%</text>' +
+            '</svg>';
+
+        var body = document.createElement('div');
+        body.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0;';
+
+        // Ring
+        var ringWrap = document.createElement('div');
+        ringWrap.innerHTML = ringSvg;
+        body.appendChild(ringWrap);
+
+        // "صليت X من Y صلاة"
+        var prayedText = t('qada_prayed_of').replace('{0}', isAr ? _arabicNum(completedAll) : completedAll.toLocaleString()).replace('{1}', isAr ? _arabicNum(totalAll) : totalAll.toLocaleString());
+        var prayedDiv = document.createElement('div');
+        prayedDiv.style.cssText = 'font-size:14px;font-weight:700;color:var(--text-primary);font-family:\'Noto Kufi Arabic\',sans-serif;';
+        prayedDiv.textContent = prayedText;
+        body.appendChild(prayedDiv);
+
+        // Progress bar
+        var barWrap = document.createElement('div');
+        barWrap.style.cssText = 'width:100%;height:20px;background:rgba(128,128,128,0.1);border-radius:10px;overflow:hidden;position:relative;';
+        var fill = document.createElement('div');
+        fill.style.cssText = 'height:100%;border-radius:10px;background:' + pctColor + ';width:' + Math.min(pct, 100) + '%;transition:width 0.6s ease;';
+        barWrap.appendChild(fill);
+        var barLabel = document.createElement('div');
+        barLabel.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:Rubik,sans-serif;color:' + (pct > 45 ? '#fff' : 'var(--text-primary)') + ';';
+        barLabel.textContent = pct + '%';
+        barWrap.appendChild(barLabel);
+        body.appendChild(barWrap);
+
+        // "المتبقي: Z صلاة"
+        var remText = t('qada_remaining_count').replace('{0}', isAr ? _arabicNum(remaining) : remaining.toLocaleString());
+        var remDiv = document.createElement('div');
+        remDiv.style.cssText = 'font-size:13px;font-weight:600;color:var(--text-muted);';
+        remDiv.textContent = remText;
+        body.appendChild(remDiv);
+
+        card.appendChild(body);
+        parent.appendChild(card);
+    }
+
+    // ---- Section 2: Prayer Breakdown ----
+
+    function _renderPrayerBreakdown(parent, plan) {
+        var card = _createCard('qadaViewBreakdown');
+        var header = _createHeader('view_list', t('qada_prayer_breakdown'));
+        card.appendChild(header);
+
+        var body = document.createElement('div');
+        body.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:4px 0;';
+
+        PRAYER_IDS.forEach(function(pid) {
+            var total = plan.totalByPrayer ? (plan.totalByPrayer[pid] || 0) : 0;
+            var completed = plan.completedByPrayer ? (plan.completedByPrayer[pid] || 0) : 0;
+            var pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            var color = SKY_COLORS[pid] || '#888';
+
+            var prayerDef = window.App.Config.fardPrayers.find(function(p) { return p.id === pid; });
+            var icon = prayerDef ? prayerDef.icon : 'mosque';
+            var name = window.App.I18n ? window.App.I18n.getPrayerName(pid) : pid;
+
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+
+            // Icon badge
+            var badge = document.createElement('span');
+            badge.style.cssText = 'background:' + color + ';width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+            badge.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;color:white;">' + icon + '</span>';
+            row.appendChild(badge);
+
+            // Name
+            var nameSpan = document.createElement('span');
+            nameSpan.style.cssText = 'width:50px;font-size:12px;font-weight:700;color:var(--text-primary);font-family:\'Noto Kufi Arabic\',sans-serif;';
+            nameSpan.textContent = name;
+            row.appendChild(nameSpan);
+
+            // Bar
+            var barWrap = document.createElement('div');
+            barWrap.style.cssText = 'flex:1;height:10px;background:rgba(128,128,128,0.1);border-radius:5px;overflow:hidden;';
+            var barFill = document.createElement('div');
+            barFill.style.cssText = 'height:100%;border-radius:5px;background:' + color + ';width:' + Math.min(pct, 100) + '%;transition:width 0.6s ease;';
+            barWrap.appendChild(barFill);
+            row.appendChild(barWrap);
+
+            // Count + pct
+            var info = document.createElement('span');
+            info.style.cssText = 'font-size:10px;color:var(--text-muted);font-weight:600;white-space:nowrap;min-width:60px;text-align:center;';
+            info.innerHTML = '<span style="color:' + color + ';font-weight:800;font-family:Rubik,sans-serif;">' + pct + '%</span> ' + completed + '/' + total;
+            row.appendChild(info);
+
+            body.appendChild(row);
+        });
+
+        card.appendChild(body);
+        parent.appendChild(card);
+    }
+
+    // ---- Section 3: Daily Rate ----
+
+    function _renderDailyRate(parent, plan, logInfo) {
+        var card = _createCard('qadaViewRate');
+        var header = _createHeader('speed', t('qada_daily_rate'));
+        card.appendChild(header);
+
+        var isAr = lang() === 'ar';
+        var completedAll = plan.completedAll || 0;
+        var days = daysSinceCreation(plan);
+        var actualRate = days > 0 ? (completedAll / days) : 0;
+        var actualStr = actualRate.toFixed(1);
+        var dailyTarget = plan.dailyTarget || 5;
+
+        // Two cards side by side
+        var row = document.createElement('div');
+        row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;';
+
+        row.innerHTML =
+            // Actual rate
+            '<div style="text-align:center;padding:14px 10px;border-radius:14px;background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.1);">' +
+                '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + t('qada_actual_rate') + '</div>' +
+                '<div style="font-size:28px;font-weight:800;color:var(--primary);font-family:Rubik,sans-serif;margin:6px 0;">' + actualStr + '</div>' +
+                '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + t('qada_prayers_per_day') + '</div>' +
+            '</div>' +
+            // Planned rate
+            '<div style="text-align:center;padding:14px 10px;border-radius:14px;background:rgba(var(--accent-rgb),0.06);border:1px solid rgba(var(--accent-rgb),0.1);">' +
+                '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + t('qada_planned_rate') + '</div>' +
+                '<div style="font-size:28px;font-weight:800;color:var(--accent);font-family:Rubik,sans-serif;margin:6px 0;">' + dailyTarget + '</div>' +
+                '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">' + t('qada_prayers_per_day') + '</div>' +
+            '</div>';
+        card.appendChild(row);
+
+        // Status indicator
+        var statusDiv = document.createElement('div');
+        statusDiv.style.cssText = 'text-align:center;margin-top:10px;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;';
+
+        if (completedAll === 0 && days <= 1) {
+            statusDiv.style.background = 'rgba(128,128,128,0.06)';
+            statusDiv.style.color = 'var(--text-muted)';
+            statusDiv.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">schedule</span> ' + t('qada_not_started');
+        } else if (actualRate >= dailyTarget) {
+            statusDiv.style.background = 'rgba(var(--primary-rgb),0.08)';
+            statusDiv.style.color = 'var(--primary)';
+            statusDiv.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">check_circle</span> ' + t('qada_on_track');
+        } else if (actualRate >= dailyTarget * 0.7) {
+            statusDiv.style.background = 'rgba(var(--accent-rgb),0.08)';
+            statusDiv.style.color = 'var(--accent)';
+            statusDiv.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">warning</span> ' + t('qada_slightly_behind');
+        } else {
+            statusDiv.style.background = 'rgba(var(--danger-rgb),0.08)';
+            statusDiv.style.color = 'var(--danger)';
+            statusDiv.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px;">trending_down</span> ' + t('qada_needs_more');
+        }
+        card.appendChild(statusDiv);
+
+        parent.appendChild(card);
+    }
+
+    // ---- Section 4: Monthly Bar Chart ----
+
+    function _renderMonthlyBarChart(parent, plan, logInfo) {
+        var card = _createCard('qadaViewMonthly');
+        var header = _createHeader('bar_chart', t('qada_monthly_chart'));
+        card.appendChild(header);
+
+        var Hijri = window.App.Hijri;
+        var todayH = Hijri.getTodayHijri();
+
+        // Get data for current Hijri year
+        var labels = [];
+        var values = [];
+        var shortNames = window.App.Dashboard ? window.App.Dashboard.getHijriMonthNamesShort() : [];
+
+        for (var m = 1; m <= 12; m++) {
+            var key = todayH.year + '_' + m;
+            var count = logInfo.monthlyTotals[key] || 0;
+            values.push(count);
+            labels.push(shortNames.length >= m ? shortNames[m - 1] : m + '');
+        }
+
+        var maxVal = Math.max.apply(null, values) || 1;
+
+        // Check if there's any data
+        var hasData = values.some(function(v) { return v > 0; });
+        if (!hasData) {
+            var emptyDiv = document.createElement('div');
+            emptyDiv.style.cssText = 'text-align:center;padding:24px;color:var(--text-muted);font-size:13px;';
+            emptyDiv.textContent = lang() === 'ar' ? 'لا توجد بيانات بعد — ابدأ بتسجيل صلوات القضاء' : 'No data yet — start logging qada prayers';
+            card.appendChild(emptyDiv);
+            parent.appendChild(card);
+            return;
+        }
+
+        // Build SVG bar chart
+        var style = getComputedStyle(document.documentElement);
+        var primaryMid = style.getPropertyValue('--primary-mid').trim() || '#52B788';
+        var accent = style.getPropertyValue('--accent').trim() || '#D4A030';
+        var textMuted = style.getPropertyValue('--text-muted').trim() || '#8D99AE';
+
+        var W = 360, H = 180;
+        var padL = 32, padR = 8, padTop = 16, padBot = 28;
+        var chartW = W - padL - padR;
+        var chartH = H - padTop - padBot;
+        var barGap = 4;
+        var barW = (chartW - barGap * 11) / 12;
+        var baseY = padTop + chartH;
+
+        var svgParts = ['<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg">'];
+
+        // Gradient
+        svgParts.push('<defs>');
+        svgParts.push('<linearGradient id="qadaBarGrad" x1="0" y1="0" x2="0" y2="1">');
+        svgParts.push('<stop offset="0%" stop-color="' + primaryMid + '" stop-opacity="1"/>');
+        svgParts.push('<stop offset="100%" stop-color="' + primaryMid + '" stop-opacity="0.6"/>');
+        svgParts.push('</linearGradient>');
+        svgParts.push('</defs>');
+
+        // Baseline
+        svgParts.push('<line x1="' + padL + '" y1="' + baseY + '" x2="' + (W - padR) + '" y2="' + baseY + '" stroke="rgba(0,0,0,0.06)" stroke-width="0.5"/>');
+
+        // Y gridlines
+        var ySteps = 3;
+        for (var g = 0; g <= ySteps; g++) {
+            var gY = padTop + (g / ySteps) * chartH;
+            var gVal = Math.round(maxVal * (1 - g / ySteps));
+            svgParts.push('<line x1="' + padL + '" y1="' + gY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gY.toFixed(1) + '" stroke="rgba(128,128,128,0.06)" stroke-width="0.5"/>');
+            svgParts.push('<text x="' + (padL - 4) + '" y="' + (gY + 3).toFixed(1) + '" text-anchor="end" font-family="Rubik,sans-serif" font-size="7" fill="' + textMuted + '">' + gVal + '</text>');
+        }
+
+        // Bars
+        for (var i = 0; i < 12; i++) {
+            var x = padL + i * (barW + barGap);
+            var val = values[i];
+            var barH = maxVal > 0 ? (val / maxVal) * chartH : 0;
+            var y = baseY - barH;
+            var isCurrent = (i + 1) === todayH.month;
+            var barColor = isCurrent ? accent : 'url(#qadaBarGrad)';
+
+            if (val > 0) {
+                svgParts.push('<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + barH.toFixed(1) + '" rx="3" fill="' + barColor + '"/>');
+                // Value label above bar
+                svgParts.push('<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" text-anchor="middle" font-family="Rubik,sans-serif" font-size="7" font-weight="600" fill="' + (isCurrent ? accent : primaryMid) + '">' + val + '</text>');
+            }
+
+            // Month label
+            svgParts.push('<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (baseY + 12) + '" text-anchor="middle" font-family="\'Noto Kufi Arabic\',sans-serif" font-size="6.5" font-weight="' + (isCurrent ? '700' : '500') + '" fill="' + (isCurrent ? accent : textMuted) + '">' + labels[i] + '</text>');
+        }
+
+        svgParts.push('</svg>');
+
+        var chartDiv = document.createElement('div');
+        chartDiv.style.cssText = 'width:100%;padding:4px 0;';
+        chartDiv.innerHTML = svgParts.join('');
+
+        // Year label
+        var yearLabel = document.createElement('div');
+        yearLabel.style.cssText = 'text-align:center;font-size:11px;font-weight:600;color:var(--text-muted);margin-top:4px;font-family:Rubik,sans-serif;';
+        yearLabel.textContent = todayH.year + (lang() === 'ar' ? ' هـ' : ' AH');
+
+        card.appendChild(chartDiv);
+        card.appendChild(yearLabel);
+        parent.appendChild(card);
+    }
+
     // ==================== PUBLIC API ====================
 
     return {
         hasPlan: hasPlan,
         injectSubToggle: injectSubToggle,
         switchSubView: switchSubView,
-        renderQadaReports: renderQadaReports
+        renderQadaReports: renderQadaReports,
+        initQadaViewToggle: initQadaViewToggle,
+        switchQadaSubView: switchQadaSubView,
+        renderQadaViewDashboard: renderQadaViewDashboard
     };
 })();
+
+// Global alias for HTML onclick
+window.switchQadaSubView = window.App.QadaDashboard.switchQadaSubView;
