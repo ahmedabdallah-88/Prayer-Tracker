@@ -756,8 +756,6 @@ window.App.Tracker = (function() {
         // Mark pulse as shown for this type after first render
         if (isCurrentMonth) _todayPulseShown[type] = true;
 
-        _applyWeekGlow(grid);
-
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
 
@@ -793,7 +791,20 @@ window.App.Tracker = (function() {
                     allDayBoxes[si].classList.add('day-entering');
                     allDayBoxes[si].style.animationDelay = (si * 15) + 'ms';
                 }
+                // After stagger completes: remove day-entering, then apply week glow
+                var staggerMs = allDayBoxes.length * 15 + 300;
+                setTimeout(function() {
+                    for (var ri = 0; ri < allDayBoxes.length; ri++) {
+                        allDayBoxes[ri].classList.remove('day-entering');
+                        allDayBoxes[ri].style.animationDelay = '';
+                    }
+                    _applyWeekGlow(grid);
+                }, staggerMs);
+            } else {
+                _applyWeekGlow(grid);
             }
+        } else {
+            _applyWeekGlow(grid);
         }
     }
 
