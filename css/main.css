@@ -486,6 +486,25 @@ body {
 .section { display: none; }
 .section.active { display: block; }
 
+/* ===== CROSSFADE PAGE TRANSITIONS ===== */
+.section.section-fading-out {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .section.section-fading-out {
+        transition: none !important;
+    }
+}
+
 /* ==================== VIEW TOGGLE (hidden - using sub-tabs) ==================== */
 .view-toggle { display: none; }
 .toggle-btn { display: none; }

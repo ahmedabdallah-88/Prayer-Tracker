@@ -20,8 +20,7 @@ window.App.Tracker = (function() {
     // Track whether today-pulse animation has been shown (once per session)
     var _todayPulseShown = {};
     // Section transition tracking
-    var _sectionOrder = { fard: 0, sunnah: 1, fasting: 2, azkar: 3 };
-    var _currentSectionIdx = -1; // -1 = first load (no animation)
+    var _prevSection = null; // null = first load (no animation)
 
     // ==================== PRIVATE HELPERS ====================
 
@@ -148,37 +147,48 @@ window.App.Tracker = (function() {
             window.updateShellBar();
         }
 
-        // ── Section slide-in animation ──
-        var newIdx = _sectionOrder[section] !== undefined ? _sectionOrder[section] : 0;
-        var oldIdx = _currentSectionIdx;
-        _currentSectionIdx = newIdx;
+        // ── Crossfade section transition ──
+        var sectionIds = ['fardSection', 'sunnahSection', 'fastingSection', 'azkarSection'];
+        var targetId = section + 'Section';
+        // Fix: fasting section ID doesn't follow pattern
+        if (section === 'azkar') targetId = 'azkarSection';
 
-        // Skip animation on first load or same tab
-        if (oldIdx < 0 || oldIdx === newIdx) return;
+        var oldEl = _prevSection ? document.getElementById(_prevSection) : null;
+        var newEl = document.getElementById(targetId);
+        _prevSection = targetId;
 
+        // Skip animation on first load, same section, or reduced motion
+        if (!oldEl || oldEl === newEl) return;
         var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reducedMotion) return;
 
-        var sectionIds = { fard: 'fardSection', sunnah: 'sunnahSection', fasting: 'fastingSection', azkar: 'azkarSection' };
-        var target = document.getElementById(sectionIds[section]);
-        if (!target) return;
+        // Old section: position absolute so it overlaps (not stacks) during fade
+        oldEl.classList.add('active');
+        oldEl.classList.add('section-fading-out');
 
-        var isRtl = document.documentElement.dir === 'rtl' || getComputedStyle(document.documentElement).direction === 'rtl';
-        var goingHigher = newIdx > oldIdx;
-        // In RTL: higher index = left; In LTR: higher index = right
-        var startX = (isRtl ? goingHigher : !goingHigher) ? '-25px' : '25px';
+        // New section: start invisible, fade in
+        if (newEl) {
+            newEl.style.opacity = '0';
+            requestAnimationFrame(function() {
+                newEl.style.transition = 'opacity 0.3s ease';
+                newEl.style.opacity = '1';
+            });
+        }
 
-        target.style.opacity = '0';
-        target.style.transform = 'translateX(' + startX + ')';
-        void target.offsetWidth;
-        target.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
-        target.style.opacity = '1';
-        target.style.transform = 'translateX(0)';
+        // After transition: clean up
         setTimeout(function() {
-            target.style.transition = '';
-            target.style.opacity = '';
-            target.style.transform = '';
-        }, 260);
+            oldEl.classList.remove('active', 'section-fading-out');
+            for (var i = 0; i < sectionIds.length; i++) {
+                var s = document.getElementById(sectionIds[i]);
+                if (s && s !== newEl) {
+                    s.classList.remove('active', 'section-fading-out');
+                }
+            }
+            if (newEl) {
+                newEl.style.transition = '';
+                newEl.style.opacity = '';
+            }
+        }, 340);
     }
 
     // ==================== switchView (merged: base + Fiori sub-tabs) ====================
