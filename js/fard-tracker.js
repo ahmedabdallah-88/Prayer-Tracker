@@ -19,6 +19,9 @@ window.App.Tracker = (function() {
 
     // Track whether today-pulse animation has been shown (once per session)
     var _todayPulseShown = {};
+    // Section transition tracking
+    var _sectionOrder = { fard: 0, sunnah: 1, fasting: 2, azkar: 3 };
+    var _currentSectionIdx = -1; // -1 = first load (no animation)
 
     // ==================== PRIVATE HELPERS ====================
 
@@ -144,6 +147,38 @@ window.App.Tracker = (function() {
         if (typeof window.updateShellBar === 'function') {
             window.updateShellBar();
         }
+
+        // ── Section slide-in animation ──
+        var newIdx = _sectionOrder[section] !== undefined ? _sectionOrder[section] : 0;
+        var oldIdx = _currentSectionIdx;
+        _currentSectionIdx = newIdx;
+
+        // Skip animation on first load or same tab
+        if (oldIdx < 0 || oldIdx === newIdx) return;
+
+        var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) return;
+
+        var sectionIds = { fard: 'fardSection', sunnah: 'sunnahSection', fasting: 'fastingSection', azkar: 'azkarSection' };
+        var target = document.getElementById(sectionIds[section]);
+        if (!target) return;
+
+        var isRtl = document.documentElement.dir === 'rtl' || getComputedStyle(document.documentElement).direction === 'rtl';
+        var goingHigher = newIdx > oldIdx;
+        // In RTL: higher index = left; In LTR: higher index = right
+        var startX = (isRtl ? goingHigher : !goingHigher) ? '-25px' : '25px';
+
+        target.style.opacity = '0';
+        target.style.transform = 'translateX(' + startX + ')';
+        void target.offsetWidth;
+        target.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+        target.style.opacity = '1';
+        target.style.transform = 'translateX(0)';
+        setTimeout(function() {
+            target.style.transition = '';
+            target.style.opacity = '';
+            target.style.transform = '';
+        }, 260);
     }
 
     // ==================== switchView (merged: base + Fiori sub-tabs) ====================
