@@ -396,51 +396,102 @@ window.App.PrayerTimes = (function() {
         renderNextPrayerCountdown();
     }
 
-    // ==================== NEXT PRAYER COUNTDOWN ====================
+    // ==================== NEXT PRAYER COUNTDOWN BAR ====================
 
     var countdownInterval = null;
 
     function renderNextPrayerCountdown() {
-        var el = document.getElementById('nextPrayerCountdown');
-        if (!el) return;
+        var bar = document.getElementById('prayerCountdownBar');
+        if (!bar) return;
 
         var state = getCurrentPrayerState();
-        if (!state || !state.next) {
-            el.style.display = 'none';
+        if (!state || !state.prayers || state.prayers.length === 0) {
+            bar.classList.add('countdown-hidden');
             if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
             return;
         }
 
-        var currentLang = getCurrentLang();
-        var nameEl = document.getElementById('npcName');
-        var timerEl = document.getElementById('npcTimer');
-        var labelEl = document.getElementById('npcLabel');
+        // Determine next prayer — after Isha, wrap to Fajr
+        var next = state.next;
+        if (!next) {
+            next = state.prayers[0]; // Fajr (next day)
+        }
+        if (!next) {
+            bar.classList.add('countdown-hidden');
+            if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+            return;
+        }
 
-        if (nameEl) nameEl.textContent = getPrayerName(state.next.id);
-        if (labelEl) labelEl.textContent = currentLang === 'ar' ? '\u0627\u0644\u0635\u0644\u0627\u0629 \u0627\u0644\u0642\u0627\u062F\u0645\u0629' : 'Next Prayer';
+        var nameEl = document.getElementById('countdownPrayerName');
+        var timeEl = document.getElementById('countdownTimeDisplay');
+        var arcEl = document.getElementById('countdownArcFill');
+        var labelEl = bar.querySelector('.countdown-label');
+        if (!nameEl || !timeEl || !arcEl) return;
 
-        el.style.display = 'flex';
+        // Prayer name + label (i18n)
+        nameEl.textContent = getPrayerName(next.id);
+        if (labelEl) {
+            var currentLang = getCurrentLang();
+            labelEl.textContent = currentLang === 'ar' ? '\u0627\u0644\u0635\u0644\u0627\u0629 \u0627\u0644\u0642\u0627\u062F\u0645\u0629' : 'Next Prayer';
+        }
 
-        // Add continuous hourglass animation
-        var hgIcon = el.querySelector('.material-symbols-rounded');
-        if (hgIcon) hgIcon.classList.add('hourglass-animated');
+        // Show bar
+        bar.classList.remove('countdown-hidden');
+
+        // Compute total prayer window (seconds) for arc progress
+        var nextMin = next.time;
+        var totalWindowSec;
+        if (!state.active) {
+            // Before Fajr: window = Isha yesterday -> Fajr
+            var ishaMin = state.prayers[4].time;
+            var fajrMin = state.prayers[0].time;
+            totalWindowSec = ((1440 - ishaMin) + fajrMin) * 60;
+        } else {
+            // Find active prayer start time
+            var activeMin = 0;
+            for (var pi = 0; pi < state.prayers.length; pi++) {
+                if (state.prayers[pi].id === state.active) {
+                    activeMin = state.prayers[pi].time;
+                    break;
+                }
+            }
+            var windowMin = nextMin - activeMin;
+            if (windowMin <= 0) windowMin += 1440;
+            totalWindowSec = windowMin * 60;
+        }
 
         // Clear previous interval
         if (countdownInterval) clearInterval(countdownInterval);
 
-        function updateTimer() {
+        var CIRC = 131.95; // 2 * PI * 21
+
+        function updateCountdown() {
             var now = new Date();
             var nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            var targetSec = state.next.time * 60;
+            var targetSec = next.time * 60;
             var diff = targetSec - nowSec;
             if (diff < 0) diff += 86400;
 
+            // Format H:MM:SS
             var h = Math.floor(diff / 3600);
             var m = Math.floor((diff % 3600) / 60);
             var s = diff % 60;
+            timeEl.textContent = h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 
-            var timeStr = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-            if (timerEl) timerEl.textContent = timeStr;
+            // Update arc progress
+            var progress = totalWindowSec > 0 ? (diff / totalWindowSec) : 0;
+            if (progress > 1) progress = 1;
+            if (progress < 0) progress = 0;
+            arcEl.style.strokeDashoffset = (CIRC * (1 - progress)).toFixed(2);
+
+            // Urgency classes
+            var totalMin = Math.floor(diff / 60);
+            bar.classList.remove('countdown-warning', 'countdown-urgent');
+            if (totalMin < 10) {
+                bar.classList.add('countdown-urgent');
+            } else if (totalMin < 30) {
+                bar.classList.add('countdown-warning');
+            }
 
             // When countdown reaches zero, re-fetch state
             if (diff <= 0) {
@@ -450,20 +501,8 @@ window.App.PrayerTimes = (function() {
             }
         }
 
-        updateTimer();
-        countdownInterval = setInterval(updateTimer, 1000);
-
-        // Start breathe pulse every 3 seconds
-        if (window._countdownBreatheInterval) clearInterval(window._countdownBreatheInterval);
-        window._countdownBreatheInterval = setInterval(function() {
-            var cdEl = document.getElementById('nextPrayerCountdown');
-            if (!cdEl || cdEl.style.display === 'none') return;
-            // Add breathe wave
-            var wave = document.createElement('div');
-            wave.className = 'breathe-wave';
-            cdEl.appendChild(wave);
-            setTimeout(function() { wave.remove(); }, 1000);
-        }, 3000);
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 1000);
     }
 
     // ==================== REFRESH ====================

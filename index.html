@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=291">
+    <link rel="stylesheet" href="css/main.css?v=293">
     <link rel="stylesheet" href="css/dashboard.css?v=285">
     <link rel="stylesheet" href="css/themes.css?v=289">
     <link rel="stylesheet" href="css/splash.css?v=285">
@@ -475,31 +475,22 @@
                     <div id="nextPrayerInfo" style="display:none;"></div>
                 </div>
 
-                <!-- Next Prayer Countdown -->
-                <div id="nextPrayerCountdown" style="display:none;
-                    padding: 12px 16px;
-                    border-radius: 16px;
-                    margin-bottom: 14px;
-                    background: var(--card-bg);
-                    backdrop-filter: blur(12px);
-                    -webkit-backdrop-filter: blur(12px);
-                    border: 1px solid rgba(0,0,0,0.04);
-                    align-items: center;
-                    gap: 10px;">
-                    <div style="width: 36px; height: 36px; border-radius: 10px;
-                        background: rgba(var(--primary-rgb),0.08);
-                        display: flex; align-items: center; justify-content: center;
-                        flex-shrink: 0;">
-                        <span class="material-symbols-rounded" style="font-size: 18px; color: var(--primary);
-                            font-variation-settings: 'FILL' 1, 'wght' 500;">hourglass_top</span>
+                <!-- Prayer Countdown Bar -->
+                <div class="countdown-bar countdown-hidden" id="prayerCountdownBar">
+                    <div class="countdown-bar-right">
+                        <div class="countdown-arc">
+                            <svg viewBox="0 0 50 50">
+                                <circle class="countdown-arc-bg" cx="25" cy="25" r="21"/>
+                                <circle class="countdown-arc-fill" cx="25" cy="25" r="21" id="countdownArcFill"/>
+                            </svg>
+                            <span class="countdown-arc-icon">&#x23F3;</span>
+                        </div>
+                        <div class="countdown-info">
+                            <div class="countdown-label" data-t="next_prayer">الصلاة القادمة</div>
+                            <div class="countdown-prayer-name" id="countdownPrayerName">&#x2014;</div>
+                        </div>
                     </div>
-                    <div style="flex: 1;">
-                        <div id="npcLabel" style="font-size: 11px; color: var(--text-muted); font-weight: 600;" data-t="next_prayer">الصلاة القادمة</div>
-                        <div id="npcName" style="font-size: 14px; font-weight: 700; color: var(--text-primary);"></div>
-                    </div>
-                    <div id="npcTimer" style="font-size: 20px; font-weight: 800; color: var(--primary);
-                        font-family: 'Rubik', sans-serif; font-variant-numeric: tabular-nums;
-                        letter-spacing: 1px; margin-inline-start: auto;">--:--:--</div>
+                    <div class="countdown-time" id="countdownTimeDisplay">--:--</div>
                 </div>
 
                 <!-- Smart Reminder -->
@@ -1072,13 +1063,13 @@
     <script src="js/themes.js?v=285"></script>
     <script src="js/profiles.js?v=285"></script>
     <script src="js/female-features.js?v=285"></script>
-    <script src="js/fard-tracker.js?v=292"></script>
+    <script src="js/fard-tracker.js?v=293"></script>
     <script src="js/sunnah-tracker.js?v=285"></script>
     <script src="js/jamaah-tracker.js?v=285"></script>
     <script src="js/prayer-streaks.js?v=285"></script>
     <script src="js/weekly-view.js?v=285"></script>
     <script src="js/fasting-tracker.js?v=285"></script>
-    <script src="js/prayer-times.js?v=285"></script>
+    <script src="js/prayer-times.js?v=293"></script>
     <script src="js/notifications.js?v=285"></script>
     <script src="js/azkar-tracker.js?v=285"></script>
     <script src="js/svg-charts.js?v=285"></script>
