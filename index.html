@@ -20,10 +20,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=277">
-    <link rel="stylesheet" href="css/dashboard.css?v=277">
-    <link rel="stylesheet" href="css/themes.css?v=277">
-    <link rel="stylesheet" href="css/splash.css?v=277">
+    <link rel="stylesheet" href="css/main.css?v=278">
+    <link rel="stylesheet" href="css/dashboard.css?v=278">
+    <link rel="stylesheet" href="css/themes.css?v=278">
+    <link rel="stylesheet" href="css/splash.css?v=278">
 </head>
 <body>
 
@@ -554,6 +554,37 @@
                 <span id="fardYearTotalPossible" style="display:none">0</span>
                 <span id="fardYearCompletionRate" style="display:none">0%</span>
 
+                <!-- 1. الإنجاز — Progress Ring -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">target</span> <span data-t="completion">الإنجاز</span></h3>
+                    <div class="svg-chart-container" id="fardOrbitalProgress"></div>
+                </div>
+
+                <!-- 2. سلاسل المواظبة على الصلاة — Moons -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">routine</span> <span data-t="prayer_streaks_title">سلاسل المواظبة على الصلاة</span></h3>
+                    <div class="svg-chart-container" id="fardPrayerMoons"></div>
+                </div>
+
+                <!-- 3. سلاسل المواظبة على الجماعة — Lanterns -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">local_fire_department</span> <span data-t="congregation_streak">سلاسل المواظبة على الجماعة</span></h3>
+                    <div class="svg-chart-container" id="fardStreakFlame"></div>
+                </div>
+
+                <!-- 4. التقدم الشهري — Mountain Chart -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">trending_up</span> <span data-t="monthly_progress">التقدم الشهري</span></h3>
+                    <div class="svg-chart-container" id="fardMountainChart"></div>
+                </div>
+
+                <!-- 5. مقارنة الصلوات — Dual Bars -->
+                <div id="fardDualBarsCard"></div>
+
+                <!-- 6. نمط الجماعة الأسبوعي — Weekly Rhythm -->
+                <div id="fardWeeklyRhythm"></div>
+
+                <!-- 7. ملخص الأداء — Best Month + Best Prayer + Congregation -->
                 <div style="background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;border:1px solid rgba(0,0,0,0.04);margin-bottom:14px;">
                     <!-- ROW 1: Best Month + Best Prayer -->
                     <div style="display:flex;gap:10px;">
@@ -595,37 +626,7 @@
                     </div>
                 </div>
 
-                <!-- Orbital Progress -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">target</span> <span data-t="completion">الإنجاز</span></h3>
-                    <div class="svg-chart-container" id="fardOrbitalProgress"></div>
-                </div>
-
-                <!-- Prayer Consistency Streaks (Moons) -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">routine</span> <span data-t="prayer_streaks_title">سلاسل المواظبة على الصلاة</span></h3>
-                    <div class="svg-chart-container" id="fardPrayerMoons"></div>
-                </div>
-
-                <!-- Streak Flame Bars -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">local_fire_department</span> <span data-t="congregation_streak">سلاسل المواظبة على الجماعة</span></h3>
-                    <div class="svg-chart-container" id="fardStreakFlame"></div>
-                </div>
-
-                <!-- Mountain Landscape -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">trending_up</span> <span data-t="monthly_progress">التقدم الشهري</span></h3>
-                    <div class="svg-chart-container" id="fardMountainChart"></div>
-                </div>
-
-                <!-- Prayer Dual Bars -->
-                <div id="fardDualBarsCard"></div>
-
-                <!-- Weekly Rhythm -->
-                <div id="fardWeeklyRhythm"></div>
-
-                <!-- Qada Report -->
+                <!-- 8. تقرير القضاء -->
                 <div class="chart-card" id="fardQadaReport" style="margin-top:16px;"></div>
 
                 <!-- Period History (Females Only) -->
@@ -724,6 +725,28 @@
                 <span id="sunnahYearTotalPossible" style="display:none">0</span>
                 <span id="sunnahYearCompletionRate" style="display:none">0%</span>
 
+                <!-- 1. الإنجاز — Orbital Progress -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">target</span> <span data-t="completion">الإنجاز</span></h3>
+                    <div class="svg-chart-container" id="sunnahOrbitalProgress"></div>
+                </div>
+
+                <!-- 2. سلاسل المواظبة — Streaks Chips -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">auto_awesome</span> <span data-t="sunnah_streaks_title">سلاسل المواظبة</span></h3>
+                    <div id="sunnahPrayerStreaks"></div>
+                </div>
+
+                <!-- 3. التقدم الشهري — Mountain Chart -->
+                <div class="chart-card">
+                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">trending_up</span> <span data-t="monthly_progress">التقدم الشهري</span></h3>
+                    <div class="svg-chart-container" id="sunnahMountainChart"></div>
+                </div>
+
+                <!-- 4. مقارنة الصلوات — Dual Bars -->
+                <div id="sunnahDualBarsCard"></div>
+
+                <!-- 5. ملخص الأداء — Best Month + Best Prayer + Completion -->
                 <div style="background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;border:1px solid rgba(0,0,0,0.04);margin-bottom:14px;">
                     <!-- ROW 1: Best Month + Best Prayer -->
                     <div style="display:flex;gap:10px;">
@@ -764,27 +787,6 @@
                         <div id="sunnahYearCompRate" style="font-size:28px;font-weight:800;color:var(--primary);font-family:'Rubik',sans-serif;font-variant-numeric:tabular-nums;">0%</div>
                     </div>
                 </div>
-
-                <!-- Orbital Progress (single ring) -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">target</span> <span data-t="completion">الإنجاز</span></h3>
-                    <div class="svg-chart-container" id="sunnahOrbitalProgress"></div>
-                </div>
-
-                <!-- Sunnah Prayer Streaks (Chips) -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">auto_awesome</span> <span data-t="sunnah_streaks_title">سلاسل المواظبة</span></h3>
-                    <div id="sunnahPrayerStreaks"></div>
-                </div>
-
-                <!-- Mountain Landscape (single layer) -->
-                <div class="chart-card">
-                    <h3><span class="material-symbols-rounded" style="font-size:18px;vertical-align:middle;">trending_up</span> <span data-t="monthly_progress">التقدم الشهري</span></h3>
-                    <div class="svg-chart-container" id="sunnahMountainChart"></div>
-                </div>
-
-                <!-- Prayer Dual Bars -->
-                <div id="sunnahDualBarsCard"></div>
 
             </div>
 
@@ -1052,34 +1054,34 @@
 
     <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImport(event)">
 
-    <script src="js/config.js?v=277"></script>
-    <script src="js/storage.js?v=277"></script>
-    <script src="js/hijri-calendar.js?v=277"></script>
-    <script src="js/ui-utils.js?v=277"></script>
-    <script src="js/i18n.js?v=277"></script>
-    <script src="js/themes.js?v=277"></script>
-    <script src="js/profiles.js?v=277"></script>
-    <script src="js/female-features.js?v=277"></script>
-    <script src="js/fard-tracker.js?v=277"></script>
-    <script src="js/sunnah-tracker.js?v=277"></script>
-    <script src="js/jamaah-tracker.js?v=277"></script>
-    <script src="js/prayer-streaks.js?v=277"></script>
-    <script src="js/weekly-view.js?v=277"></script>
-    <script src="js/fasting-tracker.js?v=277"></script>
-    <script src="js/prayer-times.js?v=277"></script>
-    <script src="js/notifications.js?v=277"></script>
-    <script src="js/azkar-tracker.js?v=277"></script>
-    <script src="js/svg-charts.js?v=277"></script>
-    <script src="js/qada-report.js?v=277"></script>
-    <script src="js/qada-calculator.js?v=277"></script>
-    <script src="js/qada-tracker.js?v=277"></script>
-    <script src="js/qada-dashboard.js?v=277"></script>
-    <script src="js/dashboard.js?v=277"></script>
-    <script src="js/year-overview.js?v=277"></script>
-    <script src="js/info-tooltips.js?v=277"></script>
-    <script src="js/data-io.js?v=277"></script>
-    <script src="js/onboarding.js?v=277"></script>
-    <script src="js/app.js?v=277"></script>
+    <script src="js/config.js?v=278"></script>
+    <script src="js/storage.js?v=278"></script>
+    <script src="js/hijri-calendar.js?v=278"></script>
+    <script src="js/ui-utils.js?v=278"></script>
+    <script src="js/i18n.js?v=278"></script>
+    <script src="js/themes.js?v=278"></script>
+    <script src="js/profiles.js?v=278"></script>
+    <script src="js/female-features.js?v=278"></script>
+    <script src="js/fard-tracker.js?v=278"></script>
+    <script src="js/sunnah-tracker.js?v=278"></script>
+    <script src="js/jamaah-tracker.js?v=278"></script>
+    <script src="js/prayer-streaks.js?v=278"></script>
+    <script src="js/weekly-view.js?v=278"></script>
+    <script src="js/fasting-tracker.js?v=278"></script>
+    <script src="js/prayer-times.js?v=278"></script>
+    <script src="js/notifications.js?v=278"></script>
+    <script src="js/azkar-tracker.js?v=278"></script>
+    <script src="js/svg-charts.js?v=278"></script>
+    <script src="js/qada-report.js?v=278"></script>
+    <script src="js/qada-calculator.js?v=278"></script>
+    <script src="js/qada-tracker.js?v=278"></script>
+    <script src="js/qada-dashboard.js?v=278"></script>
+    <script src="js/dashboard.js?v=278"></script>
+    <script src="js/year-overview.js?v=278"></script>
+    <script src="js/info-tooltips.js?v=278"></script>
+    <script src="js/data-io.js?v=278"></script>
+    <script src="js/onboarding.js?v=278"></script>
+    <script src="js/app.js?v=278"></script>
 
     <!-- Profile Settings Overlay -->
     <div class="profile-settings-overlay" id="profileSettingsOverlay">
