@@ -147,10 +147,18 @@ window.App.Tracker = (function() {
             window.updateShellBar();
         }
 
+        // Fard-specific: re-render countdown after section switch
+        if (section === 'fard') {
+            setTimeout(function() {
+                if (window.App.PrayerTimes && window.App.PrayerTimes.renderNextPrayerCountdown) {
+                    window.App.PrayerTimes.renderNextPrayerCountdown();
+                }
+            }, 400);
+        }
+
         // ── Crossfade section transition ──
         var sectionIds = ['fardSection', 'sunnahSection', 'fastingSection', 'azkarSection'];
         var targetId = section + 'Section';
-        // Fix: fasting section ID doesn't follow pattern
         if (section === 'azkar') targetId = 'azkarSection';
 
         var oldEl = _prevSection ? document.getElementById(_prevSection) : null;
@@ -166,8 +174,9 @@ window.App.Tracker = (function() {
         oldEl.classList.add('active');
         oldEl.classList.add('section-fading-out');
 
-        // New section: start invisible, fade in
+        // New section: override CSS fadeSlideIn animation so crossfade controls opacity
         if (newEl) {
+            newEl.style.animation = 'none';
             newEl.style.opacity = '0';
             requestAnimationFrame(function() {
                 newEl.style.transition = 'opacity 0.3s ease';
@@ -185,6 +194,7 @@ window.App.Tracker = (function() {
                 }
             }
             if (newEl) {
+                newEl.style.animation = '';
                 newEl.style.transition = '';
                 newEl.style.opacity = '';
             }
