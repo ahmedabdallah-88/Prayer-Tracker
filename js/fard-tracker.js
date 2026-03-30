@@ -407,6 +407,54 @@ window.App.Tracker = (function() {
         return _activeTab[type];
     }
 
+    // ==================== Complete Week Glow ====================
+    function _applyWeekGlow(grid) {
+        if (!grid) return;
+        var boxes = grid.querySelectorAll('.day-box');
+        if (!boxes.length) return;
+
+        // Remove old glow classes
+        for (var i = 0; i < boxes.length; i++) {
+            boxes[i].classList.remove('week-complete', 'week-complete-jamaah');
+        }
+
+        // Process visual rows of 7
+        for (var rowStart = 0; rowStart < boxes.length; rowStart += 7) {
+            var rowEnd = Math.min(rowStart + 7, boxes.length);
+            if (rowEnd - rowStart < 7) break; // skip partial last row
+
+            var allPrayed = true;
+            var allJamaah = true;
+
+            for (var k = rowStart; k < rowEnd; k++) {
+                var box = boxes[k];
+                var isExempt = box.classList.contains('exempt');
+                if (isExempt) {
+                    allJamaah = false;
+                    continue;
+                }
+                var isPrayed = box.classList.contains('checked') || box.classList.contains('congregation');
+                if (!isPrayed) {
+                    allPrayed = false;
+                    allJamaah = false;
+                    break;
+                }
+                if (!box.classList.contains('congregation')) {
+                    allJamaah = false;
+                }
+            }
+
+            if (allPrayed) {
+                var cls = allJamaah ? 'week-complete-jamaah' : 'week-complete';
+                for (var m = rowStart; m < rowEnd; m++) {
+                    if (!boxes[m].classList.contains('exempt')) {
+                        boxes[m].classList.add(cls);
+                    }
+                }
+            }
+        }
+    }
+
     // ==================== renderTrackerMonth (Tab-based single calendar) ====================
 
     function renderTrackerMonth(type, scrollToTab) {
@@ -708,6 +756,8 @@ window.App.Tracker = (function() {
         // Mark pulse as shown for this type after first render
         if (isCurrentMonth) _todayPulseShown[type] = true;
 
+        _applyWeekGlow(grid);
+
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
 
@@ -853,6 +903,8 @@ window.App.Tracker = (function() {
 
                 grid.appendChild(dayBox);
             }
+
+            _applyWeekGlow(grid);
 
             oldGridWrap.innerHTML = '';
             oldGridWrap.appendChild(grid);

@@ -3938,6 +3938,37 @@ body::before {
     .prayer-tabs-pill, .sub-tabs-pill { transition: transform 0.2s ease, width 0.2s ease; }
 }
 
+/* ===== COMPLETE WEEK GLOW ===== */
+
+/* Tier 1: Complete week (mixed) — subtle static golden glow */
+.day-box.week-complete {
+    box-shadow: 0 0 6px 1px rgba(218, 165, 32, 0.35) !important;
+    border-color: rgba(218, 165, 32, 0.5) !important;
+}
+
+/* Tier 2: Complete week ALL jamaah — strong pulsing golden glow */
+.day-box.week-complete-jamaah {
+    border-color: rgba(255, 215, 0, 0.6) !important;
+    animation: weekGlowPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes weekGlowPulse {
+    0%, 100% {
+        box-shadow: 0 0 6px 2px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 14px 4px rgba(255, 215, 0, 0.6), 0 0 20px 6px rgba(255, 215, 0, 0.2);
+    }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .day-box.week-complete-jamaah {
+        animation: none;
+        box-shadow: 0 0 10px 3px rgba(255, 215, 0, 0.5) !important;
+    }
+}
+
 /* SVG Chart Legend (used by dashboard charts) */
 .svg-chart-legend {
     display: flex;

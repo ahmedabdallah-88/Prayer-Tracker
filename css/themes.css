@@ -784,3 +784,19 @@
 [data-theme="dark"] .tab-bar {
     border-top-color: rgba(255,255,255,0.06);
 }
+
+/* Dark mode: complete week glow */
+[data-theme="dark"] .day-box.week-complete {
+    box-shadow: 0 0 8px 2px rgba(218, 165, 32, 0.4) !important;
+}
+[data-theme="dark"] .day-box.week-complete-jamaah {
+    animation-name: weekGlowPulseDark;
+}
+@keyframes weekGlowPulseDark {
+    0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.35);
+    }
+    50% {
+        box-shadow: 0 0 16px 5px rgba(255, 215, 0, 0.65), 0 0 24px 8px rgba(255, 215, 0, 0.25);
+    }
+}
