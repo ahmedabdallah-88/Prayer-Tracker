@@ -3910,6 +3910,48 @@ body::before {
     .day-glow-green, .day-glow-amber, .day-glow-red { animation: none; }
 }
 
+/* ==================== GOLDEN ROW SHIMMER (completed week rows) ==================== */
+@keyframes golden-row-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.golden-row-glow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    justify-items: center;
+    padding: 4px 2px;
+    margin: -4px -2px;
+    border-radius: 16px;
+    position: relative;
+}
+
+.golden-row-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 18px;
+    border: 2px solid rgba(212, 160, 60, 0.35);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(212, 160, 60, 0.06) 25%,
+        rgba(212, 160, 60, 0.12) 50%,
+        rgba(212, 160, 60, 0.06) 75%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: golden-row-shimmer 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.golden-row-glow .day-box {
+    position: relative;
+    z-index: 1;
+}
+
 /* ==================== DAY BOX RUBBER BAND TAP ==================== */
 @keyframes day-tap-bounce {
     0% { transform: scale(1); }
@@ -3935,6 +3977,7 @@ body::before {
     .day-box.tap-bounce, .fasting-day-box.tap-bounce, .qada-day-box.tap-bounce { animation: none; }
     .day-box.day-entering, .fasting-day-box.day-entering, .qada-day-box.day-entering { animation: none; opacity: 1; transform: none; }
     .prayer-tabs-pill, .sub-tabs-pill { transition: transform 0.2s ease, width 0.2s ease; }
+    .golden-row-glow::before { animation: none; background: rgba(212, 160, 60, 0.06); }
 }
 
 /* SVG Chart Legend (used by dashboard charts) */

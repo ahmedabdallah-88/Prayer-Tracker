@@ -784,3 +784,15 @@
 [data-theme="dark"] .tab-bar {
     border-top-color: rgba(255,255,255,0.06);
 }
+[data-theme="dark"] .golden-row-glow::before {
+    border-color: rgba(212, 160, 60, 0.25);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(212, 160, 60, 0.04) 25%,
+        rgba(212, 160, 60, 0.08) 50%,
+        rgba(212, 160, 60, 0.04) 75%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+}

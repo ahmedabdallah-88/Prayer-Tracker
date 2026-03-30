@@ -405,6 +405,45 @@ window.App.Tracker = (function() {
         return _activeTab[type];
     }
 
+    // ==================== Golden Row Helper ====================
+    function _appendDayBoxesWithGoldenRows(grid, dayBoxes) {
+        var rowSize = 7;
+        for (var rowStart = 0; rowStart < dayBoxes.length; rowStart += rowSize) {
+            var rowEnd = Math.min(rowStart + rowSize, dayBoxes.length);
+            var rowBoxes = dayBoxes.slice(rowStart, rowEnd);
+
+            var isCompleteRow = (rowBoxes.length === rowSize);
+            if (isCompleteRow) {
+                var allFilled = true;
+                for (var ri = 0; ri < rowBoxes.length; ri++) {
+                    var box = rowBoxes[ri];
+                    if (!(box.classList.contains('checked') ||
+                          box.classList.contains('congregation') ||
+                          box.classList.contains('qada')) ||
+                        box.classList.contains('disabled')) {
+                        allFilled = false;
+                        break;
+                    }
+                }
+
+                if (allFilled) {
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'golden-row-glow';
+                    wrapper.style.gridColumn = '1 / -1';
+                    for (var gi = 0; gi < rowBoxes.length; gi++) {
+                        wrapper.appendChild(rowBoxes[gi]);
+                    }
+                    grid.appendChild(wrapper);
+                    continue;
+                }
+            }
+
+            for (var di = 0; di < rowBoxes.length; di++) {
+                grid.appendChild(rowBoxes[di]);
+            }
+        }
+    }
+
     // ==================== renderTrackerMonth (Tab-based single calendar) ====================
 
     function renderTrackerMonth(type, scrollToTab) {
@@ -652,6 +691,7 @@ window.App.Tracker = (function() {
         var grid = document.createElement('div');
         grid.className = 'days-grid flow-grid';
 
+        var dayBoxes = [];
         for (var day = 1; day <= daysInMonth; day++) {
             var dayBox = document.createElement('div');
             dayBox.className = 'day-box';
@@ -700,8 +740,10 @@ window.App.Tracker = (function() {
                 })(type, activePrayerId, day);
             }
 
-            grid.appendChild(dayBox);
+            dayBoxes.push(dayBox);
         }
+
+        _appendDayBoxesWithGoldenRows(grid, dayBoxes);
 
         // Mark pulse as shown for this type after first render
         if (isCurrentMonth) _todayPulseShown[type] = true;
@@ -844,6 +886,7 @@ window.App.Tracker = (function() {
             var grid = document.createElement('div');
             grid.className = 'days-grid flow-grid';
 
+            var dayBoxes = [];
             for (var day = 1; day <= daysInMonth; day++) {
                 var dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
@@ -887,8 +930,10 @@ window.App.Tracker = (function() {
                     })(type, activePrayerId, day);
                 }
 
-                grid.appendChild(dayBox);
+                dayBoxes.push(dayBox);
             }
+
+            _appendDayBoxesWithGoldenRows(grid, dayBoxes);
 
             oldGridWrap.innerHTML = '';
             oldGridWrap.appendChild(grid);
@@ -1206,7 +1251,8 @@ window.App.Tracker = (function() {
         requestAnimationFrame(function() {
             var gridWrap = document.querySelector('#' + type + 'TrackerPrayersContainer .prayer-tab-grid .flow-grid');
             if (gridWrap) {
-                var box = gridWrap.children[day - 1];
+                var allBoxes = gridWrap.querySelectorAll('.day-box');
+                var box = allBoxes[day - 1];
                 if (box) {
                     // Feature #6: tap-bounce
                     box.classList.remove('tap-bounce');
