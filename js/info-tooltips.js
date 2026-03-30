@@ -384,8 +384,6 @@ window.App.InfoTooltips = (function() {
         addToChartCard('sunnahOrbitalProgress', 8);
         // 9. Sunnah stats card
         addToStatsCard('sunnahBestMonth', 9);
-        // 3s. Sunnah Streak Flame (sunnah-specific: no congregation)
-        addToChartCard('sunnahStreakFlame', '3s');
         // 4s. Sunnah Mountain Chart (sunnah-specific: no congregation line)
         addToChartCard('sunnahMountainChart', '4s');
         // 10: sunnahDualBars — handled dynamically
