@@ -287,15 +287,17 @@ window.App.Tracker = (function() {
     // ==================== STATS ROW BUILDER ====================
     function _buildProgressRing(pct) {
         var r = 18, sw = 5, size = 52;
+        var c = size / 2;
         var circ = 2 * Math.PI * r;
         var offset = circ - (pct / 100) * circ;
         if (offset < 0) offset = 0;
         if (offset > circ) offset = circ;
         var strokeColor = pct >= 80 ? '#2D6A4F' : pct >= 50 ? '#D4A03C' : '#C1574E';
+        var rot = 'rotate(-90 ' + c + ' ' + c + ')';
         return '<div class="stats-ring-wrap">' +
             '<svg viewBox="0 0 ' + size + ' ' + size + '">' +
-            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="' + sw + '"/>' +
-            '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '"/>' +
+            '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="' + sw + '"/>' +
+            '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '" transform="' + rot + '"/>' +
             '</svg>' +
             '<span class="stats-ring-pct" style="color:' + strokeColor + '">' + pct + '%</span>' +
             '</div>';

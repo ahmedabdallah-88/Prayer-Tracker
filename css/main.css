@@ -728,7 +728,7 @@ body {
 .stats-ring-wrap svg {
     width: 52px;
     height: 52px;
-    transform: rotate(-90deg);
+    display: block;
 }
 
 .stats-ring-pct {
