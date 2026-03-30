@@ -3886,6 +3886,30 @@ body::before {
     z-index: 2;
 }
 
+/* ==================== DAY BOX GLOW ON TAP ==================== */
+@keyframes day-glow-green {
+    0%   { box-shadow: 0 0 4px 0 rgba(var(--primary-rgb), 0.7); }
+    50%  { box-shadow: 0 0 12px 8px rgba(var(--primary-rgb), 0.35); }
+    100% { box-shadow: 0 0 0 16px rgba(var(--primary-rgb), 0); }
+}
+@keyframes day-glow-amber {
+    0%   { box-shadow: 0 0 4px 0 rgba(var(--accent-rgb), 0.7); }
+    50%  { box-shadow: 0 0 12px 8px rgba(var(--accent-rgb), 0.35); }
+    100% { box-shadow: 0 0 0 16px rgba(var(--accent-rgb), 0); }
+}
+@keyframes day-glow-red {
+    0%   { box-shadow: 0 0 4px 0 rgba(var(--danger-rgb), 0.65); }
+    50%  { box-shadow: 0 0 12px 8px rgba(var(--danger-rgb), 0.3); }
+    100% { box-shadow: 0 0 0 16px rgba(var(--danger-rgb), 0); }
+}
+.day-glow-green  { animation: day-glow-green 0.6s ease-out; }
+.day-glow-amber  { animation: day-glow-amber 0.6s ease-out; }
+.day-glow-red    { animation: day-glow-red   0.6s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+    .day-glow-green, .day-glow-amber, .day-glow-red { animation: none; }
+}
+
 /* SVG Chart Legend (used by dashboard charts) */
 .svg-chart-legend {
     display: flex;

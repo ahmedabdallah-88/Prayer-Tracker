@@ -1131,6 +1131,36 @@ window.App.Tracker = (function() {
             if (typeof window.updateCongregationStats === 'function') window.updateCongregationStats();
             UI.checkPrayerReminders();
         }
+
+        // Glow animation on state change
+        var newChecked = dataObj[currentMonth] && dataObj[currentMonth][prayerId] && dataObj[currentMonth][prayerId][day];
+        var newCong = congData && congData[prayerId] && congData[prayerId][day];
+        var newQada = qadaData[prayerId] && qadaData[prayerId][day];
+        var newExempt = isFemale && exemptData[day] && exemptData[day][prayerId];
+
+        var glowClass = null;
+        if (newExempt) {
+            // no glow for exempt
+        } else if (newQada) {
+            glowClass = 'day-glow-red';
+        } else if (newCong) {
+            glowClass = 'day-glow-amber';
+        } else if (newChecked) {
+            glowClass = 'day-glow-green';
+        }
+
+        if (glowClass) {
+            requestAnimationFrame(function() {
+                var gridWrap = document.querySelector('#' + type + 'TrackerPrayersContainer .prayer-tab-grid .flow-grid');
+                if (gridWrap) {
+                    var box = gridWrap.children[day - 1];
+                    if (box) {
+                        box.classList.add(glowClass);
+                        setTimeout(function() { box.classList.remove(glowClass); }, 600);
+                    }
+                }
+            });
+        }
     }
 
     // ==================== batchMarkPrayer ====================
