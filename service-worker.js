@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v275
-const CACHE_NAME = 'salah-tracker-v275';
+// Prayer Tracker PWA — Service Worker v276
+const CACHE_NAME = 'salah-tracker-v276';
 const ASSETS = [
     './',
     './index.html',

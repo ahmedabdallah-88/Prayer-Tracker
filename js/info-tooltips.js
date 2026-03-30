@@ -174,34 +174,27 @@ window.App.InfoTooltips = (function() {
             icon.style.color = '#fff';
             icon.style.fontVariationSettings = "'FILL' 1";
 
-            // Create tooltip
+            // Create tooltip — appended to body with fixed positioning to avoid overflow clipping
             var tooltip = document.createElement('div');
             tooltip.className = 'info-tooltip-popup';
-            tooltip.style.cssText = 'position:absolute;top:30px;width:260px;padding:14px 16px;' +
+
+            var wrapRect = wrapper.getBoundingClientRect();
+            var tooltipTop = wrapRect.bottom + 4;
+            var idealLeft = wrapRect.left + wrapRect.width / 2 - 130;
+            idealLeft = Math.max(8, Math.min(idealLeft, window.innerWidth - 268));
+
+            tooltip.style.cssText = 'position:fixed;top:' + tooltipTop + 'px;left:' + idealLeft + 'px;width:260px;padding:14px 16px;' +
                 'background:var(--popup-bg, #fff);border-radius:16px;border:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'box-shadow:0 8px 30px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);' +
-                'z-index:1000;animation:tooltipIn 0.2s ease;';
+                'z-index:10001;animation:tooltipIn 0.2s ease;max-width:calc(100vw - 16px);box-sizing:border-box;';
 
-            // RTL-aware positioning
-            var isRtl = document.documentElement.getAttribute('dir') === 'rtl';
-            if (isRtl) {
-                tooltip.style.right = '0';
-                tooltip.style.left = 'auto';
-            } else {
-                tooltip.style.left = '0';
-                tooltip.style.right = 'auto';
-            }
-
-            // Arrow
+            // Arrow positioned to point at the button
             var arrow = document.createElement('div');
-            arrow.style.cssText = 'position:absolute;top:-6px;width:12px;height:12px;background:var(--popup-bg, #fff);' +
+            var arrowLeft = wrapRect.left + wrapRect.width / 2 - idealLeft - 6;
+            arrowLeft = Math.max(8, Math.min(arrowLeft, 248));
+            arrow.style.cssText = 'position:absolute;top:-6px;left:' + arrowLeft + 'px;width:12px;height:12px;background:var(--popup-bg, #fff);' +
                 'border-top:1px solid var(--border, rgba(0,0,0,0.08));border-left:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'transform:rotate(45deg);';
-            if (isRtl) {
-                arrow.style.right = '6px';
-            } else {
-                arrow.style.left = '6px';
-            }
             tooltip.appendChild(arrow);
 
             // Text
@@ -211,8 +204,7 @@ window.App.InfoTooltips = (function() {
             text.textContent = getDescription(reportId);
             tooltip.appendChild(text);
 
-            wrapper.appendChild(tooltip);
-            _positionTooltip(tooltip, arrow, wrapper);
+            document.body.appendChild(tooltip);
             activeTooltip = tooltip;
             activeBtn = btn;
         });
@@ -273,31 +265,26 @@ window.App.InfoTooltips = (function() {
             icon.style.color = '#fff';
             icon.style.fontVariationSettings = "'FILL' 1";
 
+            // Create tooltip — appended to body with fixed positioning to avoid overflow clipping
             var tooltip = document.createElement('div');
             tooltip.className = 'info-tooltip-popup';
-            tooltip.style.cssText = 'position:absolute;top:30px;width:260px;padding:14px 16px;' +
+
+            var wrapRect = wrapper.getBoundingClientRect();
+            var tooltipTop = wrapRect.bottom + 4;
+            var idealLeft = wrapRect.left + wrapRect.width / 2 - 130;
+            idealLeft = Math.max(8, Math.min(idealLeft, window.innerWidth - 268));
+
+            tooltip.style.cssText = 'position:fixed;top:' + tooltipTop + 'px;left:' + idealLeft + 'px;width:260px;padding:14px 16px;' +
                 'background:var(--popup-bg, #fff);border-radius:16px;border:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'box-shadow:0 8px 30px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);' +
-                'z-index:1000;animation:tooltipIn 0.2s ease;';
-
-            var isRtl = document.documentElement.getAttribute('dir') === 'rtl';
-            if (isRtl) {
-                tooltip.style.right = '0';
-                tooltip.style.left = 'auto';
-            } else {
-                tooltip.style.left = '0';
-                tooltip.style.right = 'auto';
-            }
+                'z-index:10001;animation:tooltipIn 0.2s ease;max-width:calc(100vw - 16px);box-sizing:border-box;';
 
             var arrow = document.createElement('div');
-            arrow.style.cssText = 'position:absolute;top:-6px;width:12px;height:12px;background:var(--popup-bg, #fff);' +
+            var arrowLeft = wrapRect.left + wrapRect.width / 2 - idealLeft - 6;
+            arrowLeft = Math.max(8, Math.min(arrowLeft, 248));
+            arrow.style.cssText = 'position:absolute;top:-6px;left:' + arrowLeft + 'px;width:12px;height:12px;background:var(--popup-bg, #fff);' +
                 'border-top:1px solid var(--border, rgba(0,0,0,0.08));border-left:1px solid var(--border, rgba(0,0,0,0.08));' +
                 'transform:rotate(45deg);';
-            if (isRtl) {
-                arrow.style.right = '6px';
-            } else {
-                arrow.style.left = '6px';
-            }
             tooltip.appendChild(arrow);
 
             var text = document.createElement('div');
@@ -306,8 +293,7 @@ window.App.InfoTooltips = (function() {
             text.textContent = getDescription(reportId);
             tooltip.appendChild(text);
 
-            wrapper.appendChild(tooltip);
-            _positionTooltip(tooltip, arrow, wrapper);
+            document.body.appendChild(tooltip);
             activeTooltip = tooltip;
             activeBtn = btn;
         });
