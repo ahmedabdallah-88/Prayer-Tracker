@@ -3910,47 +3910,30 @@ body::before {
     .day-glow-green, .day-glow-amber, .day-glow-red { animation: none; }
 }
 
-/* ==================== GOLDEN ROW SHIMMER (completed week rows) ==================== */
-@keyframes golden-row-shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
+/* ==================== GOLDEN SHIMMER (completed week rows — per day box) ==================== */
+@keyframes golden-box-shimmer {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(212, 160, 60, 0.3),
+                    0 2px 8px rgba(var(--primary-mid-rgb, 64,145,108), 0.35);
+    }
+    50% {
+        box-shadow: 0 0 0 2px rgba(212, 160, 60, 0.5),
+                    0 0 12px 2px rgba(212, 160, 60, 0.15),
+                    0 2px 8px rgba(var(--primary-mid-rgb, 64,145,108), 0.35);
+    }
 }
 
-.golden-row-glow {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    justify-items: center;
-    padding: 4px 2px;
-    margin: -4px -2px;
-    border-radius: 16px;
-    position: relative;
+.day-box.golden-week {
+    animation: golden-box-shimmer 3s ease-in-out infinite;
 }
 
-.golden-row-glow::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 18px;
-    border: 2px solid rgba(212, 160, 60, 0.35);
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(212, 160, 60, 0.06) 25%,
-        rgba(212, 160, 60, 0.12) 50%,
-        rgba(212, 160, 60, 0.06) 75%,
-        transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: golden-row-shimmer 3s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.golden-row-glow .day-box {
-    position: relative;
-    z-index: 1;
-}
+.day-box.golden-week:nth-child(7n+1) { animation-delay: 0s; }
+.day-box.golden-week:nth-child(7n+2) { animation-delay: 0.15s; }
+.day-box.golden-week:nth-child(7n+3) { animation-delay: 0.3s; }
+.day-box.golden-week:nth-child(7n+4) { animation-delay: 0.45s; }
+.day-box.golden-week:nth-child(7n+5) { animation-delay: 0.6s; }
+.day-box.golden-week:nth-child(7n+6) { animation-delay: 0.75s; }
+.day-box.golden-week:nth-child(7n+7) { animation-delay: 0.9s; }
 
 /* ==================== DAY BOX RUBBER BAND TAP ==================== */
 @keyframes day-tap-bounce {
@@ -3977,7 +3960,7 @@ body::before {
     .day-box.tap-bounce, .fasting-day-box.tap-bounce, .qada-day-box.tap-bounce { animation: none; }
     .day-box.day-entering, .fasting-day-box.day-entering, .qada-day-box.day-entering { animation: none; opacity: 1; transform: none; }
     .prayer-tabs-pill, .sub-tabs-pill { transition: transform 0.2s ease, width 0.2s ease; }
-    .golden-row-glow::before { animation: none; background: rgba(212, 160, 60, 0.06); }
+    .day-box.golden-week { animation: none; box-shadow: 0 0 0 2px rgba(212, 160, 60, 0.35), 0 2px 8px rgba(var(--primary-mid-rgb, 64,145,108), 0.35); }
 }
 
 /* SVG Chart Legend (used by dashboard charts) */
