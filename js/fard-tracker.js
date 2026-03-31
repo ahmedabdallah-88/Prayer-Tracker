@@ -561,12 +561,11 @@ window.App.Tracker = (function() {
 
         // ── PRAYER SELECTOR (Tabs for fard, Scrollable tabs for sunnah) ──
         if (type === 'sunnah') {
-            // ── SUNNAH: SCROLLABLE TABS ──
+            // ── SUNNAH: SCROLLABLE THEMED CARDS ──
             var scroller = document.createElement('div');
             scroller.className = 'sunnah-tabs-scroller';
             scroller.id = type + 'PrayerTabs';
 
-            var todayDay = todayH.day;
             var activeTabEl = null;
 
             // Track touch to distinguish scroll from tap
@@ -584,21 +583,21 @@ window.App.Tracker = (function() {
 
             prayers.forEach(function(prayer) {
                 var isActive = prayer.id === activePrayerId;
-                var isDoneToday = isCurrentMonth && dataObj[hMonth] && dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][todayDay];
 
-                var tab = document.createElement('button');
-                tab.className = 'sunnah-tab' + (isActive ? ' active' : '');
+                var tab = document.createElement('div');
+                tab.className = 'prayer-tab-card' + (isActive ? ' active' : '');
                 tab.setAttribute('data-prayer', prayer.id);
 
                 var iconWrap = document.createElement('div');
-                iconWrap.className = 'sunnah-tab-icon';
-                var iconSize = isActive ? '22px' : '18px';
-                var iconColor = isActive ? '#fff' : 'var(--text-muted)';
-                var iconFill = isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400";
-                iconWrap.innerHTML = '<span class="material-symbols-rounded" style="font-size:' + iconSize + ';color:' + iconColor + ';font-variation-settings:' + iconFill + '">' + prayer.icon + '</span>';
+                iconWrap.className = 'prayer-tab-icon-wrap';
+                if (isActive) {
+                    iconWrap.style.background = SKY_GRADIENTS[prayer.id] || 'rgba(255,255,255,0.2)';
+                    iconWrap.style.boxShadow = '0 4px 10px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
+                }
+                iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
 
                 var nameSpan = document.createElement('span');
-                nameSpan.className = 'sunnah-tab-name';
+                nameSpan.className = 'prayer-tab-name';
                 nameSpan.textContent = I18n.getPrayerName(prayer.id);
 
                 tab.appendChild(iconWrap);
