@@ -89,6 +89,9 @@ window.App.UI = (function() {
     var reminderDismissed = {};
 
     function checkPrayerReminders() {
+        // Replaced by missed-prayer-notif.js — hide old bar and return
+        hideReminder();
+        return;
         var Storage = window.App.Storage;
         var Hijri = window.App.Hijri;
         var I18n = window.App.I18n;

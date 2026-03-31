@@ -4561,15 +4561,15 @@ body::before {
     align-items: center;
 }
 .missed-btn-alone {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary-mid, #40916C), var(--primary-light, #52B788));
     color: #fff;
 }
 .missed-btn-jamaah {
-    background: var(--accent);
+    background: linear-gradient(135deg, #D4A03C, #E8B84B);
     color: #fff;
 }
 .missed-btn-qada {
-    background: var(--blue, #0EA5E9);
+    background: linear-gradient(135deg, #B94A3E, #C1574E);
     color: #fff;
 }
 
@@ -4625,48 +4625,38 @@ body::before {
 }
 .missed-summary-prayers {
     display: flex;
-    flex-direction: column;
     gap: 6px;
 }
 .missed-prayer-card {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
+    flex: 1;
     background: var(--bg-main);
     border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     transition: opacity 0.4s, background 0.3s;
 }
 .missed-prayer-card-marked {
     opacity: 0.5;
     background: rgba(var(--primary-rgb, 45,106,79), 0.06);
 }
-.missed-prayer-card-icon {
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.04);
-    border-radius: 8px;
-}
 .missed-prayer-card-name {
-    flex: 1;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-primary);
+    margin-bottom: 6px;
 }
 .missed-prayer-card-actions {
     display: flex;
-    gap: 4px;
-    flex-shrink: 0;
+    gap: 3px;
+    justify-content: center;
 }
 
 /* Compact summary action buttons (icon-only) */
 .missed-sp-btn {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4674,21 +4664,22 @@ body::before {
     border-radius: 8px;
     cursor: pointer;
     transition: transform 0.15s;
+    font-size: 12px;
 }
 .missed-sp-btn:active {
     transform: scale(0.9);
 }
 .missed-sp-btn-alone {
-    background: var(--primary);
-    color: #fff;
+    background: rgba(64,145,108,0.12);
+    color: var(--primary, #2D6A4F);
 }
 .missed-sp-btn-jamaah {
-    background: var(--accent);
-    color: #fff;
+    background: rgba(212,160,60,0.12);
+    color: #D4A03C;
 }
 .missed-sp-btn-qada {
-    background: var(--blue, #0EA5E9);
-    color: #fff;
+    background: rgba(193,87,78,0.12);
+    color: #C1574E;
 }
 
 /* Feedback overlay for banner mode */

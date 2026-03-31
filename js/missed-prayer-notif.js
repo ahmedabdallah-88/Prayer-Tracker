@@ -96,25 +96,20 @@ window.App.MissedPrayerNotif = (function() {
             var prayerTime = prayerMinutes[prayerId];
 
             // Determine if this prayer's time has "passed"
-            // A prayer is considered passed when the NEXT prayer's time has started
+            // A prayer is passed 30 minutes after its start time
             var hasPassed = false;
+            var BUFFER = 30; // minutes after prayer start
 
-            if (i < PRAYER_ORDER.length - 1) {
-                // For fajr through maghrib: passed when next prayer starts
-                var nextPrayerTime = prayerMinutes[PRAYER_ORDER[i + 1]];
-                hasPassed = nowMin >= nextPrayerTime;
-            } else {
-                // Isha: passed if it's been 2+ hours since isha started,
-                // OR if we're past midnight (nowMin < fajr time, meaning next day)
+            if (prayerId === 'isha') {
                 var fajrTime = prayerMinutes['fajr'];
                 if (nowMin < fajrTime) {
                     // After midnight, before fajr — isha from "yesterday" is passed
-                    // But we only care about today's Hijri day
                     hasPassed = true;
                 } else {
-                    // Same day — isha is passed if 2+ hours have gone by
-                    hasPassed = (nowMin >= prayerTime + 120);
+                    hasPassed = (nowMin >= prayerTime + BUFFER);
                 }
+            } else {
+                hasPassed = (nowMin >= prayerTime + BUFFER);
             }
 
             if (!hasPassed) continue;
@@ -203,7 +198,6 @@ window.App.MissedPrayerNotif = (function() {
             var p = prayers[i];
             var pName = _getPrayerName(p.id);
             html += '<div class="missed-prayer-card" id="missedCard_' + p.id + '">';
-            html += '  <div class="missed-prayer-card-icon"><span class="material-symbols-rounded" style="font-size:16px;color:var(--text-muted);">' + p.icon + '</span></div>';
             html += '  <div class="missed-prayer-card-name">' + pName + '</div>';
             html += '  <div class="missed-prayer-card-actions" id="missedActions_' + p.id + '">';
             html += _buildActionBtn(p.id, 'alone', hDay, hMonth, hYear, lang, true);
