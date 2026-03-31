@@ -498,6 +498,11 @@ window.App.PrayerTimes = (function() {
                 clearInterval(countdownInterval);
                 countdownInterval = null;
                 setTimeout(function() { renderNextPrayerCountdown(); }, 1000);
+                setTimeout(function() {
+                    if (window.App.MissedPrayerNotif && window.App.MissedPrayerNotif.checkAndShow) {
+                        window.App.MissedPrayerNotif.checkAndShow();
+                    }
+                }, 5000);
             }
         }
 

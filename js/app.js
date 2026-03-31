@@ -397,6 +397,9 @@ window.App.Main = (function() {
                 if (activeProfile && window.App.Notifications) {
                     window.App.Notifications.runAllChecks();
                 }
+                if (activeProfile && window.App.MissedPrayerNotif) {
+                    window.App.MissedPrayerNotif.checkAndShow();
+                }
             }
         });
 
@@ -443,6 +446,13 @@ window.App.Main = (function() {
                 }
             }
         }, 1500);
+
+        // Missed prayer notification bar — check after prayer times load
+        setTimeout(function() {
+            if (window.App.MissedPrayerNotif && window.App.MissedPrayerNotif.checkAndShow) {
+                window.App.MissedPrayerNotif.checkAndShow();
+            }
+        }, 3000);
     }
 
     return {
