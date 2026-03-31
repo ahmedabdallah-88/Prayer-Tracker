@@ -52,72 +52,6 @@
     function loadTheme()            { return App.Themes.loadTheme(); }
 
     // ================================================================
-    // escapeHTML — strip HTML tags from user-controlled strings
-    // ================================================================
-    function escapeHTML(str) {
-        if (typeof str !== 'string') return str;
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-    }
-
-    // ================================================================
-    // validateImportData — validates imported JSON before writing
-    // Returns { valid: true } or { valid: false, reason: string }
-    // ================================================================
-    var ALLOWED_KEY_PREFIXES = [
-        'salah_tracker_', 'salah_cong_', 'salah_exempt_', 'salah_qada_',
-        'salah_fasting_', 'salah_volfasting_', 'salah_azkar_',
-        'salah_prayer_streaks_', 'salah_hijri_days_', 'salah_hijri_overrides',
-        'salah_qada_log_', 'salah_qada_plan_', 'salah_period_history_',
-        '_profile', '_theme', '_exportDate', '_version'
-    ];
-    var MAX_VALUE_SIZE = 102400;   // 100KB per value
-    var MAX_TOTAL_SIZE = 2097152;  // 2MB total
-
-    function validateImportData(data) {
-        if (!data || typeof data !== 'object' || Array.isArray(data)) {
-            return { valid: false, reason: 'Invalid data format' };
-        }
-
-        var totalSize = 0;
-        var keys = Object.keys(data);
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-
-            // Check key against whitelist
-            var keyAllowed = false;
-            for (var p = 0; p < ALLOWED_KEY_PREFIXES.length; p++) {
-                if (key.indexOf(ALLOWED_KEY_PREFIXES[p]) === 0 || key === ALLOWED_KEY_PREFIXES[p]) {
-                    keyAllowed = true;
-                    break;
-                }
-            }
-            if (!keyAllowed) {
-                return { valid: false, reason: 'Unauthorized key: ' + key.substring(0, 40) };
-            }
-
-            // Check value size
-            var valStr = typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]);
-            if (valStr && valStr.length > MAX_VALUE_SIZE) {
-                return { valid: false, reason: 'Value too large for key: ' + key.substring(0, 40) };
-            }
-            totalSize += (valStr ? valStr.length : 0);
-        }
-
-        if (totalSize > MAX_TOTAL_SIZE) {
-            return { valid: false, reason: 'Total import size exceeds 2MB limit' };
-        }
-
-        // Sanitize profile name if present
-        if (data['_profile'] && data['_profile'].name) {
-            data['_profile'].name = String(data['_profile'].name).replace(/<[^>]*>/g, '').substring(0, 50);
-        }
-
-        return { valid: true };
-    }
-
-    // ================================================================
     // downloadFallback — anchor-click download with delayed cleanup
     // ================================================================
     function downloadFallback(blob, fileName) {
@@ -489,14 +423,6 @@
         reader.onload = async function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
-
-                // Validate import data before processing
-                var validation = validateImportData(imported);
-                if (!validation.valid) {
-                    showToast(validation.reason, 'error');
-                    return;
-                }
-
                 var activeProfile = getActiveProfile();
                 var currentLang = getCurrentLang();
 
@@ -765,14 +691,6 @@
         reader.onload = async function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
-
-                // Validate import data before processing
-                var validation = validateImportData(imported);
-                if (!validation.valid) {
-                    showToast(validation.reason, 'error');
-                    return;
-                }
-
                 var currentLang = getCurrentLang();
 
                 if (imported['_profile']) {

@@ -417,9 +417,9 @@ window.App.PrayerStreaks = (function() {
         zoneNum.className = 'moon-zone-num';
         var numColor;
         if (tier === 'new') {
-            numColor = 'var(--danger)';
+            numColor = '#C1574E';
         } else if (tier === 'full') {
-            numColor = 'var(--accent)';
+            numColor = '#D4A03C';
         } else {
             numColor = prayer.color;
         }
@@ -431,7 +431,7 @@ window.App.PrayerStreaks = (function() {
         var zoneBest = document.createElement('div');
         zoneBest.className = 'moon-zone-best';
         var isRecord = current > 0 && current === best;
-        var bestColor = isRecord ? 'var(--accent)' : 'var(--text-muted)';
+        var bestColor = isRecord ? '#D4A03C' : '#6B7280';
         var bestPrefix = isRecord ? '\uD83C\uDFC6 ' : '';
         var bestLabel = currentLang === 'ar' ? '\u0627\u0644\u0623\u0641\u0636\u0644' : 'Best';
         zoneBest.innerHTML = '<span class="moon-best-num" style="font-size:9px;font-weight:600;color:' + bestColor + ';white-space:nowrap;">' + bestPrefix + bestLabel + ' ' + best + '</span>';
@@ -625,14 +625,14 @@ window.App.PrayerStreaks = (function() {
             var prayerName = I18n ? I18n.getPrayerName(prayer.id) : prayer.name;
             var nameEl = document.createElement('div');
             nameEl.className = 'sunnah-streak-name';
-            if (isTopStreak) nameEl.style.color = 'var(--accent)';
+            if (isTopStreak) nameEl.style.color = '#D4A03C';
             nameEl.textContent = prayerName;
 
             var bestEl = document.createElement('div');
             bestEl.className = 'sunnah-streak-best';
             var bestPrefix = isTopStreak ? '\uD83C\uDFC6 ' : '';
             var bestLabel = currentLang === 'ar' ? '\u0627\u0644\u0623\u0641\u0636\u0644' : 'Best';
-            if (isTopStreak) bestEl.style.color = 'var(--accent)';
+            if (isTopStreak) bestEl.style.color = '#D4A03C';
             bestEl.textContent = bestPrefix + bestLabel + ' ' + best;
 
             infoDiv.appendChild(nameEl);
@@ -640,8 +640,8 @@ window.App.PrayerStreaks = (function() {
 
             var numDiv = document.createElement('div');
             numDiv.className = 'sunnah-streak-num';
-            if (isTopStreak) numDiv.style.color = 'var(--accent)';
-            if (isZero) numDiv.style.color = 'var(--danger)';
+            if (isTopStreak) numDiv.style.color = '#D4A03C';
+            if (isZero) numDiv.style.color = '#C1574E';
             numDiv.textContent = current;
 
             chip.appendChild(iconDiv);

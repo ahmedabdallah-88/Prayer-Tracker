@@ -3,7 +3,6 @@
   "short_name": "متتبع الصلاة",
   "description": "تطبيق لتتبع وقضاء الصلوات الفرائض والسنن",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f4c3a",

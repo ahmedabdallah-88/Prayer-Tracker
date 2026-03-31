@@ -7,17 +7,6 @@ window.App.Hijri = (function() {
     var _hijriDay1Cache = {};
     var currentHijriYear, currentHijriMonth;
 
-    // Load persisted day1 cache from localStorage
-    try {
-        var _storedCache = localStorage.getItem('salah_hijri_day1_cache');
-        if (_storedCache) _hijriDay1Cache = JSON.parse(_storedCache);
-    } catch(e) { _hijriDay1Cache = {}; }
-
-    function _persistDay1Cache() {
-        try { localStorage.setItem('salah_hijri_day1_cache', JSON.stringify(_hijriDay1Cache)); }
-        catch(e) { /* storage full */ }
-    }
-
     // Initialize from today's date
     // (will be set properly during app init)
 
@@ -136,7 +125,6 @@ window.App.Hijri = (function() {
                 high = new Date(mid.getTime() - 86400000);
             } else {
                 _hijriDay1Cache[key] = mid.getTime();
-                _persistDay1Cache();
                 return mid;
             }
         }
@@ -146,12 +134,10 @@ window.App.Hijri = (function() {
             var hh = gregorianToHijri(d);
             if (hh.year === hYear && hh.month === hMonth && hh.day === 1) {
                 _hijriDay1Cache[key] = d.getTime();
-                _persistDay1Cache();
                 return d;
             }
         }
         _hijriDay1Cache[key] = guess.getTime();
-        _persistDay1Cache();
         return guess;
     }
 
@@ -340,7 +326,7 @@ window.App.Hijri = (function() {
 
     // Clean ALL ghost days across all months for the current profile
     function cleanAllGhostDays() {
-        if (!window.App.Storage || !window.App.Storage.getActiveProfile()) return;
+        if (!window.activeProfile) return;
         var cleaned = 0;
         for (var hMonth = 1; hMonth <= 12; hMonth++) {
             var actualDays = getHijriDaysInMonth(currentHijriYear, hMonth);
@@ -458,7 +444,7 @@ window.App.Hijri = (function() {
         cleanAllGhostDays: cleanAllGhostDays,
         updateMonthDaysButton: updateMonthDaysButton,
         showHijriOverrideDialog: showHijriOverrideDialog,
-        clearCache: function() { _hijriDay1Cache = {}; try { localStorage.removeItem('salah_hijri_day1_cache'); } catch(e) {} },
+        clearCache: function() { _hijriDay1Cache = {}; },
         getCurrentHijriYear: function() { return currentHijriYear; },
         setCurrentHijriYear: function(y) { currentHijriYear = y; },
         getCurrentHijriMonth: function() { return currentHijriMonth; },

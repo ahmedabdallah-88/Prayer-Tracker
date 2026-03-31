@@ -1,19 +1,4 @@
 /* Prayer Tracker PWA — app.js (MUST load last) */
-
-// Global error handler — catch unhandled errors and show user-friendly toast
-window.onerror = function(msg, src, line) {
-    console.error('[APP ERROR]', msg, src, line);
-    try {
-        if (window.App && window.App.UI && window.App.UI.showToast) {
-            var lang = (window.App.I18n && window.App.I18n.getCurrentLang()) || 'ar';
-            window.App.UI.showToast(
-                lang === 'ar' ? '\u062d\u062f\u062b \u062e\u0637\u0623 \u2014 \u0623\u0639\u062f \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642' : 'An error occurred \u2014 please reload',
-                'warning', 5000
-            );
-        }
-    } catch(e) {}
-};
-
 window.App = window.App || {};
 window.App.Main = (function() {
 
@@ -348,7 +333,7 @@ window.App.Main = (function() {
 
         // PWA Service Worker
         if ('serviceWorker' in navigator) {
-            // Show update banner when new SW takes control (user clicks to reload)
+            // Auto-reload when new SW takes control
             var swRefreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', function() {
                 if (!swRefreshing) {
@@ -370,41 +355,54 @@ window.App.Main = (function() {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('./service-worker.js')
                     .then(function(reg) {
-                        // If a new SW is already waiting, show update banner
+                        // If a new SW is already waiting, activate it immediately
                         if (reg.waiting) {
-                            showUpdateBanner();
+                            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
                         }
 
-                        // Detect new SW installing — show update banner when ready
+                        // Detect new SW installing — force activate as soon as installed
                         reg.addEventListener('updatefound', function() {
                             var newWorker = reg.installing;
                             if (!newWorker) return;
                             newWorker.addEventListener('statechange', function() {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showUpdateBanner();
+                                    // New version ready — skip waiting immediately
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
                                 }
                             });
                         });
 
                         // Force check for SW updates on every page load
                         reg.update();
+
+                        // Register periodic background sync
+                        if ('periodicSync' in reg) {
+                            navigator.permissions.query({ name: 'periodic-background-sync' }).then(function(status) {
+                                if (status.state === 'granted') {
+                                    reg.periodicSync.register('prayer-check', {
+                                        minInterval: 15 * 60 * 1000
+                                    });
+                                }
+                            }).catch(function() {});
+                        }
                     })
                     .catch(function(err) { console.error('SW registration failed:', err); });
             });
         }
 
-        // Visibility change — handle both foreground and background in one listener
+        // Re-check prayer times and ALL notifications when app becomes visible
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
                 var activeProfile = window.App.Storage.getActiveProfile();
                 if (activeProfile && window.App.Notifications) {
                     window.App.Notifications.runAllChecks();
                 }
-                // Re-check missed prayers when returning to app
-                if (activeProfile && window.App.MissedPrayerNotif) {
-                    window.App.MissedPrayerNotif.checkAndShow();
-                }
-            } else if (document.visibilityState === 'hidden') {
+            }
+        });
+
+        // Schedule SW notifications when app goes to background
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
                 if (window.App.Notifications) {
                     var N = window.App.Notifications;
                     if (N.isBeforeEnabled() || N.isAfterEnabled()) {
@@ -445,13 +443,6 @@ window.App.Main = (function() {
                 }
             }
         }, 1500);
-
-        // Missed prayer notification bar — check after prayer times load
-        setTimeout(function() {
-            if (window.App.MissedPrayerNotif && window.App.MissedPrayerNotif.checkAndShow) {
-                window.App.MissedPrayerNotif.checkAndShow();
-            }
-        }, 3000);
     }
 
     return {
@@ -519,22 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.remove('splash-active');
     }
 
-    // Listen for splash transition end for reliable cleanup
-    var splashEl = document.getElementById('splashScreen');
-    if (splashEl) {
-        splashEl.addEventListener('transitionend', function(e) {
-            if (e.target === splashEl) {
-                _scrollSafetyCleanup();
-            }
-        });
-        splashEl.addEventListener('animationend', function(e) {
-            if (e.target === splashEl) {
-                _scrollSafetyCleanup();
-            }
-        });
-    }
-
-    // Run safety cleanup at intervals AFTER splash would have finished (fallback)
+    // Run safety cleanup at intervals AFTER splash would have finished
     setTimeout(_scrollSafetyCleanup, 12000);
     setTimeout(_scrollSafetyCleanup, 16000);
 });

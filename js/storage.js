@@ -191,60 +191,6 @@ window.App.Storage = (function() {
         catch(e) { if (window.App.UI && window.App.UI.showToast) window.App.UI.showToast('Storage full', 'error'); }
     }
 
-    // ==================== STORAGE QUOTA CHECK ====================
-
-    function checkStorageQuota() {
-        try {
-            var total = 0;
-            for (var i = 0; i < localStorage.length; i++) {
-                var key = localStorage.key(i);
-                total += key.length + (localStorage.getItem(key) || '').length;
-            }
-            // Warn if estimated usage > 4.5MB (typical 5MB limit)
-            var remaining = (5 * 1024 * 1024) - (total * 2); // *2 for UTF-16
-            if (remaining < 500 * 1024) {
-                var lang = (window.App.I18n && window.App.I18n.getCurrentLang()) || 'ar';
-                var msg = lang === 'ar'
-                    ? '\u062a\u062d\u0630\u064a\u0631: \u0645\u0633\u0627\u062d\u0629 \u0627\u0644\u062a\u062e\u0632\u064a\u0646 \u0634\u0627\u0631\u0641\u062a \u0639\u0644\u0649 \u0627\u0644\u0627\u0645\u062a\u0644\u0627\u0621. \u0642\u0645 \u0628\u062a\u0635\u062f\u064a\u0631 \u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0643\u0646\u0633\u062e\u0629 \u0627\u062d\u062a\u064a\u0627\u0637\u064a\u0629.'
-                    : 'Warning: Storage is nearly full. Please export your data as a backup.';
-                setTimeout(function() {
-                    if (window.App.UI && window.App.UI.showToast) {
-                        window.App.UI.showToast(msg, 'warning', 5000);
-                    }
-                }, 3000);
-            }
-        } catch(e) {}
-    }
-
-    // ==================== DATA INTEGRITY CHECK ====================
-
-    function validateDataIntegrity() {
-        try {
-            var profilesStored = localStorage.getItem('salah_profiles');
-            if (!profilesStored) return;
-            var profiles = JSON.parse(profilesStored);
-            var profileIds = {};
-            profiles.forEach(function(p) { profileIds[p.id] = true; });
-
-            var orphanCount = 0;
-            for (var i = 0; i < localStorage.length; i++) {
-                var key = localStorage.key(i);
-                if (!key || key.indexOf('salah_') !== 0) continue;
-                // Extract profile ID from key patterns like salah_tracker_PROFILEID_...
-                var match = key.match(/^salah_(?:tracker|cong|exempt|qada|fasting|volfasting|azkar|prayer_streaks|hijri_days|hijri_overrides|qada_log|qada_plan|period_history|sunnah_streaks)_([a-zA-Z0-9]+)_/);
-                if (match && match[1] && !profileIds[match[1]] && match[1] !== 'h' && match[1] !== 'fard' && match[1] !== 'sunnah') {
-                    orphanCount++;
-                    console.warn('[STORAGE] Orphaned key (profile "' + match[1] + '" not found):', key);
-                }
-            }
-            if (orphanCount > 0) {
-                console.warn('[STORAGE] Found ' + orphanCount + ' orphaned localStorage keys');
-            }
-        } catch(e) {
-            console.error('[STORAGE] Integrity check error:', e);
-        }
-    }
-
     // ==================== BASE INIT ====================
 
     function init() {
@@ -254,9 +200,6 @@ window.App.Storage = (function() {
 
         loadAllData('fard');
         loadAllData('sunnah');
-
-        checkStorageQuota();
-        validateDataIntegrity();
     }
 
     // ==================== PUBLIC API ====================
@@ -300,8 +243,6 @@ window.App.Storage = (function() {
         saveFastingData: saveFastingData,
         getVolFastingData: getVolFastingData,
         saveVolFastingData: saveVolFastingData,
-        checkStorageQuota: checkStorageQuota,
-        validateDataIntegrity: validateDataIntegrity,
         init: init
     };
 })();

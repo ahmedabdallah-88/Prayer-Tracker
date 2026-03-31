@@ -2,15 +2,6 @@
 window.App = window.App || {};
 window.App.UI = (function() {
 
-    // ==================== HTML ESCAPING ====================
-
-    function escapeHTML(str) {
-        if (typeof str !== 'string') return String(str);
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-    }
-
     // ==================== TOAST NOTIFICATIONS ====================
 
     function showToast(msg, type, duration) {
@@ -281,15 +272,6 @@ window.App.UI = (function() {
 
     // ==================== HAPTIC FEEDBACK ====================
 
-    var _sharedAudioCtx = null;
-    function _getAudioContext() {
-        if (_sharedAudioCtx && _sharedAudioCtx.state !== 'closed') return _sharedAudioCtx;
-        try {
-            _sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        } catch(e) { _sharedAudioCtx = null; }
-        return _sharedAudioCtx;
-    }
-
     function hapticFeedback(type) {
         try {
             if (navigator.vibrate) {
@@ -304,9 +286,7 @@ window.App.UI = (function() {
 
         try {
             if (type === 'success' || type === 'medium') {
-                var ctx = _getAudioContext();
-                if (!ctx) return;
-                if (ctx.state === 'suspended') ctx.resume();
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
                 var osc = ctx.createOscillator();
                 var gain = ctx.createGain();
                 osc.connect(gain);
@@ -316,6 +296,7 @@ window.App.UI = (function() {
                 osc.start();
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
                 osc.stop(ctx.currentTime + 0.1);
+                setTimeout(function() { ctx.close(); }, 200);
             }
         } catch(e) {}
     }
@@ -606,8 +587,7 @@ window.App.UI = (function() {
         initInstallBanner: initInstallBanner,
         promptInstall: promptInstall,
         showMonthYearPicker: showMonthYearPicker,
-        getDeferredPrompt: function() { return deferredPrompt; },
-        escapeHTML: escapeHTML
+        getDeferredPrompt: function() { return deferredPrompt; }
     };
 })();
 

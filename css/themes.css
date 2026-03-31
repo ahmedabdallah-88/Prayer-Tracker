@@ -702,13 +702,6 @@
 [data-theme="dark"] .pt-item .pt-icon .material-symbols-rounded {
     color: rgba(255,255,255,0.5);
 }
-
-/* Reduced motion for dark theme animations */
-@media (prefers-reduced-motion: reduce) {
-    [data-theme="dark"] .day-box.today-box.today-pulse {
-        animation: none;
-    }
-}
 [data-theme="dark"] .pt-item .pt-name {
     color: rgba(255,255,255,0.7);
 }

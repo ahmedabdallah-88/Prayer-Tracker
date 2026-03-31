@@ -14,7 +14,6 @@ window.App.Jamaah = (function() {
         if (!data[prayerId][day]) delete data[prayerId][day];
         if (Object.keys(data[prayerId]).length === 0) delete data[prayerId];
         Storage.saveCongregationData(currentYear, currentMonth, data);
-        invalidateStreakCache();
         if (typeof window.renderTrackerMonth === 'function') window.renderTrackerMonth('fard');
         updateCongregationStats();
         renderStreaks('fard');
@@ -55,37 +54,11 @@ window.App.Jamaah = (function() {
             '<span class="cong-stat alone"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">person</span> ' + I18n.t('individual') + ': ' + totalAlone + '</span>';
     }
 
-    // ==================== MONTH DATA CACHE ====================
-    // Per-calculation caches — cleared at start of each renderStreaks call
-    var _congCache = {};
-    var _sunnahCache = {};
-    var _streakResultCache = null;
-    var _streakResultCacheKey = '';
-
-    function _getCongData(hYear, hMonth) {
-        var cacheKey = hYear + '_' + hMonth;
-        if (_congCache[cacheKey]) return _congCache[cacheKey];
-        var Storage = window.App.Storage;
-        var congKey = Storage.getCongregationKey(hYear, hMonth);
-        var stored = localStorage.getItem(congKey);
-        _congCache[cacheKey] = stored ? JSON.parse(stored) : {};
-        return _congCache[cacheKey];
-    }
-
-    function _getSunnahData(hYear, hMonth) {
-        var cacheKey = hYear + '_' + hMonth;
-        if (_sunnahCache[cacheKey]) return _sunnahCache[cacheKey];
-        var Storage = window.App.Storage;
-        var sunnahKey = Storage.getStorageKey('sunnah', hMonth, hYear);
-        var stored = localStorage.getItem(sunnahKey);
-        _sunnahCache[cacheKey] = stored ? JSON.parse(stored) : {};
-        return _sunnahCache[cacheKey];
-    }
-
     // ==================== STREAK CALCULATOR ====================
 
     function calculateStreak(type, prayerId) {
         var Hijri = window.App.Hijri;
+        var Storage = window.App.Storage;
         var today = new Date();
         var currentStreak = 0;
         var bestStreak = 0;
@@ -102,11 +75,15 @@ window.App.Jamaah = (function() {
         function isDayChecked(hYear, hMonth, hDay) {
             if (hDay < 1) return false;
             if (type === 'sunnah') {
-                var data = _getSunnahData(hYear, hMonth);
-                return !!(data[prayerId] && data[prayerId][String(hDay)]);
+                // Sunnah: check prayer data directly (no congregation)
+                Storage.setCurrentYear(hYear);
+                Storage.loadAllData('sunnah');
+                var dataObj = Storage.getDataObject('sunnah');
+                return dataObj && dataObj[hMonth] && dataObj[hMonth][prayerId] && dataObj[hMonth][prayerId][hDay];
             }
-            var congData = _getCongData(hYear, hMonth);
-            return !!(congData[prayerId] && (congData[prayerId][String(hDay)] === true || congData[prayerId][hDay] === true));
+            // Fard: check congregation data
+            var congData = Storage.getCongregationData(hYear, hMonth);
+            return congData && congData[prayerId] && (congData[prayerId][String(hDay)] === true || congData[prayerId][hDay] === true);
         }
 
         var startFromToday = false;
@@ -161,29 +138,12 @@ window.App.Jamaah = (function() {
         if (!grid) return;
         grid.innerHTML = '';
 
-        // Clear per-render caches
-        _congCache = {};
-        _sunnahCache = {};
-
         var prayers = window.App.Storage.getPrayersArray(type);
         var isFard = (type === 'fard');
         var currentLang = I18n.getCurrentLang();
 
-        // Check streak result cache — keyed by profile + type + today's date
-        var Hijri = window.App.Hijri;
-        var todayH = Hijri.getTodayHijri();
-        var Storage = window.App.Storage;
-        var profileId = Storage.getProfilePrefix();
-        var cacheKey = profileId + type + '_' + todayH.year + '_' + todayH.month + '_' + todayH.day;
-        var cachedResults = null;
-        if (_streakResultCacheKey === cacheKey && _streakResultCache) {
-            cachedResults = _streakResultCache;
-        }
-        var newResults = {};
-
         prayers.forEach(function(prayer) {
-            var streak = cachedResults ? cachedResults[prayer.id] : calculateStreak(type, prayer.id);
-            newResults[prayer.id] = streak;
+            var streak = calculateStreak(type, prayer.id);
 
             var card = document.createElement('div');
             card.className = 'streak-card' + (streak.current >= 7 ? ' high-streak' : '');
@@ -212,15 +172,6 @@ window.App.Jamaah = (function() {
 
             grid.appendChild(card);
         });
-
-        // Save streak results to cache
-        _streakResultCache = newResults;
-        _streakResultCacheKey = cacheKey;
-    }
-
-    function invalidateStreakCache() {
-        _streakResultCache = null;
-        _streakResultCacheKey = '';
     }
 
     function getCongregationMode() {
@@ -238,8 +189,7 @@ window.App.Jamaah = (function() {
         isCongregation: isCongregation,
         updateCongregationStats: updateCongregationStats,
         calculateStreak: calculateStreak,
-        renderStreaks: renderStreaks,
-        invalidateStreakCache: invalidateStreakCache
+        renderStreaks: renderStreaks
     };
 })();
 
