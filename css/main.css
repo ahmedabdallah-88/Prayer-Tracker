@@ -720,8 +720,6 @@ body {
     align-items: center;
     justify-content: space-around;
     background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border-radius: 14px;
     border: 1px solid var(--border);
     padding: 8px 12px;
@@ -1165,8 +1163,6 @@ body {
     text-align: center;
     padding: 14px 8px;
     background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border-radius: 16px;
     border: 1px solid rgba(0,0,0,0.04);
     transition: all 0.2s;
@@ -1292,7 +1288,7 @@ body {
 .days-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 5px;
     justify-content: flex-start;
     padding: 6px 10px 8px;
     position: relative;
@@ -4455,5 +4451,297 @@ body::before {
     .moon-glow-lg,
     .moon-float {
         animation: none;
+    }
+    .day-box.today-box.today-pulse,
+    .day-box.today-box.checked.today-pulse,
+    .day-box.today-box.congregation.today-pulse,
+    .day-box.today-box.qada.today-pulse {
+        animation: none;
+    }
+    .tab-item.tab-bounce .tab-icon-wrap .material-symbols-rounded {
+        animation: none;
+    }
+}
+
+/* ==================== MISSED PRAYER NOTIFICATION BAR ==================== */
+#missedPrayerBar {
+    margin: 0 16px 8px;
+}
+
+/* --- Single Banner --- */
+.missed-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--card-bg);
+    border: 1.5px solid rgba(var(--accent-rgb, 200,168,78), 0.35);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: opacity 0.4s, max-height 0.4s ease-out;
+    max-height: 120px;
+    overflow: hidden;
+}
+.missed-banner-collapsing {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    border-width: 0;
+}
+.missed-banner-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--primary-rgb, 45,106,79), 0.1);
+    border-radius: 10px;
+}
+.missed-banner-content {
+    flex: 1;
+    min-width: 0;
+}
+.missed-banner-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+.missed-banner-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+.missed-banner-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.missed-banner-close {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    opacity: 0.6;
+}
+[dir="ltr"] .missed-banner-close {
+    left: auto;
+    right: 4px;
+}
+.missed-banner-close:hover {
+    opacity: 1;
+}
+
+/* Banner action buttons */
+.missed-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+}
+.missed-btn:active {
+    transform: scale(0.94);
+}
+.missed-btn-icon {
+    display: flex;
+    align-items: center;
+}
+.missed-btn-alone {
+    background: var(--primary);
+    color: #fff;
+}
+.missed-btn-jamaah {
+    background: var(--accent);
+    color: #fff;
+}
+.missed-btn-qada {
+    background: var(--blue, #0EA5E9);
+    color: #fff;
+}
+
+/* --- Multi-prayer Summary --- */
+.missed-summary {
+    background: var(--card-bg);
+    border: 1.5px solid rgba(var(--accent-rgb, 200,168,78), 0.3);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.missed-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.missed-summary-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.missed-summary-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+}
+.missed-summary-dismiss {
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+.missed-summary-dismiss:hover {
+    background: rgba(0,0,0,0.05);
+}
+.missed-summary-prayers {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.missed-prayer-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--bg-main);
+    border-radius: 10px;
+    transition: opacity 0.4s, background 0.3s;
+}
+.missed-prayer-card-marked {
+    opacity: 0.5;
+    background: rgba(var(--primary-rgb, 45,106,79), 0.06);
+}
+.missed-prayer-card-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.04);
+    border-radius: 8px;
+}
+.missed-prayer-card-name {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.missed-prayer-card-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Compact summary action buttons (icon-only) */
+.missed-sp-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.missed-sp-btn:active {
+    transform: scale(0.9);
+}
+.missed-sp-btn-alone {
+    background: var(--primary);
+    color: #fff;
+}
+.missed-sp-btn-jamaah {
+    background: var(--accent);
+    color: #fff;
+}
+.missed-sp-btn-qada {
+    background: var(--blue, #0EA5E9);
+    color: #fff;
+}
+
+/* Feedback overlay for banner mode */
+.missed-feedback-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    z-index: 2;
+    animation: missed-feedback-fade 0.45s ease-out forwards;
+}
+.missed-feedback-alone {
+    background: rgba(var(--primary-rgb, 45,106,79), 0.15);
+    color: var(--primary);
+}
+.missed-feedback-jamaah {
+    background: rgba(var(--accent-rgb, 200,168,78), 0.15);
+    color: var(--accent);
+}
+.missed-feedback-qada {
+    background: rgba(14,165,233,0.15);
+    color: var(--blue, #0EA5E9);
+}
+@keyframes missed-feedback-fade {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Card-mode feedback */
+.missed-card-feedback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: missed-feedback-fade 0.35s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .missed-feedback-overlay,
+    .missed-card-feedback {
+        animation: none;
+    }
+    .missed-banner-collapsing {
+        transition: none;
+    }
+    .missed-prayer-card-marked {
+        transition: none;
     }
 }

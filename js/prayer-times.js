@@ -168,7 +168,21 @@ window.App.PrayerTimes = (function() {
 
     // ==================== FETCH ====================
 
+    var _lastFetchTime = 0;
+    var MIN_FETCH_INTERVAL = 60000; // 60 seconds
+
     function fetchPrayerTimes(forceRefresh) {
+        // Rate limit: prevent fetching more than once per 60 seconds
+        var now = Date.now();
+        if (forceRefresh && (now - _lastFetchTime) < MIN_FETCH_INTERVAL) {
+            var cached = getPrayerTimesFromStorage();
+            if (cached) {
+                prayerTimesData = cached;
+                renderPrayerTimes();
+            }
+            return Promise.resolve();
+        }
+
         // Check cache first
         if (!forceRefresh) {
             var cached = getPrayerTimesFromStorage();
@@ -179,6 +193,7 @@ window.App.PrayerTimes = (function() {
             }
         }
 
+        _lastFetchTime = Date.now();
         return getUserLocation().then(function(loc) {
             userLocation = loc;
 
@@ -201,6 +216,21 @@ window.App.PrayerTimes = (function() {
                 }).then(function(json) {
                     if (json.code === 200 && json.data && json.data.timings) {
                         var timings = json.data.timings;
+
+                        // Validate timing values match expected HH:MM format
+                        var timePattern = /^\d{2}:\d{2}/;
+                        var requiredFields = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+                        var valid = true;
+                        for (var fi = 0; fi < requiredFields.length; fi++) {
+                            if (!timings[requiredFields[fi]] || !timePattern.test(timings[requiredFields[fi]])) {
+                                valid = false;
+                                break;
+                            }
+                        }
+                        if (!valid) {
+                            console.error('[PRAYER-TIMES] Invalid API response format');
+                            return;
+                        }
 
                         var methodName = json.data.meta && json.data.meta.method ? json.data.meta.method.name : '';
 
@@ -498,6 +528,12 @@ window.App.PrayerTimes = (function() {
                 clearInterval(countdownInterval);
                 countdownInterval = null;
                 setTimeout(function() { renderNextPrayerCountdown(); }, 1000);
+                // A prayer time just passed — check for missed prayers after a short delay
+                setTimeout(function() {
+                    if (window.App.MissedPrayerNotif && window.App.MissedPrayerNotif.checkAndShow) {
+                        window.App.MissedPrayerNotif.checkAndShow();
+                    }
+                }, 5000);
             }
         }
 

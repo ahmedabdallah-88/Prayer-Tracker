@@ -90,11 +90,18 @@ window.App.Dashboard = (function() {
             : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         var weekTotals = [0,0,0,0,0,0,0];
         var weekCong = [0,0,0,0,0,0,0];
+        var todayH = Hijri.getTodayHijri();
 
         for (var month = 1; month <= 12; month++) {
+            // Skip entirely future months
+            if (hYear === todayH.year && month > todayH.month) break;
+            if (hYear > todayH.year) break;
+
             var cd = Storage.getCongregationData(hYear, month);
             var daysInMonth = Hijri.getHijriDaysInMonth(hYear, month);
-            for (var day = 1; day <= daysInMonth; day++) {
+            // Cap days to today if current month
+            var maxDay = (hYear === todayH.year && month === todayH.month) ? Math.min(daysInMonth, todayH.day) : daysInMonth;
+            for (var day = 1; day <= maxDay; day++) {
                 var date = Hijri.hijriToGregorian(hYear, month, day);
                 var dow = date.getDay();
                 weekTotals[dow]++;

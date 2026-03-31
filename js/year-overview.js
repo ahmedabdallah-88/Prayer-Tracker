@@ -296,31 +296,8 @@ window.App.YearOverview = (function() {
         });
     }
 
-    // Private helper — same as in fard-tracker
     function createDualDayNum(hijriDay, hYear, hMonth) {
-        var Hijri = window.App.Hijri;
-        var frag = document.createDocumentFragment();
-        var dayNum = document.createElement('span');
-        dayNum.className = 'day-number';
-        dayNum.textContent = hijriDay;
-        frag.appendChild(dayNum);
-
-        try {
-            var gDate = Hijri.hijriToGregorian(hYear, hMonth, hijriDay);
-            var gregSpan = document.createElement('span');
-            gregSpan.className = 'day-greg';
-            gregSpan.textContent = gDate.getDate();
-            frag.appendChild(gregSpan);
-        } catch(e) {}
-
-        var iconSpan = document.createElement('span');
-        iconSpan.className = 'day-icon material-symbols-rounded';
-        iconSpan.style.display = 'none';
-        iconSpan.style.fontSize = '13px';
-        iconSpan.textContent = 'mosque';
-        frag.appendChild(iconSpan);
-
-        return frag;
+        return window.App.Hijri.createDualDayNum(hijriDay, hYear, hMonth);
     }
 
     // Year overview toggle/reset day functions

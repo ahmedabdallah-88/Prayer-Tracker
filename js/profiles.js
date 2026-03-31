@@ -126,7 +126,7 @@ window.App.Profiles = (function() {
             card.innerHTML =
                 '<div class="profile-avatar ' + avatarClass + '">' + avatarIcon + '</div>' +
                 '<div class="profile-info">' +
-                    '<div class="name">' + p.name + '</div>' +
+                    '<div class="name">' + (window.App.UI.escapeHTML ? window.App.UI.escapeHTML(p.name) : p.name) + '</div>' +
                     '<div class="details">' + genderLabel + ' \u00B7 ' + p.age + ' ' + t('years_old') + '</div>' +
                 '</div>' +
                 '<div class="profile-actions">' +
@@ -289,12 +289,23 @@ window.App.Profiles = (function() {
             profiles = profiles.filter(function(p) { return p.id !== id; });
             saveProfiles(profiles);
 
-            // Delete all data for this profile
+            // Delete all data for this profile (exact ID match only)
+            var prefixes = [
+                'salah_tracker_', 'salah_cong_', 'salah_exempt_', 'salah_qada_',
+                'salah_fasting_', 'salah_volfasting_', 'salah_azkar_',
+                'salah_prayer_streaks_', 'salah_hijri_days_', 'salah_hijri_overrides_',
+                'salah_qada_log_', 'salah_qada_plan_', 'salah_period_history_'
+            ];
             var keysToDelete = [];
             for (var i = 0; i < localStorage.length; i++) {
                 var key = localStorage.key(i);
-                if (key && key.includes(id)) {
-                    keysToDelete.push(key);
+                if (!key) continue;
+                for (var pi = 0; pi < prefixes.length; pi++) {
+                    var fullPrefix = prefixes[pi] + id;
+                    if (key === fullPrefix || key.indexOf(fullPrefix + '_') === 0) {
+                        keysToDelete.push(key);
+                        break;
+                    }
                 }
             }
             keysToDelete.forEach(function(k) { localStorage.removeItem(k); });
