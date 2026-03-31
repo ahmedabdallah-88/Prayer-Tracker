@@ -201,27 +201,23 @@ window.App.QadaTracker = (function() {
         }
         var activePrayerId = _activeQadaTab;
 
-        // ── PRAYER TABS ROW ──
+        // ── PRAYER TABS ROW (themed cards) ──
         var tabsContainer = document.createElement('div');
         tabsContainer.className = 'prayer-tabs-container';
-        var tabPill = document.createElement('div');
-        tabPill.className = 'prayer-tabs-pill';
-        tabsContainer.appendChild(tabPill);
 
-        var activeIdx = 0;
-        PRAYER_IDS.forEach(function(prayerId, idx) {
-            if (prayerId === activePrayerId) activeIdx = idx;
+        PRAYER_IDS.forEach(function(prayerId) {
             var prayerDef = window.App.Config.fardPrayers.find(function(p) { return p.id === prayerId; });
             var icon = prayerDef ? prayerDef.icon : 'mosque';
+            var isActive = prayerId === activePrayerId;
 
-            var tab = document.createElement('button');
-            tab.className = 'prayer-tab' + (prayerId === activePrayerId ? ' active' : '');
+            var tab = document.createElement('div');
+            tab.className = 'prayer-tab-card' + (isActive ? ' active' : '');
 
             var iconWrap = document.createElement('div');
-            iconWrap.className = 'prayer-tab-icon';
-            if (prayerId === activePrayerId) {
-                iconWrap.style.background = SKY_GRADIENTS[prayerId] || '#888';
-                iconWrap.style.boxShadow = '0 2px 8px ' + (SKY_SHADOWS[prayerId] || 'rgba(0,0,0,0.2)');
+            iconWrap.className = 'prayer-tab-icon-wrap';
+            if (isActive) {
+                iconWrap.style.background = SKY_GRADIENTS[prayerId] || 'rgba(255,255,255,0.2)';
+                iconWrap.style.boxShadow = '0 4px 10px ' + (SKY_SHADOWS[prayerId] || 'rgba(0,0,0,0.2)');
             }
             iconWrap.innerHTML = '<span class="material-symbols-rounded">' + icon + '</span>';
 
@@ -241,21 +237,6 @@ window.App.QadaTracker = (function() {
             tabsContainer.appendChild(tab);
         });
         container.appendChild(tabsContainer);
-
-        requestAnimationFrame(function() {
-            var tabs = tabsContainer.querySelectorAll('.prayer-tab');
-            if (tabs[activeIdx]) {
-                var tt = tabs[activeIdx];
-                var isRTL = document.documentElement.dir === 'rtl';
-                tabPill.style.width = tt.offsetWidth + 'px';
-                if (isRTL) {
-                    var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
-                    tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
-                } else {
-                    tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
-                }
-            }
-        });
 
         // ── STATS ROW (Card 1 — own glassmorphism styling) ──
         var totalForPrayer = plan.totalByPrayer ? (plan.totalByPrayer[activePrayerId] || 0) : 0;

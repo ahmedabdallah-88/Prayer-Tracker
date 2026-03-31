@@ -650,26 +650,21 @@ window.App.Tracker = (function() {
                 });
             }
         } else {
-            // ── FARD: TABS LAYOUT ──
+            // ── FARD: TABS LAYOUT (themed cards) ──
             var tabsContainer = document.createElement('div');
             tabsContainer.className = 'prayer-tabs-container';
             tabsContainer.id = type + 'PrayerTabs';
 
-            var tabPill = document.createElement('div');
-            tabPill.className = 'prayer-tabs-pill';
-            tabsContainer.appendChild(tabPill);
-
-            var activeIdx = 0;
-            prayers.forEach(function(prayer, idx) {
-                if (prayer.id === activePrayerId) activeIdx = idx;
-                var tab = document.createElement('button');
-                tab.className = 'prayer-tab' + (prayer.id === activePrayerId ? ' active' : '');
+            prayers.forEach(function(prayer) {
+                var isActive = prayer.id === activePrayerId;
+                var tab = document.createElement('div');
+                tab.className = 'prayer-tab-card' + (isActive ? ' active' : '');
                 tab.setAttribute('data-prayer', prayer.id);
 
                 var iconWrap = document.createElement('div');
-                iconWrap.className = 'prayer-tab-icon';
-                if (prayer.id === activePrayerId) {
-                    iconWrap.style.background = SKY_GRADIENTS[prayer.id] || '#888';
+                iconWrap.className = 'prayer-tab-icon-wrap';
+                if (isActive) {
+                    iconWrap.style.background = SKY_GRADIENTS[prayer.id] || 'rgba(255,255,255,0.2)';
                     iconWrap.style.boxShadow = '0 4px 10px ' + (SKY_SHADOWS[prayer.id] || 'rgba(0,0,0,0.2)');
                 }
                 iconWrap.innerHTML = '<span class="material-symbols-rounded">' + prayer.icon + '</span>';
@@ -681,36 +676,18 @@ window.App.Tracker = (function() {
                 tab.appendChild(iconWrap);
                 tab.appendChild(nameSpan);
 
-                tab.onclick = (function(pid, iconEl) {
+                tab.onclick = (function(pid) {
                     return function() {
-                        iconEl.classList.add('tap-anim');
-                        setTimeout(function() { iconEl.classList.remove('tap-anim'); }, 100);
                         _activeTab[type] = pid;
                         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
                         renderTrackerMonth(type);
                     };
-                })(prayer.id, iconWrap);
+                })(prayer.id);
 
                 tabsContainer.appendChild(tab);
             });
 
             container.appendChild(tabsContainer);
-
-            // Position pill after DOM insertion
-            requestAnimationFrame(function() {
-                var tabs = tabsContainer.querySelectorAll('.prayer-tab');
-                if (tabs[activeIdx]) {
-                    var tt = tabs[activeIdx];
-                    var isRTL = document.documentElement.dir === 'rtl';
-                    tabPill.style.width = tt.offsetWidth + 'px';
-                    if (isRTL) {
-                        var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
-                        tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
-                    } else {
-                        tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
-                    }
-                }
-            });
         }
 
         // ── STATS ROW (Card 1 — own glassmorphism styling) ──

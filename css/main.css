@@ -602,105 +602,115 @@ body {
 }
 
 /* ==================== PRAYER TABS (Tab-based calendar layout) ==================== */
+/* ===== PRAYER TABS — THEMED CARDS ===== */
 .prayer-tabs-container {
-    background: rgba(128,128,128,0.08);
-    border-radius: 16px;
-    padding: 4px;
     display: flex;
-    gap: 0;
+    gap: 4px;
     margin-bottom: 12px;
-    position: relative;
-    overflow: hidden;
 }
 
-.prayer-tabs-pill {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    right: auto;
-    left: 0;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.3s ease;
-    z-index: 0;
-    pointer-events: none;
-}
-
-[dir="rtl"] .prayer-tabs-pill {
-    left: auto;
-    right: 0;
-}
-
-.prayer-tab {
+.prayer-tab-card {
     flex: 1;
     min-width: 0;
-    padding: 10px 4px 12px;
-    border: none;
+    text-align: center;
+    padding: 8px 2px 6px;
     border-radius: 12px;
-    background: transparent;
+    background: rgba(var(--primary-rgb), 0.06);
+    border: 1.5px solid rgba(var(--primary-rgb), 0.1);
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    position: relative;
-    z-index: 1;
-    transition: all 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
+    gap: 2px;
+    transition: all 0.25s ease;
 }
 
-.prayer-tab-icon {
-    width: 28px; height: 28px;
-    border-radius: 8px;
+.prayer-tab-card:active {
+    transform: scale(0.95);
+}
+
+.prayer-tab-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(var(--primary-rgb), 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    background: transparent;
+    transition: all 0.25s;
 }
 
-.prayer-tab.active .prayer-tab-icon {
-    width: 38px; height: 38px;
-    border-radius: 11px;
-}
-
-.prayer-tab-icon .material-symbols-rounded {
-    font-size: 16px;
-    color: var(--text-muted);
-    font-variation-settings: 'FILL' 0, 'wght' 400;
-    transition: all 0.3s ease;
-}
-
-.prayer-tab.active .prayer-tab-icon .material-symbols-rounded {
+.prayer-tab-icon-wrap .material-symbols-rounded {
     font-size: 20px;
-    color: #fff;
-    font-variation-settings: 'FILL' 1, 'wght' 500;
+    color: var(--primary-mid, #40916C);
+    font-variation-settings: 'FILL' 0, 'wght' 400;
+    animation: prayerIconFloat 3s ease-in-out infinite;
 }
 
-.prayer-tab-name {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-muted);
+.prayer-tab-card .prayer-tab-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary, #8D99AE);
     font-family: 'Noto Kufi Arabic', sans-serif;
     white-space: nowrap;
-    transition: all 0.3s ease;
+    transition: color 0.25s;
     line-height: 1.2;
 }
 
-.prayer-tab.active .prayer-tab-name {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--text-primary);
+/* Active tab */
+.prayer-tab-card.active {
+    background: linear-gradient(135deg, var(--primary, #2D6A4F), var(--primary-mid, #40916C));
+    border-color: transparent;
+    box-shadow: 0 3px 10px rgba(var(--primary-rgb), 0.3);
 }
 
-@keyframes tab-icon-tap {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.9); }
-    100% { transform: scale(1); }
+.prayer-tab-card.active .prayer-tab-icon-wrap {
+    background: rgba(255, 255, 255, 0.2);
 }
-.prayer-tab-icon.tap-anim {
-    animation: tab-icon-tap 0.1s ease;
+
+.prayer-tab-card.active .prayer-tab-icon-wrap .material-symbols-rounded {
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+    animation: prayerIconFloatActive 2s ease-in-out infinite;
+}
+
+.prayer-tab-card.active .prayer-tab-name {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* Float animations */
+@keyframes prayerIconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+@keyframes prayerIconFloatActive {
+    0%, 100% {
+        transform: translateY(0);
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1));
+    }
+    50% {
+        transform: translateY(-4px);
+        filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+    }
+}
+
+/* Stagger animation */
+.prayer-tab-card:nth-child(1) .material-symbols-rounded { animation-delay: 0s; }
+.prayer-tab-card:nth-child(2) .material-symbols-rounded { animation-delay: 0.3s; }
+.prayer-tab-card:nth-child(3) .material-symbols-rounded { animation-delay: 0.6s; }
+.prayer-tab-card:nth-child(4) .material-symbols-rounded { animation-delay: 0.9s; }
+.prayer-tab-card:nth-child(5) .material-symbols-rounded { animation-delay: 1.2s; }
+
+/* Dark mode */
+[data-theme="dark"] .prayer-tab-card {
+    background: rgba(var(--primary-rgb), 0.12);
+    border-color: rgba(var(--primary-rgb), 0.2);
+}
+[data-theme="dark"] .prayer-tab-card.active {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Tracker card — wraps stats + grid + legend */
@@ -3946,7 +3956,7 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
     .day-box.tap-bounce, .fasting-day-box.tap-bounce, .qada-day-box.tap-bounce { animation: none; }
     .day-box.day-entering, .fasting-day-box.day-entering, .qada-day-box.day-entering { animation: none; opacity: 1; transform: none; }
-    .prayer-tabs-pill, .sub-tabs-pill { transition: transform 0.2s ease, width 0.2s ease; }
+    .sub-tabs-pill { transition: transform 0.2s ease, width 0.2s ease; }
 }
 
 /* ===== COMPLETE WEEK GLOW ===== */
@@ -4454,6 +4464,10 @@ body::before {
     .moon-glow-md,
     .moon-glow-lg,
     .moon-float {
+        animation: none;
+    }
+    .prayer-tab-icon-wrap .material-symbols-rounded,
+    .prayer-tab-card.active .prayer-tab-icon-wrap .material-symbols-rounded {
         animation: none;
     }
 }

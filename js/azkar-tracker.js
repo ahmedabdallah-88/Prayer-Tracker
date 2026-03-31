@@ -76,24 +76,21 @@ window.App.Azkar = (function() {
         }
         var activeCatId = _activeAzkarTab;
 
-        // ── AZKAR TABS ROW ──
+        // ── AZKAR TABS ROW (themed cards) ──
         var tabsContainer = document.createElement('div');
         tabsContainer.className = 'prayer-tabs-container';
-        var tabPill = document.createElement('div');
-        tabPill.className = 'prayer-tabs-pill';
-        tabsContainer.appendChild(tabPill);
 
         var activeIdx = 0;
         categories.forEach(function(cat, idx) {
             if (cat.id === activeCatId) activeIdx = idx;
-            var tab = document.createElement('button');
-            tab.className = 'prayer-tab' + (cat.id === activeCatId ? ' active' : '');
+            var tab = document.createElement('div');
+            tab.className = 'prayer-tab-card' + (cat.id === activeCatId ? ' active' : '');
 
             var iconWrap = document.createElement('div');
-            iconWrap.className = 'prayer-tab-icon';
+            iconWrap.className = 'prayer-tab-icon-wrap';
             if (cat.id === activeCatId) {
                 iconWrap.style.background = cat.gradient;
-                iconWrap.style.boxShadow = '0 2px 8px ' + (cat.shadow || 'rgba(0,0,0,0.2)');
+                iconWrap.style.boxShadow = '0 4px 10px ' + (cat.shadow || 'rgba(0,0,0,0.2)');
             }
             iconWrap.innerHTML = '<span class="material-symbols-rounded">' + cat.icon + '</span>';
 
@@ -113,21 +110,6 @@ window.App.Azkar = (function() {
             tabsContainer.appendChild(tab);
         });
         container.appendChild(tabsContainer);
-
-        requestAnimationFrame(function() {
-            var tabs = tabsContainer.querySelectorAll('.prayer-tab');
-            if (tabs[activeIdx]) {
-                var tt = tabs[activeIdx];
-                var isRTL = document.documentElement.dir === 'rtl';
-                tabPill.style.width = tt.offsetWidth + 'px';
-                if (isRTL) {
-                    var rightOffset = tabsContainer.offsetWidth - tt.offsetLeft - tt.offsetWidth;
-                    tabPill.style.transform = 'translateX(-' + rightOffset + 'px)';
-                } else {
-                    tabPill.style.transform = 'translateX(' + tt.offsetLeft + 'px)';
-                }
-            }
-        });
 
         // ── STATS ROW (Card 1 — own glassmorphism styling) ──
         var activeCat = categories[activeIdx];
