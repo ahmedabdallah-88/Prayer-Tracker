@@ -154,7 +154,7 @@ window.App.MissedPrayerNotif = (function() {
 
         var html = '';
         html += '<div class="missed-banner" id="missedBanner_' + prayer.id + '">';
-        html += '  <div class="missed-banner-icon"><span class="material-symbols-rounded" style="font-size:20px;color:var(--primary);">' + prayer.icon + '</span></div>';
+        html += '  <div class="missed-banner-icon"><span class="material-symbols-rounded" style="font-size:20px;color:#fff;">' + prayer.icon + '</span></div>';
         html += '  <div class="missed-banner-content">';
         html += '    <div class="missed-banner-title">';
         html += lang === 'ar' ? '\u0644\u0645 \u062a\u0633\u062c\u0644 ' + prayerName : 'Not marked: ' + prayerName;
@@ -192,7 +192,7 @@ window.App.MissedPrayerNotif = (function() {
         html += ' <span class="material-symbols-rounded" style="font-size:12px;vertical-align:middle;">close</span>';
         html += '    </button>';
         html += '  </div>';
-        html += '  <div class="missed-summary-prayers">';
+        html += '  <div class="missed-summary-prayers' + (prayers.length >= 4 ? ' missed-compact' : '') + '">';
 
         for (var i = 0; i < prayers.length; i++) {
             var p = prayers[i];
