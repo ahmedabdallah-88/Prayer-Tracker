@@ -575,9 +575,17 @@ window.App.UI = (function() {
         }
     }
 
+    function escapeHTML(str) {
+        if (typeof str !== 'string') return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
     return {
         showToast: showToast,
         showConfirm: showConfirm,
+        escapeHTML: escapeHTML,
         checkPrayerReminders: checkPrayerReminders,
         hideReminder: hideReminder,
         dismissReminder: dismissReminder,
@@ -602,3 +610,4 @@ window.dismissReminder = window.App.UI.dismissReminder;
 window.hapticFeedback = window.App.UI.hapticFeedback;
 window.haptic = window.App.UI.haptic;
 window.showMonthYearPicker = window.App.UI.showMonthYearPicker;
+window.escapeHTML = window.App.UI.escapeHTML;

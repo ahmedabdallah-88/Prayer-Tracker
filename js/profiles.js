@@ -123,15 +123,17 @@ window.App.Profiles = (function() {
             card.className = 'profile-card';
             card.setAttribute('role', 'button');
             card.setAttribute('tabindex', '0');
+            var esc = window.App.UI.escapeHTML;
+            var safeId = esc(p.id);
             card.innerHTML =
                 '<div class="profile-avatar ' + avatarClass + '">' + avatarIcon + '</div>' +
                 '<div class="profile-info">' +
-                    '<div class="name">' + p.name + '</div>' +
-                    '<div class="details">' + genderLabel + ' \u00B7 ' + p.age + ' ' + t('years_old') + '</div>' +
+                    '<div class="name">' + esc(p.name) + '</div>' +
+                    '<div class="details">' + genderLabel + ' \u00B7 ' + esc(String(p.age)) + ' ' + t('years_old') + '</div>' +
                 '</div>' +
                 '<div class="profile-actions">' +
-                    '<button class="profile-action-btn edit" onclick="event.stopPropagation();editProfile(\'' + p.id + '\')" title="\u062A\u0639\u062F\u064A\u0644"><span class="material-symbols-rounded" style="font-size:16px;">edit</span></button>' +
-                    '<button class="profile-action-btn delete" onclick="event.stopPropagation();deleteProfile(\'' + p.id + '\')" title="\u062D\u0630\u0641"><span class="material-symbols-rounded" style="font-size:16px;">delete_outline</span></button>' +
+                    '<button class="profile-action-btn edit" onclick="event.stopPropagation();editProfile(\'' + safeId + '\')" title="\u062A\u0639\u062F\u064A\u0644"><span class="material-symbols-rounded" style="font-size:16px;">edit</span></button>' +
+                    '<button class="profile-action-btn delete" onclick="event.stopPropagation();deleteProfile(\'' + safeId + '\')" title="\u062D\u0630\u0641"><span class="material-symbols-rounded" style="font-size:16px;">delete_outline</span></button>' +
                 '</div>';
             card.onclick = function() { selectProfile(p.id); };
             list.appendChild(card);
