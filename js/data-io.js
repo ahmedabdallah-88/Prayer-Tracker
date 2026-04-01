@@ -52,6 +52,117 @@
     function loadTheme()            { return App.Themes.loadTheme(); }
 
     // ================================================================
+    // validateImportData — validate JSON before writing to localStorage
+    // ================================================================
+    var ALLOWED_PREFIXES = [
+        'salah_tracker_',
+        'salah_cong_',
+        'salah_qada_',
+        'salah_exempt_',
+        'salah_fasting_',
+        'salah_volfasting_',
+        'salah_azkar_',
+        'salah_hijri_days_',
+        'salah_hijri_overrides',
+        'salah_prayer_streaks_',
+        'salah_qada_log_',
+        'salah_qada_plan_',
+        'salah_profiles',
+        'salah_active_profile',
+        'salah_settings',
+        'salah_theme',
+        'salah_lang',
+        'salah_onboarding',
+        'salah_location',
+        'salah_prayer_times',
+        'salah_periods_'
+    ];
+
+    function validateImportData(data) {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            return { valid: false, reason_ar: '\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0633\u062a\u0648\u0631\u062f\u0629 \u063a\u064a\u0631 \u0635\u0627\u0644\u062d\u0629', reason_en: 'Invalid import data' };
+        }
+
+        var keys = Object.keys(data);
+
+        // Allow internal keys (_profile, _theme)
+        var dataKeys = [];
+        for (var i = 0; i < keys.length; i++) {
+            if (keys[i].charAt(0) === '_') continue;
+            dataKeys.push(keys[i]);
+        }
+
+        // Key count limit: 500
+        if (dataKeys.length > 500) {
+            return { valid: false, reason_ar: '\u0639\u062f\u062f \u0627\u0644\u0645\u0641\u0627\u062a\u064a\u062d \u0643\u0628\u064a\u0631 \u062c\u062f\u0627\u064b: ' + dataKeys.length, reason_en: 'Too many keys: ' + dataKeys.length };
+        }
+
+        var totalSize = 0;
+
+        for (var k = 0; k < dataKeys.length; k++) {
+            var key = dataKeys[k];
+
+            // Check key against whitelist
+            var allowed = false;
+            for (var j = 0; j < ALLOWED_PREFIXES.length; j++) {
+                if (key === ALLOWED_PREFIXES[j] || key.indexOf(ALLOWED_PREFIXES[j]) === 0) {
+                    allowed = true;
+                    break;
+                }
+            }
+
+            if (!allowed) {
+                return { valid: false, reason_ar: '\u0645\u0641\u062a\u0627\u062d \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641: ' + key, reason_en: 'Unknown key: ' + key };
+            }
+
+            // Value size limit: 100KB per key
+            var valueStr = typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]);
+            if (valueStr.length > 100 * 1024) {
+                return { valid: false, reason_ar: '\u0642\u064a\u0645\u0629 \u0643\u0628\u064a\u0631\u0629 \u062c\u062f\u0627\u064b \u0644\u0644\u0645\u0641\u062a\u0627\u062d: ' + key, reason_en: 'Value too large for key: ' + key };
+            }
+
+            totalSize += valueStr.length;
+        }
+
+        // Total size limit: 2MB
+        if (totalSize > 2 * 1024 * 1024) {
+            return { valid: false, reason_ar: '\u062d\u062c\u0645 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0643\u0628\u064a\u0631 \u062c\u062f\u0627\u064b (\u0623\u0643\u062b\u0631 \u0645\u0646 2 \u0645\u064a\u062c\u0627)', reason_en: 'Data too large (over 2MB)' };
+        }
+
+        return { valid: true };
+    }
+
+    // ================================================================
+    // sanitizeProfiles — strip HTML tags from profile names
+    // ================================================================
+    function sanitizeProfiles(data) {
+        if (!data['_profile']) return;
+        if (data['_profile'].name) {
+            data['_profile'].name = data['_profile'].name.replace(/<[^>]*>/g, '');
+        }
+        // Also sanitize profiles list if present
+        var profKey = 'salah_profiles';
+        if (data[profKey]) {
+            var profiles = data[profKey];
+            if (Array.isArray(profiles)) {
+                for (var i = 0; i < profiles.length; i++) {
+                    if (profiles[i] && profiles[i].name) {
+                        profiles[i].name = profiles[i].name.replace(/<[^>]*>/g, '');
+                    }
+                }
+            }
+        }
+    }
+
+    // ================================================================
+    // showValidationError — display validation failure to user
+    // ================================================================
+    function showValidationError(result) {
+        var msg = getCurrentLang() === 'ar' ? result.reason_ar : result.reason_en;
+        showToast(msg, 'error', 3000);
+    }
+
+    // ================================================================
     // downloadFallback — anchor-click download with delayed cleanup
     // ================================================================
     function downloadFallback(blob, fileName) {
@@ -423,6 +534,15 @@
         reader.onload = async function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
+
+                // Validate before writing anything
+                var validation = validateImportData(imported);
+                if (!validation.valid) {
+                    showValidationError(validation);
+                    return;
+                }
+                sanitizeProfiles(imported);
+
                 var activeProfile = getActiveProfile();
                 var currentLang = getCurrentLang();
 
@@ -691,6 +811,15 @@
         reader.onload = async function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
+
+                // Validate before writing anything
+                var validation = validateImportData(imported);
+                if (!validation.valid) {
+                    showValidationError(validation);
+                    return;
+                }
+                sanitizeProfiles(imported);
+
                 var currentLang = getCurrentLang();
 
                 if (imported['_profile']) {
