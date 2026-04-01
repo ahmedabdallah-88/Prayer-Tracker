@@ -353,6 +353,15 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
+/* ========== Reduced Motion ========== */
+@media (prefers-reduced-motion: reduce) {
+    .splash-star.visible,
+    .splash-sparkle.visible { animation: none; opacity: 0.5; }
+    .splash-circle.checked svg { animation: none; opacity: 1; }
+    .splash-moon-svg.visible { transition: opacity 0.3s ease; transform: scale(1); }
+    #splashScreen.splash-fade-out { transition: opacity 0.5s ease; }
+}
+
 /* ========== Hide app content during splash ========== */
 body.splash-active > *:not(#splashScreen) {
     opacity: 0 !important;

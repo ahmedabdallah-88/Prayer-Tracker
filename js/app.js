@@ -1,4 +1,26 @@
 /* Prayer Tracker PWA — app.js (MUST load last) */
+
+// Global error handler — catch unhandled errors
+window.onerror = function(msg, source, line, col, error) {
+    console.error('App Error:', msg, 'at', source, ':', line);
+    setTimeout(function() {
+        if (window.App && window.App.UI && window.App.UI.showToast) {
+            var I18n = window.App.I18n;
+            var lang = I18n ? I18n.getCurrentLang() : 'ar';
+            var userMsg = lang === 'ar'
+                ? 'حدث خطأ — أعد تحميل التطبيق'
+                : 'An error occurred — please reload';
+            window.App.UI.showToast(userMsg, 'error', 5000);
+        }
+    }, 100);
+    return false;
+};
+
+// Catch unhandled promise rejections
+window.onunhandledrejection = function(event) {
+    console.error('Unhandled Promise:', event.reason);
+};
+
 window.App = window.App || {};
 window.App.Main = (function() {
 
@@ -70,6 +92,11 @@ window.App.Main = (function() {
 
         Storage.loadAllData('fard');
         Storage.loadAllData('sunnah');
+
+        // Check for orphaned localStorage keys
+        if (Storage.validateDataIntegrity) {
+            Storage.validateDataIntegrity();
+        }
 
         // Warn if localStorage is nearly full (>90%)
         try {
@@ -331,6 +358,17 @@ window.App.Main = (function() {
                 document.body.style.position = '';
             }
         }
+
+        // Enable Enter/Space to trigger click on role="button" elements
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                var el = document.activeElement;
+                if (el && el.getAttribute('role') === 'button') {
+                    e.preventDefault();
+                    el.click();
+                }
+            }
+        });
 
         // Clamp year inputs to valid Hijri range (1400-1500)
         document.addEventListener('input', function(e) {

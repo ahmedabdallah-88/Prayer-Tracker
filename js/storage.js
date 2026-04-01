@@ -215,6 +215,38 @@ window.App.Storage = (function() {
         return { usedKB: usedKB, remainingKB: remainingKB, percentUsed: percentUsed };
     }
 
+    // ==================== DATA INTEGRITY CHECK ====================
+
+    function validateDataIntegrity() {
+        var profilesRaw = localStorage.getItem('salah_profiles');
+        if (!profilesRaw) return;
+        var profiles;
+        try { profiles = JSON.parse(profilesRaw); } catch(e) { return; }
+        if (!Array.isArray(profiles)) return;
+
+        var validIds = {};
+        for (var i = 0; i < profiles.length; i++) {
+            if (profiles[i].id) validIds[profiles[i].id] = true;
+        }
+
+        var orphanCount = 0;
+        for (var k = 0; k < localStorage.length; k++) {
+            var key = localStorage.key(k);
+            if (key.indexOf('salah_') !== 0) continue;
+            // Keys with profile ID: salah_tracker_{id}_fard_h... or salah_cong_{id}_h...
+            var match = key.match(/^salah_(?:tracker|cong|exempt|qada|fasting|volfasting|azkar|prayer_streaks|sunnah_streaks|jamaah_streaks)_(p_[^_]+_[^_]+)_/);
+            if (match && match[1]) {
+                if (!validIds[match[1]]) {
+                    console.warn('Orphaned key (profile "' + match[1] + '" not found):', key);
+                    orphanCount++;
+                }
+            }
+        }
+        if (orphanCount > 0) {
+            console.warn('Found ' + orphanCount + ' orphaned localStorage keys');
+        }
+    }
+
     // ==================== BASE INIT ====================
 
     function init() {
@@ -268,6 +300,7 @@ window.App.Storage = (function() {
         getVolFastingData: getVolFastingData,
         saveVolFastingData: saveVolFastingData,
         checkStorageQuota: checkStorageQuota,
+        validateDataIntegrity: validateDataIntegrity,
         init: init
     };
 })();

@@ -31,7 +31,7 @@
     /* Neutrals */
     --text-primary: #2B2D42;
     --text-secondary: #5A5D6E;
-    --text-muted: #8D99AE;
+    --text-muted: #6B7280;
     --text-faint: #B8BCC8;
     --bg-main: #F5F3EF;
     --card-bg: rgba(255,255,255,0.55);
@@ -649,7 +649,7 @@ body {
 .prayer-tab-card .prayer-tab-name {
     font-size: 10px;
     font-weight: 600;
-    color: var(--text-secondary, #8D99AE);
+    color: var(--text-secondary, #6B7280);
     font-family: 'Noto Kufi Arabic', sans-serif;
     white-space: nowrap;
     transition: color 0.25s;
@@ -806,14 +806,14 @@ body {
 
 .stats-value.days-val .days-total {
     font-size: 11px;
-    color: #8D99AE;
+    color: #6B7280;
     font-weight: 700;
 }
 
 .stats-label {
     font-size: 9px;
     font-weight: 600;
-    color: #8D99AE;
+    color: #6B7280;
     font-family: 'Noto Kufi Arabic', sans-serif;
     line-height: 1;
 }
@@ -2160,7 +2160,7 @@ body {
 .vol-fasting-hero-label {
     font-size: 14px;
     font-weight: 700;
-    color: #8D99AE;
+    color: #6B7280;
     margin-top: 4px;
 }
 
@@ -2709,7 +2709,7 @@ body {
 }
 .onboard-tooltip-body {
     font-size: 12px;
-    color: #8D99AE;
+    color: #6B7280;
     line-height: 1.5;
     margin-bottom: 12px;
 }
@@ -2734,7 +2734,7 @@ body {
     padding: 8px 12px;
     border: none;
     background: none;
-    color: #8D99AE;
+    color: #6B7280;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -4267,7 +4267,7 @@ body::before {
 
 .sunnah-streak-best {
     font-size: 7.5px;
-    color: #8D99AE;
+    color: #6B7280;
     font-family: 'Noto Kufi Arabic', sans-serif;
 }
 
@@ -4708,5 +4708,41 @@ body::before {
     }
     .missed-prayer-card-marked {
         transition: none;
+    }
+}
+
+/* ==================== REDUCED MOTION — CATCH-ALL ==================== */
+@media (prefers-reduced-motion: reduce) {
+    /* Today pulse */
+    .day-box.today-pulse { animation: none !important; }
+
+    /* Tab icon bounce */
+    .tab-item.tab-bounce .tab-icon-wrap .material-symbols-rounded { animation: none !important; }
+
+    /* Prayer tab icon float */
+    .prayer-tab-icon-wrap .material-symbols-rounded { animation: none !important; }
+
+    /* Current month dot pulse */
+    .month-dot-pulse { animation: none !important; }
+
+    /* Sub-tab pill slide */
+    .sub-tabs-pill { transition: transform 0.15s ease, width 0.15s ease !important; }
+
+    /* Qada pop-in */
+    .qada-pop-in { animation: none !important; }
+
+    /* Tooltip/info animations */
+    .info-tooltip { animation: none !important; }
+    .toast { animation: none !important; }
+
+    /* Section cross-fade */
+    .section.section-fading-in,
+    .section.section-fading-out { transition: none !important; }
+
+    /* Catch-all: kill ALL animations and shorten transitions globally */
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

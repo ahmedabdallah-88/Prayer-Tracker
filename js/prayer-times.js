@@ -166,6 +166,36 @@ window.App.PrayerTimes = (function() {
         return 3;
     }
 
+    // ==================== VALIDATION ====================
+
+    function _validatePrayerTimesResponse(json) {
+        if (!json || !json.data || !json.data.timings) {
+            console.warn('Invalid prayer times response: missing data.timings');
+            return false;
+        }
+        var timings = json.data.timings;
+        var required = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        for (var i = 0; i < required.length; i++) {
+            var time = timings[required[i]];
+            if (!time || typeof time !== 'string') {
+                console.warn('Invalid prayer time for ' + required[i]);
+                return false;
+            }
+            var cleanTime = time.split(' ')[0];
+            if (!/^\d{1,2}:\d{2}$/.test(cleanTime)) {
+                console.warn('Invalid time format for ' + required[i] + ': ' + time);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ==================== RATE LIMITING ====================
+
+    var _lastFetchTime = 0;
+    var _lastFetchPromise = null;
+    var MIN_FETCH_INTERVAL = 60 * 1000; // 60 seconds
+
     // ==================== FETCH ====================
 
     function fetchPrayerTimes(forceRefresh) {
@@ -179,7 +209,14 @@ window.App.PrayerTimes = (function() {
             }
         }
 
-        return getUserLocation().then(function(loc) {
+        // Rate limit: return last promise if called too soon
+        var now = Date.now();
+        if (_lastFetchPromise && (now - _lastFetchTime) < MIN_FETCH_INTERVAL) {
+            return _lastFetchPromise;
+        }
+        _lastFetchTime = now;
+
+        _lastFetchPromise = getUserLocation().then(function(loc) {
             userLocation = loc;
 
             // Get city name and country code first
@@ -199,7 +236,7 @@ window.App.PrayerTimes = (function() {
                 return fetch(url).then(function(response) {
                     return response.json();
                 }).then(function(json) {
-                    if (json.code === 200 && json.data && json.data.timings) {
+                    if (json.code === 200 && _validatePrayerTimesResponse(json)) {
                         var timings = json.data.timings;
 
                         var methodName = json.data.meta && json.data.meta.method ? json.data.meta.method.name : '';
@@ -245,6 +282,8 @@ window.App.PrayerTimes = (function() {
                 }
             }
         });
+
+        return _lastFetchPromise;
     }
 
     // ==================== TIME HELPERS ====================

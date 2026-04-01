@@ -706,13 +706,13 @@ window.App.Tracker = (function() {
         gridWrap.className = 'prayer-tab-grid';
         var grid = document.createElement('div');
         grid.className = 'days-grid flow-grid';
+        var lang = I18n.getCurrentLang();
 
         for (var day = 1; day <= daysInMonth; day++) {
             var dayBox = document.createElement('div');
             dayBox.className = 'day-box';
             dayBox.setAttribute('role', 'button');
             dayBox.setAttribute('tabindex', '0');
-            dayBox.setAttribute('aria-label', I18n.getPrayerName(activePrayerId) + ' - ' + day);
 
             dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
 
@@ -729,31 +729,41 @@ window.App.Tracker = (function() {
                 }
             }
 
+            var stateLabel = '';
             if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
                 dayBox.classList.add('disabled');
             } else {
                 var isExempt = Female.isPrayerExempt(exemptData, activePrayerId, day);
                 if (isExempt) {
                     dayBox.classList.add('exempt');
+                    stateLabel = lang === 'ar' ? 'معفاة' : 'Exempt';
                 } else if (dataObj[hMonth][activePrayerId] && dataObj[hMonth][activePrayerId][day]) {
                     dayBox.classList.add('checked');
+                    stateLabel = lang === 'ar' ? 'صليت منفرد' : 'Prayed alone';
                     if (type === 'fard') {
                         var congData = Storage.getCongregationData(hYear, hMonth);
                         if (isCongregation(congData, activePrayerId, day)) {
                             dayBox.classList.add('congregation');
                             dayBox.classList.remove('checked');
+                            stateLabel = lang === 'ar' ? 'صليت جماعة' : 'Prayed in congregation';
                         }
                     }
                     var qadaData = Storage.getQadaData(hYear, hMonth);
                     if (qadaData[activePrayerId] && qadaData[activePrayerId][day]) {
                         dayBox.classList.remove('checked', 'congregation');
                         dayBox.classList.add('qada');
+                        stateLabel = lang === 'ar' ? 'قضاء' : 'Qada';
                     }
+                } else {
+                    stateLabel = lang === 'ar' ? 'لم تسجل' : 'Not marked';
                 }
                 dayBox.onclick = (function(t, pId, d) {
                     return function() { handleDayClick(t, pId, d); };
                 })(type, activePrayerId, day);
             }
+
+            dayBox.setAttribute('aria-label',
+                (lang === 'ar' ? 'يوم ' : 'Day ') + day + ' — ' + (stateLabel || I18n.getPrayerName(activePrayerId)));
 
             grid.appendChild(dayBox);
         }
@@ -873,13 +883,13 @@ window.App.Tracker = (function() {
         if (oldGridWrap) {
             var grid = document.createElement('div');
             grid.className = 'days-grid flow-grid';
+            var lang = I18n.getCurrentLang();
 
             for (var day = 1; day <= daysInMonth; day++) {
                 var dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
                 dayBox.setAttribute('role', 'button');
                 dayBox.setAttribute('tabindex', '0');
-                dayBox.setAttribute('aria-label', I18n.getPrayerName(activePrayerId) + ' - ' + day);
 
                 dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
 
@@ -891,31 +901,41 @@ window.App.Tracker = (function() {
                 var isDayToday = isCurrentMonth && todayH.day === day;
                 if (isDayToday) dayBox.classList.add('today-box');
 
+                var stateLabel = '';
                 if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
                     dayBox.classList.add('disabled');
                 } else {
                     var isExempt = Female.isPrayerExempt(exemptData, activePrayerId, day);
                     if (isExempt) {
                         dayBox.classList.add('exempt');
+                        stateLabel = lang === 'ar' ? 'معفاة' : 'Exempt';
                     } else if (dataObj[hMonth][activePrayerId] && dataObj[hMonth][activePrayerId][day]) {
                         dayBox.classList.add('checked');
+                        stateLabel = lang === 'ar' ? '��ليت منفرد' : 'Prayed alone';
                         if (type === 'fard') {
                             var congData = Storage.getCongregationData(hYear, hMonth);
                             if (isCongregation(congData, activePrayerId, day)) {
                                 dayBox.classList.add('congregation');
                                 dayBox.classList.remove('checked');
+                                stateLabel = lang === 'ar' ? 'صليت جماعة' : 'Prayed in congregation';
                             }
                         }
                         var qadaData = Storage.getQadaData(hYear, hMonth);
                         if (qadaData[activePrayerId] && qadaData[activePrayerId][day]) {
                             dayBox.classList.remove('checked', 'congregation');
                             dayBox.classList.add('qada');
+                            stateLabel = lang === 'ar' ? 'قضاء' : 'Qada';
                         }
+                    } else {
+                        stateLabel = lang === 'ar' ? 'لم تسجل' : 'Not marked';
                     }
                     dayBox.onclick = (function(t, pId, d) {
                         return function() { handleDayClick(t, pId, d); };
                     })(type, activePrayerId, day);
                 }
+
+                dayBox.setAttribute('aria-label',
+                    (lang === 'ar' ? 'يوم ' : 'Day ') + day + ' — ' + (stateLabel || I18n.getPrayerName(activePrayerId)));
 
                 grid.appendChild(dayBox);
             }
