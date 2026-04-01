@@ -24,32 +24,6 @@ window.App.Tracker = (function() {
 
     // ==================== PRIVATE HELPERS ====================
 
-    function createDualDayNum(hijriDay, hYear, hMonth) {
-        var frag = document.createDocumentFragment();
-        var dayNum = document.createElement('span');
-        dayNum.className = 'day-number';
-        dayNum.textContent = hijriDay;
-        frag.appendChild(dayNum);
-
-        try {
-            var gDate = _getHijri().hijriToGregorian(hYear, hMonth, hijriDay);
-            var gregSpan = document.createElement('span');
-            gregSpan.className = 'day-greg';
-            gregSpan.textContent = gDate.getDate();
-            frag.appendChild(gregSpan);
-        } catch(e) {}
-
-        // Hidden Material icon (shown by CSS for congregation/qada)
-        var iconSpan = document.createElement('span');
-        iconSpan.className = 'day-icon material-symbols-rounded';
-        iconSpan.style.display = 'none';
-        iconSpan.style.fontSize = '13px';
-        iconSpan.textContent = 'mosque';
-        frag.appendChild(iconSpan);
-
-        return frag;
-    }
-
     function isCongregation(congData, prayerId, day) {
         return congData[prayerId] && congData[prayerId][day];
     }
@@ -740,7 +714,7 @@ window.App.Tracker = (function() {
             dayBox.setAttribute('tabindex', '0');
             dayBox.setAttribute('aria-label', I18n.getPrayerName(activePrayerId) + ' - ' + day);
 
-            dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+            dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
 
             try {
                 var gDate = Hijri.hijriToGregorian(hYear, hMonth, day);
@@ -907,7 +881,7 @@ window.App.Tracker = (function() {
                 dayBox.setAttribute('tabindex', '0');
                 dayBox.setAttribute('aria-label', I18n.getPrayerName(activePrayerId) + ' - ' + day);
 
-                dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
 
                 try {
                     var gDate = Hijri.hijriToGregorian(hYear, hMonth, day);
@@ -1440,14 +1414,14 @@ window.App.Tracker = (function() {
                 dayBox.className = 'day-box';
 
                 if (Female.isPrayerExempt(exemptData, prayer.id, day)) {
-                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                    dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
                     dayBox.classList.add('exempt');
                 } else if (Hijri.isFutureDateHijri(day, hMonth, hYear)) {
-                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                    dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
                     dayBox.classList.add('disabled');
                     dayBox.style.opacity = '0.3';
                 } else {
-                    dayBox.appendChild(createDualDayNum(day, hYear, hMonth));
+                    dayBox.appendChild(_getHijri().createDualDayNum(day, hYear, hMonth));
 
                     if (dataObj[hMonth][prayer.id] && dataObj[hMonth][prayer.id][day]) {
                         dayBox.classList.add('checked');

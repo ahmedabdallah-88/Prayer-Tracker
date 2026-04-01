@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v313
-const CACHE_NAME = 'salah-tracker-v313';
+// Prayer Tracker PWA — Service Worker v314
+const CACHE_NAME = 'salah-tracker-v314';
 const ASSETS = [
     './',
     './index.html',
@@ -12,13 +12,13 @@ const ASSETS = [
     // JS modules (dependency order)
     './js/config.js?v=304',
     './js/storage.js?v=312',
-    './js/hijri-calendar.js?v=304',
+    './js/hijri-calendar.js?v=314',
     './js/ui-utils.js?v=305',
     './js/i18n.js?v=304',
     './js/themes.js?v=304',
     './js/profiles.js?v=307',
     './js/female-features.js?v=304',
-    './js/fard-tracker.js?v=313',
+    './js/fard-tracker.js?v=314',
     './js/sunnah-tracker.js?v=304',
     './js/jamaah-tracker.js?v=313',
     './js/prayer-streaks.js?v=304',
@@ -35,7 +35,7 @@ const ASSETS = [
     './js/qada-tracker.js?v=304',
     './js/qada-dashboard.js?v=304',
     './js/dashboard.js?v=304',
-    './js/year-overview.js?v=304',
+    './js/year-overview.js?v=314',
     './js/data-io.js?v=311',
     './js/onboarding.js?v=304',
     './js/app.js?v=312',

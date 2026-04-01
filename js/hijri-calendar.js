@@ -5,10 +5,31 @@
 window.App = window.App || {};
 window.App.Hijri = (function() {
     var _hijriDay1Cache = {};
+    var CACHE_STORAGE_KEY = 'salah_hijri_day1_cache';
     var currentHijriYear, currentHijriMonth;
 
-    // Initialize from today's date
-    // (will be set properly during app init)
+    // Load persisted day1 cache from localStorage
+    (function _loadPersistedCache() {
+        try {
+            var raw = localStorage.getItem(CACHE_STORAGE_KEY);
+            if (raw) _hijriDay1Cache = JSON.parse(raw);
+        } catch (e) {
+            _hijriDay1Cache = {};
+        }
+    })();
+
+    function _persistCache() {
+        var keys = Object.keys(_hijriDay1Cache);
+        if (keys.length > 100) {
+            var toRemove = keys.slice(0, keys.length - 100);
+            for (var i = 0; i < toRemove.length; i++) {
+                delete _hijriDay1Cache[toRemove[i]];
+            }
+        }
+        try {
+            localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(_hijriDay1Cache));
+        } catch (e) {}
+    }
 
     // Convert a Gregorian Date object to Hijri {year, month, day}
     function gregorianToHijri(gDate) {
@@ -125,6 +146,7 @@ window.App.Hijri = (function() {
                 high = new Date(mid.getTime() - 86400000);
             } else {
                 _hijriDay1Cache[key] = mid.getTime();
+                _persistCache();
                 return mid;
             }
         }
@@ -134,10 +156,12 @@ window.App.Hijri = (function() {
             var hh = gregorianToHijri(d);
             if (hh.year === hYear && hh.month === hMonth && hh.day === 1) {
                 _hijriDay1Cache[key] = d.getTime();
+                _persistCache();
                 return d;
             }
         }
         _hijriDay1Cache[key] = guess.getTime();
+        _persistCache();
         return guess;
     }
 
@@ -326,7 +350,7 @@ window.App.Hijri = (function() {
 
     // Clean ALL ghost days across all months for the current profile
     function cleanAllGhostDays() {
-        if (!window.activeProfile) return;
+        if (!window.App.Profiles || !window.App.Profiles.getActiveProfile()) return;
         var cleaned = 0;
         for (var hMonth = 1; hMonth <= 12; hMonth++) {
             var actualDays = getHijriDaysInMonth(currentHijriYear, hMonth);
@@ -444,7 +468,7 @@ window.App.Hijri = (function() {
         cleanAllGhostDays: cleanAllGhostDays,
         updateMonthDaysButton: updateMonthDaysButton,
         showHijriOverrideDialog: showHijriOverrideDialog,
-        clearCache: function() { _hijriDay1Cache = {}; },
+        clearCache: function() { _hijriDay1Cache = {}; try { localStorage.removeItem(CACHE_STORAGE_KEY); } catch(e) {} },
         getCurrentHijriYear: function() { return currentHijriYear; },
         setCurrentHijriYear: function(y) { currentHijriYear = y; },
         getCurrentHijriMonth: function() { return currentHijriMonth; },
@@ -455,3 +479,4 @@ window.App.Hijri = (function() {
 // Backward compat
 window.toggleMonthDays = window.App.Hijri.toggleMonthDays;
 window.showHijriOverrideDialog = window.App.Hijri.showHijriOverrideDialog;
+window.createDualDayNum = window.App.Hijri.createDualDayNum;
