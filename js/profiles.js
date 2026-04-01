@@ -292,6 +292,24 @@ window.App.Profiles = (function() {
         showProfileForm(id);
     }
 
+    // Precise profile key matching — avoids partial ID collisions
+    function _isKeyForProfile(key, profileId) {
+        var prefixes = [
+            'salah_tracker_', 'salah_cong_', 'salah_exempt_',
+            'salah_qada_', 'salah_fasting_', 'salah_volfasting_',
+            'salah_azkar_', 'salah_prayer_streaks_', 'salah_sunnah_streaks_',
+            'salah_jamaah_streaks_', 'salah_hijri_days_', 'salah_hijri_overrides_',
+            'salah_qada_log_', 'salah_qada_plan_', 'salah_periods_'
+        ];
+        for (var i = 0; i < prefixes.length; i++) {
+            if (key.indexOf(prefixes[i] + profileId) === 0) {
+                var afterId = key.charAt(prefixes[i].length + profileId.length);
+                if (afterId === '' || afterId === '_') return true;
+            }
+        }
+        return false;
+    }
+
     function deleteProfile(id) {
         return showConfirm(t('confirm_delete_profile')).then(function(confirmed) {
             if (!confirmed) return;
@@ -300,11 +318,11 @@ window.App.Profiles = (function() {
             profiles = profiles.filter(function(p) { return p.id !== id; });
             saveProfiles(profiles);
 
-            // Delete all data for this profile
+            // Delete all data for this profile (precise matching)
             var keysToDelete = [];
             for (var i = 0; i < localStorage.length; i++) {
                 var key = localStorage.key(i);
-                if (key && key.includes(id)) {
+                if (key && _isKeyForProfile(key, id)) {
                     keysToDelete.push(key);
                 }
             }
