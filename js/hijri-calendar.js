@@ -476,7 +476,7 @@ window.App.Hijri = (function() {
     };
 })();
 
-// Backward compat
-window.toggleMonthDays = window.App.Hijri.toggleMonthDays;
-window.showHijriOverrideDialog = window.App.Hijri.showHijriOverrideDialog;
-window.createDualDayNum = window.App.Hijri.createDualDayNum;
+// Backward compat (DEPRECATED — use window.App.Hijri.*)
+window.toggleMonthDays = window.App.Hijri.toggleMonthDays;             // DEPRECATED
+window.showHijriOverrideDialog = window.App.Hijri.showHijriOverrideDialog; // DEPRECATED
+window.createDualDayNum = window.App.Hijri.createDualDayNum;           // DEPRECATED

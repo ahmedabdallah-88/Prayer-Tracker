@@ -321,7 +321,7 @@ window.App.Tracker = (function() {
         var offset = circ - (pct / 100) * circ;
         if (offset < 0) offset = 0;
         if (offset > circ) offset = circ;
-        var strokeColor = pct >= 80 ? '#2D6A4F' : pct >= 50 ? '#D4A03C' : '#C1574E';
+        var strokeColor = pct >= 80 ? 'var(--primary, #2D6A4F)' : pct >= 50 ? 'var(--accent, #D4A03C)' : 'var(--danger, #C1574E)';
         var rot = 'rotate(-90 ' + c + ' ' + c + ')';
         return '<div class="stats-ring-wrap">' +
             '<svg viewBox="0 0 ' + size + ' ' + size + '">' +
@@ -1496,17 +1496,17 @@ window.App.Tracker = (function() {
     };
 })();
 
-// ==================== BACKWARD COMPAT GLOBALS ====================
-window.switchSection      = window.App.Tracker.switchSection;
-window.switchView         = window.App.Tracker.switchView;
-window.renderTrackerMonth = window.App.Tracker.renderTrackerMonth;
-window.updateTrackerStats = window.App.Tracker.updateTrackerStats;
-window.updateTrackerView  = window.App.Tracker.updateTrackerView;
-window.changeTrackerMonth = window.App.Tracker.changeTrackerMonth;
-window.changeQadaMonth    = window.App.Tracker.changeQadaMonth;
-window.resetTrackerMonth  = window.App.Tracker.resetTrackerMonth;
-window.handleDayClick     = window.App.Tracker.handleDayClick;
-window.batchMarkPrayer    = window.App.Tracker.batchMarkPrayer;
-window.toggleDay          = window.App.Tracker.toggleDay;
-window.resetMonth         = window.App.Tracker.resetMonth;
-window.renderMonthDetail  = window.App.Tracker.renderMonthDetail;
+// ==================== BACKWARD COMPAT GLOBALS (DEPRECATED — use window.App.Tracker.*) ====================
+window.switchSection      = window.App.Tracker.switchSection;      // DEPRECATED
+window.switchView         = window.App.Tracker.switchView;         // DEPRECATED
+window.renderTrackerMonth = window.App.Tracker.renderTrackerMonth; // DEPRECATED
+window.updateTrackerStats = window.App.Tracker.updateTrackerStats; // DEPRECATED
+window.updateTrackerView  = window.App.Tracker.updateTrackerView;  // DEPRECATED
+window.changeTrackerMonth = window.App.Tracker.changeTrackerMonth; // DEPRECATED
+window.changeQadaMonth    = window.App.Tracker.changeQadaMonth;    // DEPRECATED
+window.resetTrackerMonth  = window.App.Tracker.resetTrackerMonth;  // DEPRECATED
+window.handleDayClick     = window.App.Tracker.handleDayClick;     // DEPRECATED
+window.batchMarkPrayer    = window.App.Tracker.batchMarkPrayer;    // DEPRECATED
+window.toggleDay          = window.App.Tracker.toggleDay;          // DEPRECATED
+window.resetMonth         = window.App.Tracker.resetMonth;         // DEPRECATED
+window.renderMonthDetail  = window.App.Tracker.renderMonthDetail;  // DEPRECATED

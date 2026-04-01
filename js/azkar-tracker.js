@@ -159,7 +159,7 @@ window.App.Azkar = (function() {
             } else {
                 if (catData[day]) {
                     dayBox.classList.add('checked');
-                    dayBox.style.background = 'linear-gradient(135deg, #0EA5E9, #38BDF8)';
+                    dayBox.style.background = 'linear-gradient(135deg, var(--blue, #0EA5E9), #38BDF8)';
                     dayBox.style.color = 'white';
                 }
                 (function(d, catId, box) {
@@ -209,7 +209,7 @@ window.App.Azkar = (function() {
         var legend = document.createElement('div');
         legend.className = 'prayer-legend';
         legend.innerHTML =
-            '<div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);"><span class="material-symbols-rounded" style="font-size:10px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'تم' : 'Done') + '</span></div>' +
+            '<div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,var(--blue, #0EA5E9),#38BDF8);"><span class="material-symbols-rounded" style="font-size:10px;color:white;">check</span></div><span>' + (currentLang === 'ar' ? 'تم' : 'Done') + '</span></div>' +
             '<div class="legend-item"><div class="legend-dot" style="background:transparent;border:1.5px solid rgba(0,0,0,0.1);"></div><span>' + (currentLang === 'ar' ? 'لم يتم' : 'Not done') + '</span></div>';
         trackerCard.appendChild(legend);
         container.appendChild(trackerCard);

@@ -404,7 +404,7 @@ window.App.Main = (function() {
             });
         }
 
-        // Re-check prayer times and ALL notifications when app becomes visible
+        // Visibility change: foreground → re-check, background → schedule SW notifications
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
                 var activeProfile = window.App.Storage.getActiveProfile();
@@ -414,12 +414,7 @@ window.App.Main = (function() {
                 if (activeProfile && window.App.MissedPrayerNotif) {
                     window.App.MissedPrayerNotif.checkAndShow();
                 }
-            }
-        });
-
-        // Schedule SW notifications when app goes to background
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'hidden') {
+            } else if (document.visibilityState === 'hidden') {
                 if (window.App.Notifications) {
                     var N = window.App.Notifications;
                     if (N.isBeforeEnabled() || N.isAfterEnabled()) {
@@ -482,13 +477,13 @@ window.App.Main = (function() {
     };
 })();
 
-// Backward compat globals
-window.switchTab = window.App.Main.switchTab;
-window.updateShellBar = window.App.Main.updateShellBar;
-window.openProfileSettings = window.App.Main.openProfileSettings;
-window.closeProfileSettings = window.App.Main.closeProfileSettings;
-window.applyUpdate = window.App.Main.applyUpdate;
-window.checkForUpdates = window.App.Main.checkForUpdates;
+// Backward compat globals (DEPRECATED — use window.App.Main.*)
+window.switchTab = window.App.Main.switchTab;                     // DEPRECATED
+window.updateShellBar = window.App.Main.updateShellBar;           // DEPRECATED
+window.openProfileSettings = window.App.Main.openProfileSettings; // DEPRECATED
+window.closeProfileSettings = window.App.Main.closeProfileSettings; // DEPRECATED
+window.applyUpdate = window.App.Main.applyUpdate;                 // DEPRECATED
+window.checkForUpdates = window.App.Main.checkForUpdates;         // DEPRECATED
 
 // ==================== SCROLL SAFETY CLEANUP ====================
 // Ensures the app is scrollable after splash ends. Only runs when
@@ -534,9 +529,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.remove('splash-active');
     }
 
-    // Run safety cleanup at intervals AFTER splash would have finished
+    // Safety cleanup after splash finishes (~10.4s + buffer)
     setTimeout(_scrollSafetyCleanup, 12000);
-    setTimeout(_scrollSafetyCleanup, 16000);
 });
 
 // ==================== RUN STARTUP ====================

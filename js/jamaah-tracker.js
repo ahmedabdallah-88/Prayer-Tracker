@@ -209,9 +209,9 @@ window.App.Jamaah = (function() {
             var card = document.createElement('div');
             card.className = 'streak-card' + (streak.current >= 7 ? ' high-streak' : '');
 
-            var fireEmoji = streak.current >= 7 ? '<span class="material-symbols-rounded" style="font-size:20px;color:#ea580c;">local_fire_department</span>' :
-                          streak.current >= 3 ? '<span class="material-symbols-rounded" style="font-size:20px;color:#d97706;">bolt</span>' :
-                          streak.current >= 1 ? '<span class="material-symbols-rounded" style="font-size:20px;color:#65a30d;">auto_awesome</span>' : '<span class="material-symbols-rounded" style="font-size:20px;color:#9ca3af;">bedtime</span>';
+            var fireEmoji = streak.current >= 7 ? '<span class="material-symbols-rounded" style="font-size:20px;color:var(--danger, #ea580c);">local_fire_department</span>' :
+                          streak.current >= 3 ? '<span class="material-symbols-rounded" style="font-size:20px;color:var(--accent, #d97706);">bolt</span>' :
+                          streak.current >= 1 ? '<span class="material-symbols-rounded" style="font-size:20px;color:var(--primary-mid, #65a30d);">auto_awesome</span>' : '<span class="material-symbols-rounded" style="font-size:20px;color:var(--text-muted, #9ca3af);">bedtime</span>';
 
             var isOnFire = streak.current >= 3;
 
@@ -256,10 +256,10 @@ window.App.Jamaah = (function() {
     };
 })();
 
-// Backward compat globals
-window.toggleCongregation = window.App.Jamaah.toggleCongregation;
-window.isCongregation = window.App.Jamaah.isCongregation;
-window.updateCongregationStats = window.App.Jamaah.updateCongregationStats;
-window.renderStreaks = window.App.Jamaah.renderStreaks;
-window.invalidateJamaahCache = window.App.Jamaah.invalidateCache;
+// Backward compat globals (DEPRECATED — use window.App.Jamaah.*)
+window.toggleCongregation = window.App.Jamaah.toggleCongregation;       // DEPRECATED
+window.isCongregation = window.App.Jamaah.isCongregation;               // DEPRECATED
+window.updateCongregationStats = window.App.Jamaah.updateCongregationStats; // DEPRECATED
+window.renderStreaks = window.App.Jamaah.renderStreaks;                   // DEPRECATED
+window.invalidateJamaahCache = window.App.Jamaah.invalidateCache;        // DEPRECATED
 window.congregationMode = false;

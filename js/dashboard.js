@@ -331,5 +331,5 @@ window.App.Dashboard = (function() {
     };
 })();
 
-// Backward compat
-window.updateDashboard = window.App.Dashboard.updateDashboard;
+// Backward compat (DEPRECATED — use window.App.Dashboard.*)
+window.updateDashboard = window.App.Dashboard.updateDashboard; // DEPRECATED

@@ -272,8 +272,8 @@ window.App.Storage = (function() {
     };
 })();
 
-// Backward compat globals
-window.getStorageKey = window.App.Storage.getStorageKey;
-window.getCongregationKey = window.App.Storage.getCongregationKey;
-window.getQadaKey = window.App.Storage.getQadaKey;
-window.getExemptKey = window.App.Storage.getExemptKey;
+// Backward compat globals (DEPRECATED — use window.App.Storage.*)
+window.getStorageKey = window.App.Storage.getStorageKey;           // DEPRECATED
+window.getCongregationKey = window.App.Storage.getCongregationKey; // DEPRECATED
+window.getQadaKey = window.App.Storage.getQadaKey;                 // DEPRECATED
+window.getExemptKey = window.App.Storage.getExemptKey;             // DEPRECATED
