@@ -1232,6 +1232,7 @@ window.App.Tracker = (function() {
         Storage.saveMonthData(type, currentMonth);
         if (type === 'fard' && congData) Storage.saveCongregationData(currentYear, currentMonth, congData);
         Storage.saveQadaData(currentYear, currentMonth, qadaData);
+        if (window.App.Jamaah && window.App.Jamaah.invalidateCache) window.App.Jamaah.invalidateCache();
         _refreshGridAndStats(type);
         updateTrackerStats(type);
         if (typeof window.renderStreaks === 'function') {

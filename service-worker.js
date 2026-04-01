@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v312
-const CACHE_NAME = 'salah-tracker-v312';
+// Prayer Tracker PWA — Service Worker v313
+const CACHE_NAME = 'salah-tracker-v313';
 const ASSETS = [
     './',
     './index.html',
@@ -18,9 +18,9 @@ const ASSETS = [
     './js/themes.js?v=304',
     './js/profiles.js?v=307',
     './js/female-features.js?v=304',
-    './js/fard-tracker.js?v=304',
+    './js/fard-tracker.js?v=313',
     './js/sunnah-tracker.js?v=304',
-    './js/jamaah-tracker.js?v=304',
+    './js/jamaah-tracker.js?v=313',
     './js/prayer-streaks.js?v=304',
     './js/weekly-view.js?v=304',
     './js/fasting-tracker.js?v=304',
