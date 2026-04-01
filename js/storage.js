@@ -191,6 +191,30 @@ window.App.Storage = (function() {
         catch(e) { if (window.App.UI && window.App.UI.showToast) window.App.UI.showToast('Storage full', 'error'); }
     }
 
+    // ==================== STORAGE QUOTA CHECK ====================
+
+    function checkStorageQuota() {
+        var used = 0;
+        try {
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                var val = localStorage.getItem(key);
+                if (key && val) {
+                    used += key.length + val.length;
+                }
+            }
+        } catch(e) {
+            return { usedKB: 0, remainingKB: 0, percentUsed: 0 };
+        }
+        // localStorage is typically 5MB (~5,242,880 chars at 2 bytes each, but length counts chars)
+        var totalChars = 5 * 1024 * 1024; // 5MB in chars
+        var usedKB = Math.round(used / 1024);
+        var totalKB = Math.round(totalChars / 1024);
+        var remainingKB = Math.max(0, totalKB - usedKB);
+        var percentUsed = Math.round((used / totalChars) * 100);
+        return { usedKB: usedKB, remainingKB: remainingKB, percentUsed: percentUsed };
+    }
+
     // ==================== BASE INIT ====================
 
     function init() {
@@ -243,6 +267,7 @@ window.App.Storage = (function() {
         saveFastingData: saveFastingData,
         getVolFastingData: getVolFastingData,
         saveVolFastingData: saveVolFastingData,
+        checkStorageQuota: checkStorageQuota,
         init: init
     };
 })();

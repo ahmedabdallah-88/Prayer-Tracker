@@ -71,6 +71,20 @@ window.App.Main = (function() {
         Storage.loadAllData('fard');
         Storage.loadAllData('sunnah');
 
+        // Warn if localStorage is nearly full (>90%)
+        try {
+            var quota = Storage.checkStorageQuota();
+            if (quota.remainingKB < 500) {
+                var lang = window.App.I18n ? window.App.I18n.getCurrentLang() : 'ar';
+                var msg = lang === 'ar'
+                    ? 'تحذير: المساحة التخزينية ممتلئة تقريباً (' + quota.percentUsed + '%). يرجى تصدير بياناتك.'
+                    : 'Warning: Storage nearly full (' + quota.percentUsed + '%). Please export your data.';
+                if (window.App.UI && window.App.UI.showToast) {
+                    window.App.UI.showToast(msg, 'error', 6000);
+                }
+            }
+        } catch(e) {}
+
         // Update shell bar date — show Hijri + Gregorian (language-aware)
         var shellDate = document.getElementById('shellDateText');
         if (shellDate) {
