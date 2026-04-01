@@ -36,7 +36,7 @@ const ASSETS = [
     './js/qada-dashboard.js?v=304',
     './js/dashboard.js?v=304',
     './js/year-overview.js?v=304',
-    './js/data-io.js?v=305',
+    './js/data-io.js?v=306',
     './js/onboarding.js?v=304',
     './js/app.js?v=304',
     // Icons

@@ -54,30 +54,6 @@
     // ================================================================
     // validateImportData — validate JSON before writing to localStorage
     // ================================================================
-    var ALLOWED_PREFIXES = [
-        'salah_tracker_',
-        'salah_cong_',
-        'salah_qada_',
-        'salah_exempt_',
-        'salah_fasting_',
-        'salah_volfasting_',
-        'salah_azkar_',
-        'salah_hijri_days_',
-        'salah_hijri_overrides',
-        'salah_prayer_streaks_',
-        'salah_qada_log_',
-        'salah_qada_plan_',
-        'salah_profiles',
-        'salah_active_profile',
-        'salah_settings',
-        'salah_theme',
-        'salah_lang',
-        'salah_onboarding',
-        'salah_location',
-        'salah_prayer_times',
-        'salah_periods_'
-    ];
-
     function validateImportData(data) {
         if (!data || typeof data !== 'object' || Array.isArray(data)) {
             return { valid: false, reason_ar: '\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0633\u062a\u0648\u0631\u062f\u0629 \u063a\u064a\u0631 \u0635\u0627\u0644\u062d\u0629', reason_en: 'Invalid import data' };
@@ -102,14 +78,8 @@
         for (var k = 0; k < dataKeys.length; k++) {
             var key = dataKeys[k];
 
-            // Check key against whitelist
-            var allowed = false;
-            for (var j = 0; j < ALLOWED_PREFIXES.length; j++) {
-                if (key === ALLOWED_PREFIXES[j] || key.indexOf(ALLOWED_PREFIXES[j]) === 0) {
-                    allowed = true;
-                    break;
-                }
-            }
+            // All app keys must start with 'salah_'
+            var allowed = (key.indexOf('salah_') === 0);
 
             if (!allowed) {
                 return { valid: false, reason_ar: '\u0645\u0641\u062a\u0627\u062d \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641: ' + key, reason_en: 'Unknown key: ' + key };
