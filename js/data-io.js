@@ -572,263 +572,164 @@
     }
 
     // ================================================================
+    // _postImportRefresh — common UI refresh after successful import
+    // ================================================================
+    function _postImportRefresh() {
+        var todayH = getTodayHijri();
+        setCurrentHijriMonth(todayH.month);
+        setCurrentHijriYear(todayH.year);
+        App.Storage.setCurrentMonth(todayH.month);
+        App.Storage.setCurrentYear(todayH.year);
+
+        ['fardTrackerMonthSelect','sunnahTrackerMonthSelect'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = todayH.month; });
+        ['fardTrackerYearInput','sunnahTrackerYearInput','fardDashboardYear','fardYearlyYear','sunnahDashboardYear','sunnahYearlyYear'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = todayH.year; });
+
+        loadAllData('fard');
+        loadAllData('sunnah');
+        cleanAllGhostDays();
+        loadAllData('fard');
+        loadAllData('sunnah');
+
+        if (window.updateTrackerView) {
+            window.updateTrackerView('fard');
+            window.updateTrackerView('sunnah');
+        }
+        if (window.renderStreaks) {
+            window.renderStreaks('fard');
+            window.renderStreaks('sunnah');
+        }
+        if (window.updateShellBar) window.updateShellBar();
+        if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
+
+        var fardDash = document.getElementById('fardDashboardView');
+        if (fardDash && fardDash.classList.contains('active') && window.updateDashboard) {
+            window.updateDashboard('fard');
+        }
+        var sunnahDash = document.getElementById('sunnahDashboardView');
+        if (sunnahDash && sunnahDash.classList.contains('active') && window.updateDashboard) {
+            window.updateDashboard('sunnah');
+        }
+    }
+
+    // ================================================================
+    // _adoptProfileAndImport — create profile, import data, refresh UI
+    // ================================================================
+    function _adoptProfileAndImport(imported, profileData) {
+        var newId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        var newProfile = {
+            id: newId,
+            name: profileData.name,
+            age: profileData.age || 25,
+            gender: profileData.gender || 'male'
+        };
+        var profiles = getProfiles();
+        profiles.push(newProfile);
+        saveProfiles(profiles);
+
+        setActiveProfileId(newId);
+        App.Profiles.setActiveProfile(newProfile);
+        App.Storage.setActiveProfile(newProfile);
+
+        var importCount = importAndConvertToHijri(imported, newId);
+
+        if (imported['_theme']) {
+            localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
+            loadTheme();
+        }
+
+        restoreHijriOverrides(imported);
+        hideProfileScreen();
+        applyProfileUI();
+        _postImportRefresh();
+
+        if (window.switchSection) window.switchSection('fard');
+        showToast(t('import_success') + ' (' + importCount + ')', 'success');
+    }
+
+    // ================================================================
     // handleImport — FileReader handler for main import flow
+    // Uses native confirm() for reliability (no async overlay issues)
     // ================================================================
     function handleImport(event) {
         var file = event.target.files[0];
         if (!file) return;
 
         var reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
                 var currentLang = getCurrentLang();
 
-                // Confirm before proceeding
-                var confirmMsg = currentLang === 'ar'
-                    ? '\u26a0\ufe0f \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0633\u064a\u0633\u062a\u0628\u062f\u0644 \u062c\u0645\u064a\u0639 \u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u062d\u0627\u0644\u064a\u0629.\n\n\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f\u061f'
-                    : '\u26a0\ufe0f Importing data will replace ALL your current data.\n\nAre you sure?';
-                if (!(await showConfirm(confirmMsg))) return;
-
-                // Validate before writing anything
+                // Validate FIRST — before any confirm or write
                 var validation = validateImportData(imported);
                 if (!validation.valid) {
                     showValidationError(validation);
                     return;
                 }
+
+                // Confirm with native confirm() — synchronous, guaranteed to block
+                var confirmMsg = currentLang === 'ar'
+                    ? '\u26a0\ufe0f \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0633\u064a\u0633\u062a\u0628\u062f\u0644 \u062c\u0645\u064a\u0639 \u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u062d\u0627\u0644\u064a\u0629.\n\n\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f\u061f'
+                    : '\u26a0\ufe0f Importing data will replace ALL your current data.\n\nAre you sure?';
+                if (!confirm(confirmMsg)) return;
+
                 sanitizeProfiles(imported);
 
                 var activeProfile = getActiveProfile();
 
+                // --- Path 1: No active profile — resolve from imported data ---
                 if (!activeProfile) {
-                    // Check if imported data contains a profile — offer to adopt it
-                    if (imported['_profile']) {
-                        var ip = imported['_profile'];
-                        if (await showConfirm(
-                            (currentLang === 'ar'
-                                ? '\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0645\u0644\u0641 \u0634\u062e\u0635\u064a \u0641\u064a \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a:\n\n' + ip.name + ' (' + (ip.gender === 'female' ? '\u0623\u0646\u062b\u0649' : '\u0630\u0643\u0631') + ', ' + ip.age + ' \u0633\u0646\u0629)\n\n\u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0647\u0630\u0627 \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a\u061f'
-                                : 'Profile found in data:\n\n' + ip.name + ' (' + ip.gender + ', ' + ip.age + ' yrs)\n\nAdopt this profile?')
-                        )) {
-                            // Create and adopt the profile
-                            var newId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-                            var newProfile = { id: newId, name: ip.name, age: ip.age, gender: ip.gender };
-                            var profiles = getProfiles();
-                            profiles.push(newProfile);
-                            saveProfiles(profiles);
+                    var profileSource = null;
 
-                            // Activate profile on BOTH modules before importing
-                            setActiveProfileId(newId);
-                            App.Profiles.setActiveProfile(newProfile);
-                            App.Storage.setActiveProfile(newProfile);
-
-                            // Import data under new profile ID
-                            var importCount = importAndConvertToHijri(imported, newId);
-
-                            if (imported['_theme']) {
-                                localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
-                                loadTheme();
-                            }
-
-                            // Restore Hijri calendar overrides (global)
-                            restoreHijriOverrides(imported);
-
-                            // Hide profile screen
-                            hideProfileScreen();
-                            applyProfileUI();
-
-                            // Same proven refresh logic as the working path below
-                            var todayH = getTodayHijri();
-                            setCurrentHijriMonth(todayH.month);
-                            setCurrentHijriYear(todayH.year);
-                            App.Storage.setCurrentMonth(todayH.month);
-                            App.Storage.setCurrentYear(todayH.year);
-
-                            ['fardTrackerMonthSelect','sunnahTrackerMonthSelect'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = todayH.month; });
-                            ['fardTrackerYearInput','sunnahTrackerYearInput','fardDashboardYear','fardYearlyYear','sunnahDashboardYear','sunnahYearlyYear'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = todayH.year; });
-
-                            loadAllData('fard');
-                            loadAllData('sunnah');
-
-                            cleanAllGhostDays();
-
-                            loadAllData('fard');
-                            loadAllData('sunnah');
-
-                            if (window.updateTrackerView) {
-                                window.updateTrackerView('fard');
-                                window.updateTrackerView('sunnah');
-                            }
-                            if (window.renderStreaks) {
-                                window.renderStreaks('fard');
-                                window.renderStreaks('sunnah');
-                            }
-                            if (window.updateShellBar) window.updateShellBar();
-                            if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
-                            if (window.switchSection) window.switchSection('fard');
-
-                            showToast(t('import_success') + ' (' + importCount + ')', 'success');
-                            return;
-                        }
+                    // Try _profile metadata key first
+                    if (imported['_profile'] && imported['_profile'].name) {
+                        profileSource = imported['_profile'];
                     }
 
-                    // No _profile key — try salah_profiles or auto-create
-                    var fallbackProfile = null;
-
-                    // Check if salah_profiles contains profiles we can adopt
-                    if (imported['salah_profiles']) {
+                    // Try salah_profiles array
+                    if (!profileSource && imported['salah_profiles']) {
                         var pList = imported['salah_profiles'];
                         if (typeof pList === 'string') {
-                            try { pList = JSON.parse(pList); } catch(e2) { pList = null; }
+                            try { pList = JSON.parse(pList); } catch(ep) { pList = null; }
                         }
                         if (Array.isArray(pList) && pList.length > 0 && pList[0].name) {
-                            fallbackProfile = pList[0];
+                            profileSource = pList[0];
                         }
                     }
 
-                    // Try to detect profile ID from data keys
-                    if (!fallbackProfile) {
+                    // Auto-create default profile if nothing found
+                    if (!profileSource) {
                         var detectedId = null;
                         var dataKeys = Object.keys(imported);
                         for (var dk = 0; dk < dataKeys.length; dk++) {
                             var pidMatch = dataKeys[dk].match(/_(p_\d+_[a-z0-9]+)_/);
                             if (pidMatch) { detectedId = pidMatch[1]; break; }
                         }
-                        fallbackProfile = {
-                            id: detectedId || ('p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+                        profileSource = {
+                            id: detectedId || null,
                             name: currentLang === 'ar' ? '\u0645\u0633\u062a\u062e\u062f\u0645' : 'User',
                             age: 25,
                             gender: 'male'
                         };
                     }
 
-                    var fbName = fallbackProfile.name || (currentLang === 'ar' ? '\u0645\u0633\u062a\u062e\u062f\u0645' : 'User');
-                    var fbConfirmMsg = currentLang === 'ar'
-                        ? '\u0633\u064a\u062a\u0645 \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 \u0634\u062e\u0635\u064a:\n\n' + fbName + '\n\n\u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629\u061f'
-                        : 'A profile will be created:\n\n' + fbName + '\n\nContinue?';
-
-                    if (await showConfirm(fbConfirmMsg)) {
-                        var fbNewId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-                        var fbNewProfile = {
-                            id: fbNewId,
-                            name: fbName,
-                            age: fallbackProfile.age || 25,
-                            gender: fallbackProfile.gender || 'male'
-                        };
-                        var fbProfiles = getProfiles();
-                        fbProfiles.push(fbNewProfile);
-                        saveProfiles(fbProfiles);
-
-                        setActiveProfileId(fbNewId);
-                        App.Profiles.setActiveProfile(fbNewProfile);
-                        App.Storage.setActiveProfile(fbNewProfile);
-
-                        var fbCount = importAndConvertToHijri(imported, fbNewId);
-
-                        if (imported['_theme']) {
-                            localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
-                            loadTheme();
-                        }
-
-                        restoreHijriOverrides(imported);
-                        hideProfileScreen();
-                        applyProfileUI();
-
-                        var fbTodayH = getTodayHijri();
-                        setCurrentHijriMonth(fbTodayH.month);
-                        setCurrentHijriYear(fbTodayH.year);
-                        App.Storage.setCurrentMonth(fbTodayH.month);
-                        App.Storage.setCurrentYear(fbTodayH.year);
-
-                        ['fardTrackerMonthSelect','sunnahTrackerMonthSelect'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = fbTodayH.month; });
-                        ['fardTrackerYearInput','sunnahTrackerYearInput','fardDashboardYear','fardYearlyYear','sunnahDashboardYear','sunnahYearlyYear'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = fbTodayH.year; });
-
-                        loadAllData('fard');
-                        loadAllData('sunnah');
-                        cleanAllGhostDays();
-                        loadAllData('fard');
-                        loadAllData('sunnah');
-
-                        if (window.updateTrackerView) {
-                            window.updateTrackerView('fard');
-                            window.updateTrackerView('sunnah');
-                        }
-                        if (window.renderStreaks) {
-                            window.renderStreaks('fard');
-                            window.renderStreaks('sunnah');
-                        }
-                        if (window.updateShellBar) window.updateShellBar();
-                        if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
-                        if (window.switchSection) window.switchSection('fard');
-
-                        showToast(t('import_success') + ' (' + fbCount + ')', 'success');
-                    }
+                    _adoptProfileAndImport(imported, profileSource);
                     return;
                 }
 
-                {
-                    var currentId = activeProfile.id;
+                // --- Path 2: Active profile exists — import under it ---
+                var currentId = activeProfile.id;
+                var importCount = importAndConvertToHijri(imported, currentId);
 
-                    // Use the full day-by-day converter
-                    var importCount = importAndConvertToHijri(imported, currentId);
-
-                    // Apply theme if present
-                    if (imported['_theme']) {
-                        localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
-                        loadTheme();
-                    }
-
-                    // Restore Hijri calendar overrides (global)
-                    restoreHijriOverrides(imported);
-
-                    // Full reload: reset state to today's Hijri date
-                    var todayH = getTodayHijri();
-                    setCurrentHijriMonth(todayH.month);
-                    setCurrentHijriYear(todayH.year);
-                    App.Storage.setCurrentMonth(todayH.month);
-                    App.Storage.setCurrentYear(todayH.year);
-
-                    // Update ALL month/year selects (null-safe)
-                    var _ids = ['fardTrackerMonthSelect','sunnahTrackerMonthSelect'];
-                    _ids.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = todayH.month; });
-                    var _yids = ['fardTrackerYearInput','sunnahTrackerYearInput','fardDashboardYear','fardYearlyYear','sunnahDashboardYear','sunnahYearlyYear'];
-                    _yids.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = todayH.year; });
-
-                    // Reload data
-                    loadAllData('fard');
-                    loadAllData('sunnah');
-
-                    // Clean ghost days (day 30/31 in 29-day months)
-                    cleanAllGhostDays();
-
-                    // Reload again after cleanup
-                    loadAllData('fard');
-                    loadAllData('sunnah');
-
-                    // Force re-render of ALL views
-                    if (window.updateTrackerView) {
-                        window.updateTrackerView('fard');
-                        window.updateTrackerView('sunnah');
-                    }
-                    if (window.renderStreaks) {
-                        window.renderStreaks('fard');
-                        window.renderStreaks('sunnah');
-                    }
-
-                    // If dashboard is visible, update it
-                    var fardDash = document.getElementById('fardDashboardView');
-                    if (fardDash && fardDash.classList.contains('active') && window.updateDashboard) {
-                        window.updateDashboard('fard');
-                    }
-                    var sunnahDash = document.getElementById('sunnahDashboardView');
-                    if (sunnahDash && sunnahDash.classList.contains('active') && window.updateDashboard) {
-                        window.updateDashboard('sunnah');
-                    }
-
-                    // Inject qada tab if imported data contains a plan
-                    if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
-
-                    showToast(t('import_success') + ' (' + importCount + ')', 'success');
+                if (imported['_theme']) {
+                    localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
+                    loadTheme();
                 }
+
+                restoreHijriOverrides(imported);
+                _postImportRefresh();
+                showToast(t('import_success') + ' (' + importCount + ')', 'success');
+
             } catch (error) {
                 console.error('Import error:', error);
                 showToast(t('file_error'), 'error');
@@ -944,29 +845,31 @@
 
     // ================================================================
     // handleImportOnProfile — import from profile screen (before profile exists)
+    // Uses native confirm() for reliability
     // ================================================================
     function handleImportOnProfile(event) {
         var file = event.target.files[0];
         if (!file) return;
 
         var reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
                 var currentLang = getCurrentLang();
 
-                // Confirm before proceeding
-                var confirmMsg = currentLang === 'ar'
-                    ? '\u26a0\ufe0f \u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0647\u0630\u0647 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a\u061f'
-                    : '\u26a0\ufe0f Import this data?';
-                if (!(await showConfirm(confirmMsg))) return;
-
-                // Validate before writing anything
+                // Validate before anything
                 var validation = validateImportData(imported);
                 if (!validation.valid) {
                     showValidationError(validation);
                     return;
                 }
+
+                // Confirm with native confirm()
+                var confirmMsg = currentLang === 'ar'
+                    ? '\u26a0\ufe0f \u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0647\u0630\u0647 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a\u061f'
+                    : '\u26a0\ufe0f Import this data?';
+                if (!confirm(confirmMsg)) return;
+
                 sanitizeProfiles(imported);
 
                 if (imported['_profile']) {
@@ -987,15 +890,14 @@
                         loadTheme();
                     }
 
-                    // Use the same proven path as handleImport: selectProfile does everything
                     selectProfile(newId);
                     showToast(t('import_success'), 'success');
                     return;
                 }
 
-                // No profile found — store as pending import
+                // No _profile — store as pending for after profile creation
                 localStorage.setItem('_pending_import', e.target.result);
-                showToast(t('pending_import_saved'), 'success');
+                showToast(currentLang === 'ar' ? '\u0623\u0646\u0634\u0626 \u0645\u0644\u0641 \u0634\u062e\u0635\u064a \u0644\u0625\u062a\u0645\u0627\u0645 \u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f' : 'Create a profile to complete import', 'info');
                 if (window.renderProfilesList) window.renderProfilesList();
             } catch (error) {
                 showToast(t('file_error'), 'error');
