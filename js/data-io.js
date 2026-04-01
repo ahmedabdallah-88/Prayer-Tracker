@@ -671,9 +671,97 @@
                         }
                     }
 
-                    // No profile to adopt — store as pending
-                    localStorage.setItem('_pending_import', e.target.result);
-                    showToast(t('select_profile_first'), 'warning');
+                    // No _profile key — try salah_profiles or auto-create
+                    var fallbackProfile = null;
+
+                    // Check if salah_profiles contains profiles we can adopt
+                    if (imported['salah_profiles']) {
+                        var pList = imported['salah_profiles'];
+                        if (typeof pList === 'string') {
+                            try { pList = JSON.parse(pList); } catch(e2) { pList = null; }
+                        }
+                        if (Array.isArray(pList) && pList.length > 0 && pList[0].name) {
+                            fallbackProfile = pList[0];
+                        }
+                    }
+
+                    // Try to detect profile ID from data keys
+                    if (!fallbackProfile) {
+                        var detectedId = null;
+                        var dataKeys = Object.keys(imported);
+                        for (var dk = 0; dk < dataKeys.length; dk++) {
+                            var pidMatch = dataKeys[dk].match(/_(p_\d+_[a-z0-9]+)_/);
+                            if (pidMatch) { detectedId = pidMatch[1]; break; }
+                        }
+                        fallbackProfile = {
+                            id: detectedId || ('p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+                            name: currentLang === 'ar' ? '\u0645\u0633\u062a\u062e\u062f\u0645' : 'User',
+                            age: 25,
+                            gender: 'male'
+                        };
+                    }
+
+                    var fbName = fallbackProfile.name || (currentLang === 'ar' ? '\u0645\u0633\u062a\u062e\u062f\u0645' : 'User');
+                    var fbConfirmMsg = currentLang === 'ar'
+                        ? '\u0633\u064a\u062a\u0645 \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 \u0634\u062e\u0635\u064a:\n\n' + fbName + '\n\n\u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629\u061f'
+                        : 'A profile will be created:\n\n' + fbName + '\n\nContinue?';
+
+                    if (await showConfirm(fbConfirmMsg)) {
+                        var fbNewId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                        var fbNewProfile = {
+                            id: fbNewId,
+                            name: fbName,
+                            age: fallbackProfile.age || 25,
+                            gender: fallbackProfile.gender || 'male'
+                        };
+                        var fbProfiles = getProfiles();
+                        fbProfiles.push(fbNewProfile);
+                        saveProfiles(fbProfiles);
+
+                        setActiveProfileId(fbNewId);
+                        App.Profiles.setActiveProfile(fbNewProfile);
+                        App.Storage.setActiveProfile(fbNewProfile);
+
+                        var fbCount = importAndConvertToHijri(imported, fbNewId);
+
+                        if (imported['_theme']) {
+                            localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
+                            loadTheme();
+                        }
+
+                        restoreHijriOverrides(imported);
+                        hideProfileScreen();
+                        applyProfileUI();
+
+                        var fbTodayH = getTodayHijri();
+                        setCurrentHijriMonth(fbTodayH.month);
+                        setCurrentHijriYear(fbTodayH.year);
+                        App.Storage.setCurrentMonth(fbTodayH.month);
+                        App.Storage.setCurrentYear(fbTodayH.year);
+
+                        ['fardTrackerMonthSelect','sunnahTrackerMonthSelect'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = fbTodayH.month; });
+                        ['fardTrackerYearInput','sunnahTrackerYearInput','fardDashboardYear','fardYearlyYear','sunnahDashboardYear','sunnahYearlyYear'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = fbTodayH.year; });
+
+                        loadAllData('fard');
+                        loadAllData('sunnah');
+                        cleanAllGhostDays();
+                        loadAllData('fard');
+                        loadAllData('sunnah');
+
+                        if (window.updateTrackerView) {
+                            window.updateTrackerView('fard');
+                            window.updateTrackerView('sunnah');
+                        }
+                        if (window.renderStreaks) {
+                            window.renderStreaks('fard');
+                            window.renderStreaks('sunnah');
+                        }
+                        if (window.updateShellBar) window.updateShellBar();
+                        if (window.App && window.App.QadaTracker) window.App.QadaTracker.injectTab();
+                        if (window.switchSection) window.switchSection('fard');
+
+                        showToast(t('import_success') + ' (' + fbCount + ')', 'success');
+                    }
                     return;
                 }
 
