@@ -625,7 +625,7 @@
                             var importCount = importAndConvertToHijri(imported, newId);
 
                             if (imported['_theme']) {
-                                localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                                localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
                                 loadTheme();
                             }
 
@@ -685,7 +685,7 @@
 
                     // Apply theme if present
                     if (imported['_theme']) {
-                        localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                        localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
                         loadTheme();
                     }
 
@@ -895,7 +895,7 @@
                     importAndConvertToHijri(imported, newId);
 
                     if (imported['_theme']) {
-                        localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                        localStorage.setItem('salah_tracker_theme', sanitizeValue(String(imported['_theme'])));
                         loadTheme();
                     }
 
@@ -927,6 +927,7 @@
         handleImport:            handleImport,
         isGregorianKey:          isGregorianKey,
         importAndConvertToHijri: importAndConvertToHijri,
+        validateImportData:      validateImportData,
         migrateGregorianToHijri: migrateGregorianToHijri,
         migrateExistingData:     migrateExistingData,
         exportOldData:           exportOldData,

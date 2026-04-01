@@ -248,13 +248,24 @@ window.App.Profiles = (function() {
                 if (pendingImport) {
                     try {
                         var imported = JSON.parse(pendingImport);
-                        importAndConvertToHijri(imported, newId);
 
-                        if (imported['_theme']) {
-                            localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                        // Re-validate before writing (defense in depth)
+                        var DataIO = window.App && window.App.DataIO;
+                        var validation = DataIO && DataIO.validateImportData
+                            ? DataIO.validateImportData(imported)
+                            : { valid: true };
+                        if (!validation.valid) {
+                            console.error('Pending import failed validation:', validation.reason_en);
+                            localStorage.removeItem('_pending_import');
+                        } else {
+                            importAndConvertToHijri(imported, newId);
+
+                            if (imported['_theme']) {
+                                localStorage.setItem('salah_tracker_theme', imported['_theme']);
+                            }
+
+                            localStorage.removeItem('_pending_import');
                         }
-
-                        localStorage.removeItem('_pending_import');
                     } catch(e) {
                         console.error('Pending import error:', e);
                     }
