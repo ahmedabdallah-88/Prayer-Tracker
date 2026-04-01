@@ -1,44 +1,44 @@
-// Prayer Tracker PWA — Service Worker v316
-const CACHE_NAME = 'salah-tracker-v316';
+// Prayer Tracker PWA — Service Worker v317
+const CACHE_NAME = 'salah-tracker-v317';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
     // CSS (versioned)
-    './css/main.css?v=315',
-    './css/themes.css?v=304',
-    './css/dashboard.css?v=316',
-    './css/splash.css?v=304',
+    './css/main.css?v=317',
+    './css/themes.css?v=317',
+    './css/dashboard.css?v=317',
+    './css/splash.css?v=317',
     // JS modules (dependency order)
-    './js/config.js?v=304',
-    './js/storage.js?v=316',
-    './js/hijri-calendar.js?v=316',
-    './js/ui-utils.js?v=305',
-    './js/i18n.js?v=304',
-    './js/themes.js?v=304',
-    './js/profiles.js?v=307',
-    './js/female-features.js?v=304',
-    './js/fard-tracker.js?v=316',
-    './js/sunnah-tracker.js?v=304',
-    './js/jamaah-tracker.js?v=316',
-    './js/prayer-streaks.js?v=316',
-    './js/weekly-view.js?v=304',
-    './js/fasting-tracker.js?v=304',
-    './js/prayer-times.js?v=304',
-    './js/missed-prayer-notif.js?v=304',
-    './js/notifications.js?v=304',
-    './js/azkar-tracker.js?v=316',
-    './js/svg-charts.js?v=304',
-    './js/info-tooltips.js?v=304',
-    './js/qada-report.js?v=304',
-    './js/qada-calculator.js?v=304',
-    './js/qada-tracker.js?v=304',
-    './js/qada-dashboard.js?v=304',
-    './js/dashboard.js?v=316',
-    './js/year-overview.js?v=316',
-    './js/data-io.js?v=311',
-    './js/onboarding.js?v=304',
-    './js/app.js?v=316',
+    './js/config.js?v=317',
+    './js/storage.js?v=317',
+    './js/hijri-calendar.js?v=317',
+    './js/ui-utils.js?v=317',
+    './js/i18n.js?v=317',
+    './js/themes.js?v=317',
+    './js/profiles.js?v=317',
+    './js/female-features.js?v=317',
+    './js/fard-tracker.js?v=317',
+    './js/sunnah-tracker.js?v=317',
+    './js/jamaah-tracker.js?v=317',
+    './js/prayer-streaks.js?v=317',
+    './js/weekly-view.js?v=317',
+    './js/fasting-tracker.js?v=317',
+    './js/prayer-times.js?v=317',
+    './js/missed-prayer-notif.js?v=317',
+    './js/notifications.js?v=317',
+    './js/azkar-tracker.js?v=317',
+    './js/svg-charts.js?v=317',
+    './js/info-tooltips.js?v=317',
+    './js/qada-report.js?v=317',
+    './js/qada-calculator.js?v=317',
+    './js/qada-tracker.js?v=317',
+    './js/qada-dashboard.js?v=317',
+    './js/dashboard.js?v=317',
+    './js/year-overview.js?v=317',
+    './js/data-io.js?v=317',
+    './js/onboarding.js?v=317',
+    './js/app.js?v=317',
     // Icons
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
@@ -109,7 +109,10 @@ self.addEventListener('activate', event => {
     );
 });
 
-// ==================== FETCH — NETWORK FIRST, cache fallback ====================
+// ==================== FETCH — split strategy ====================
+// Navigation (HTML) → network-first (always get latest page)
+// Static assets (JS, CSS, images, fonts) → cache-first (SW version busting handles updates)
+// APIs → network-only
 self.addEventListener('fetch', event => {
     if (event.request.method !== 'GET') return;
 
@@ -124,27 +127,40 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // ALL resources — network first, cache fallback
-    event.respondWith(
-        fetch(event.request)
-            .then(response => {
+    // Navigation requests (HTML) — network first, offline fallback
+    if (event.request.mode === 'navigate' ||
+        (event.request.headers.get('accept') || '').indexOf('text/html') !== -1) {
+        event.respondWith(
+            fetch(event.request).then(response => {
                 if (response.ok) {
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
                 }
                 return response;
-            })
-            .catch(() => {
+            }).catch(() => {
                 return caches.match(event.request, { ignoreSearch: true }).then(cached => {
                     if (cached) return cached;
-                    if (event.request.mode === 'navigate') {
-                        return new Response(OFFLINE_HTML, {
-                            headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                        });
-                    }
-                    return new Response('', { status: 408 });
+                    return new Response(OFFLINE_HTML, {
+                        headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                    });
                 });
             })
+        );
+        return;
+    }
+
+    // Static assets (JS, CSS, images, fonts) — cache first
+    event.respondWith(
+        caches.match(event.request).then(cached => {
+            if (cached) return cached;
+            return fetch(event.request).then(response => {
+                if (response.ok) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                }
+                return response;
+            });
+        }).catch(() => new Response('', { status: 408 }))
     );
 });
 
@@ -173,44 +189,12 @@ self.addEventListener('notificationclick', event => {
 self.addEventListener('notificationclose', event => {
 });
 
-// ==================== BACKGROUND PERIODIC SYNC ====================
-self.addEventListener('periodicsync', event => {
-    if (event.tag === 'prayer-check') {
-        event.waitUntil(checkAndNotify());
-    }
-});
-
 // ==================== MESSAGE FROM MAIN APP ====================
+// NOTE: SCHEDULE_NOTIFICATION removed — SW setTimeout is unreliable
+// (browser may kill SW before timer fires). Scheduling handled in notifications.js.
+// NOTE: periodicsync handler removed — was empty dead code.
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-
-    if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
-        const { title, body, tag, delay } = event.data;
-        if (delay && delay > 0) {
-            setTimeout(() => {
-                self.registration.showNotification(title, {
-                    body: body,
-                    icon: 'icons/icon-192x192.png',
-                    badge: 'icons/icon-72x72.png',
-                    tag: tag,
-                    renotify: true,
-                    vibrate: [200, 100, 200],
-                    data: { url: './' }
-                });
-            }, delay);
-        }
-    }
 });
-
-// Helper for background sync
-async function checkAndNotify() {
-    try {
-        const allClients = await clients.matchAll({ type: 'window' });
-        if (allClients.length === 0 || allClients.every(c => c.visibilityState === 'hidden')) {
-            // Main app sends scheduled notifications via message
-        }
-    } catch(e) {
-    }
-}

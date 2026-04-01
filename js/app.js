@@ -347,13 +347,26 @@ window.App.Main = (function() {
 
         // PWA Service Worker
         if ('serviceWorker' in navigator) {
-            // Auto-reload when new SW takes control
+            // Show update toast when new SW takes control (instead of auto-reload)
             var swRefreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', function() {
-                if (!swRefreshing) {
-                    swRefreshing = true;
+                if (swRefreshing) return;
+                swRefreshing = true;
+                var I18n = window.App.I18n;
+                var lang = I18n ? I18n.getCurrentLang() : 'ar';
+                var msg = lang === 'ar'
+                    ? 'تحديث متاح — اضغط هنا للتحديث'
+                    : 'Update available — tap to refresh';
+                var container = document.getElementById('toastContainer');
+                if (!container) { window.location.reload(); return; }
+                var toast = document.createElement('div');
+                toast.className = 'toast info show';
+                toast.textContent = msg;
+                toast.style.cursor = 'pointer';
+                container.appendChild(toast);
+                toast.addEventListener('click', function() {
                     window.location.reload();
-                }
+                });
             });
 
             // Listen for notification clicks from SW
@@ -388,17 +401,6 @@ window.App.Main = (function() {
 
                         // Force check for SW updates on every page load
                         reg.update();
-
-                        // Register periodic background sync
-                        if ('periodicSync' in reg) {
-                            navigator.permissions.query({ name: 'periodic-background-sync' }).then(function(status) {
-                                if (status.state === 'granted') {
-                                    reg.periodicSync.register('prayer-check', {
-                                        minInterval: 15 * 60 * 1000
-                                    });
-                                }
-                            }).catch(function() {});
-                        }
                     })
                     .catch(function(err) { console.error('SW registration failed:', err); });
             });
