@@ -18,14 +18,20 @@ window.App.Dashboard = (function() {
 
     // ==================== SHARED DATA GATHERERS ====================
 
+    function _maxMonthForYear(hYear) {
+        var todayH = Hijri.getTodayHijri();
+        return (hYear === todayH.year) ? todayH.month : 12;
+    }
+
     function gatherPrayerStats(type, hYear) {
         var prayers = Storage.getPrayersArray(type);
         var dataObj = Storage.getDataObject(type);
         var results = [];
+        var maxM = _maxMonthForYear(hYear);
 
         prayers.forEach(function(prayer) {
             var completed = 0, total = 0, congCount = 0;
-            for (var m = 1; m <= 12; m++) {
+            for (var m = 1; m <= maxM; m++) {
                 var days = Hijri.getHijriDaysInMonth(hYear, m);
                 total += days;
                 if (dataObj[m] && dataObj[m][prayer.id]) {
@@ -59,7 +65,8 @@ window.App.Dashboard = (function() {
     function gatherMonthlyData(type, hYear) {
         var completionData = [];
         var congData = [];
-        for (var m = 1; m <= 12; m++) {
+        var maxM = _maxMonthForYear(hYear);
+        for (var m = 1; m <= maxM; m++) {
             completionData.push(Storage.getMonthStats(type, m, hYear).percentage);
             if (type === 'fard') {
                 var prayers = Storage.getPrayersArray('fard');
@@ -90,8 +97,9 @@ window.App.Dashboard = (function() {
             : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         var weekTotals = [0,0,0,0,0,0,0];
         var weekCong = [0,0,0,0,0,0,0];
+        var maxM = _maxMonthForYear(hYear);
 
-        for (var month = 1; month <= 12; month++) {
+        for (var month = 1; month <= maxM; month++) {
             var cd = Storage.getCongregationData(hYear, month);
             var daysInMonth = Hijri.getHijriDaysInMonth(hYear, month);
             for (var day = 1; day <= daysInMonth; day++) {
@@ -135,7 +143,8 @@ window.App.Dashboard = (function() {
         _set(type + 'YearCompletionRate', yearStats.percentage + '%');
 
         var bestMonth = { month: 0, percentage: 0 };
-        for (var m = 1; m <= 12; m++) {
+        var maxMBest = _maxMonthForYear(hYear);
+        for (var m = 1; m <= maxMBest; m++) {
             var ms = Storage.getMonthStats(type, m, hYear);
             if (ms.percentage > bestMonth.percentage) bestMonth = { month: m, percentage: ms.percentage };
         }
