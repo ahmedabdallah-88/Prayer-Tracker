@@ -99,6 +99,73 @@
             return { valid: false, reason_ar: '\u062d\u062c\u0645 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0643\u0628\u064a\u0631 \u062c\u062f\u0627\u064b (\u0623\u0643\u062b\u0631 \u0645\u0646 2 \u0645\u064a\u062c\u0627)', reason_en: 'Data too large (over 2MB)' };
         }
 
+        // Validate profile structures
+        var profileResult = validateProfileData(data);
+        if (!profileResult.valid) return profileResult;
+
+        return { valid: true };
+    }
+
+    // ================================================================
+    // validateProfileData — validate _profile and salah_profiles
+    // ================================================================
+    function validateProfileData(data) {
+        var profilesToCheck = [];
+
+        // Collect _profile if present
+        if (data['_profile']) {
+            profilesToCheck.push(data['_profile']);
+        }
+
+        // Collect salah_profiles if present
+        if (data['salah_profiles']) {
+            var list = data['salah_profiles'];
+            if (typeof list === 'string') {
+                try { list = JSON.parse(list); } catch(e) {
+                    return { valid: false, reason_ar: '\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0644\u0641\u0627\u062a \u0627\u0644\u0634\u062e\u0635\u064a\u0629 \u062a\u0627\u0644\u0641\u0629', reason_en: 'Corrupted profiles data' };
+                }
+            }
+            if (!Array.isArray(list)) {
+                return { valid: false, reason_ar: '\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u0644\u0641\u0627\u062a \u0627\u0644\u0634\u062e\u0635\u064a\u0629 \u063a\u064a\u0631 \u0635\u0627\u0644\u062d\u0629', reason_en: 'Invalid profiles data' };
+            }
+            for (var i = 0; i < list.length; i++) {
+                profilesToCheck.push(list[i]);
+            }
+        }
+
+        for (var p = 0; p < profilesToCheck.length; p++) {
+            var prof = profilesToCheck[p];
+            if (!prof || typeof prof !== 'object') {
+                return { valid: false, reason_ar: '\u0645\u0644\u0641 \u0634\u062e\u0635\u064a \u063a\u064a\u0631 \u0635\u0627\u0644\u062d', reason_en: 'Invalid profile entry' };
+            }
+            // Must have id and name
+            if (!prof.id || typeof prof.id !== 'string') {
+                return { valid: false, reason_ar: '\u0645\u0644\u0641 \u0634\u062e\u0635\u064a \u0628\u062f\u0648\u0646 \u0645\u0639\u0631\u0651\u0641', reason_en: 'Profile missing ID' };
+            }
+            if (!prof.name || typeof prof.name !== 'string') {
+                return { valid: false, reason_ar: '\u0645\u0644\u0641 \u0634\u062e\u0635\u064a \u0628\u062f\u0648\u0646 \u0627\u0633\u0645', reason_en: 'Profile missing name' };
+            }
+            // Name length limit (1-50 chars)
+            if (prof.name.length > 50) {
+                return { valid: false, reason_ar: '\u0627\u0633\u0645 \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a \u0637\u0648\u064a\u0644 \u062c\u062f\u0627\u064b', reason_en: 'Profile name too long' };
+            }
+            // Reject names containing HTML/script tags
+            if (/<[^>]*>/g.test(prof.name)) {
+                return { valid: false, reason_ar: '\u0627\u0633\u0645 \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a \u064a\u062d\u062a\u0648\u064a \u0639\u0644\u0649 \u0623\u0643\u0648\u0627\u062f \u063a\u064a\u0631 \u0645\u0633\u0645\u0648\u062d\u0629', reason_en: 'Profile name contains invalid code' };
+            }
+            // Gender must be valid if present
+            if (prof.gender && prof.gender !== 'male' && prof.gender !== 'female') {
+                return { valid: false, reason_ar: '\u0627\u0644\u062c\u0646\u0633 \u063a\u064a\u0631 \u0635\u0627\u0644\u062d \u0641\u064a \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a', reason_en: 'Invalid gender in profile' };
+            }
+            // Age must be reasonable (1-120) if present
+            if (prof.age !== undefined && prof.age !== null) {
+                var age = parseInt(prof.age);
+                if (isNaN(age) || age < 1 || age > 120) {
+                    return { valid: false, reason_ar: '\u0627\u0644\u0639\u0645\u0631 \u063a\u064a\u0631 \u0635\u0627\u0644\u062d \u0641\u064a \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a', reason_en: 'Invalid age in profile' };
+                }
+            }
+        }
+
         return { valid: true };
     }
 
@@ -504,6 +571,13 @@
         reader.onload = async function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
+                var currentLang = getCurrentLang();
+
+                // Confirm before proceeding
+                var confirmMsg = currentLang === 'ar'
+                    ? '\u26a0\ufe0f \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0633\u064a\u0633\u062a\u0628\u062f\u0644 \u062c\u0645\u064a\u0639 \u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u062d\u0627\u0644\u064a\u0629.\n\n\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f\u061f'
+                    : '\u26a0\ufe0f Importing data will replace ALL your current data.\n\nAre you sure?';
+                if (!(await showConfirm(confirmMsg))) return;
 
                 // Validate before writing anything
                 var validation = validateImportData(imported);
@@ -514,7 +588,6 @@
                 sanitizeProfiles(imported);
 
                 var activeProfile = getActiveProfile();
-                var currentLang = getCurrentLang();
 
                 if (!activeProfile) {
                     // Check if imported data contains a profile — offer to adopt it
@@ -593,7 +666,7 @@
                     return;
                 }
 
-                if (await showConfirm(t('import_replace'))) {
+                {
                     var currentId = activeProfile.id;
 
                     // Use the full day-by-day converter
@@ -781,6 +854,13 @@
         reader.onload = async function(e) {
             try {
                 var imported = JSON.parse(e.target.result);
+                var currentLang = getCurrentLang();
+
+                // Confirm before proceeding
+                var confirmMsg = currentLang === 'ar'
+                    ? '\u26a0\ufe0f \u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0647\u0630\u0647 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a\u061f'
+                    : '\u26a0\ufe0f Import this data?';
+                if (!(await showConfirm(confirmMsg))) return;
 
                 // Validate before writing anything
                 var validation = validateImportData(imported);
@@ -789,8 +869,6 @@
                     return;
                 }
                 sanitizeProfiles(imported);
-
-                var currentLang = getCurrentLang();
 
                 if (imported['_profile']) {
                     var ip = imported['_profile'];
