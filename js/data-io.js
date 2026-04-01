@@ -170,6 +170,17 @@
     }
 
     // ================================================================
+    // sanitizeValue — strip dangerous HTML/script from any string
+    // ================================================================
+    function sanitizeValue(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/<script[\s\S]*?<\/script>/gi, '')  // Remove script blocks
+                  .replace(/<\/script>/gi, '')                   // Leftover closing tags
+                  .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')  // Remove event handlers (onerror=, onclick=, etc.)
+                  .replace(/<img[^>]*onerror[^>]*>/gi, '');      // Remove img with onerror
+    }
+
+    // ================================================================
     // sanitizeProfiles — strip HTML tags from profile names
     // ================================================================
     function sanitizeProfiles(data) {
@@ -228,12 +239,12 @@
         var keys = Object.keys(imported);
         for (var i = 0; i < keys.length; i++) {
             if (keys[i].startsWith('salah_hijri_days_')) {
-                localStorage.setItem(keys[i], JSON.stringify(imported[keys[i]]));
+                localStorage.setItem(keys[i], sanitizeValue(JSON.stringify(imported[keys[i]])));
             }
         }
         // Restore salah_hijri_overrides (custom month start dates)
         if (imported['salah_hijri_overrides'] !== undefined) {
-            localStorage.setItem('salah_hijri_overrides', JSON.stringify(imported['salah_hijri_overrides']));
+            localStorage.setItem('salah_hijri_overrides', sanitizeValue(JSON.stringify(imported['salah_hijri_overrides'])));
         }
     }
 
@@ -534,7 +545,7 @@
                         existing[k1] = data[k1];
                     }
                 });
-                try { localStorage.setItem(hKey, JSON.stringify(existing)); } catch(e) {}
+                try { localStorage.setItem(hKey, sanitizeValue(JSON.stringify(existing))); } catch(e) {}
             });
         }
 
@@ -549,12 +560,12 @@
             try { var s = localStorage.getItem(hKey); if (s) existing = JSON.parse(s); } catch(e) {}
             var data = hijriVolFast[hKey];
             Object.keys(data).forEach(function(d) { existing[d] = data[d]; });
-            try { localStorage.setItem(hKey, JSON.stringify(existing)); } catch(e) {}
+            try { localStorage.setItem(hKey, sanitizeValue(JSON.stringify(existing))); } catch(e) {}
         });
 
         // Direct keys
         Object.keys(directKeys).forEach(function(k) {
-            try { localStorage.setItem(k, JSON.stringify(directKeys[k])); } catch(e) {}
+            try { localStorage.setItem(k, sanitizeValue(JSON.stringify(directKeys[k]))); } catch(e) {}
         });
 
         return importCount;
