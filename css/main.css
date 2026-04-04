@@ -4693,6 +4693,313 @@ body::before {
     }
 }
 
+/* ==================== NOTIFICATION CENTER ==================== */
+.nc-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg-main);
+    z-index: 25000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.nc-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+    padding: 24px 20px 20px;
+    padding-top: max(24px, env(safe-area-inset-top));
+    color: #fff;
+}
+
+.nc-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.nc-title {
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+.nc-back {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nc-subtitle {
+    font-size: 0.85em;
+    opacity: 0.85;
+    margin-bottom: 16px;
+}
+
+.nc-master {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.nc-master-label {
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.nc-master-sub {
+    font-size: 0.75em;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+/* Toggle switch */
+.nc-toggle {
+    width: 48px; height: 28px;
+    border-radius: 14px;
+    background: #ccc;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.25s;
+    flex-shrink: 0;
+}
+
+.nc-toggle.on {
+    background: var(--primary);
+}
+
+.nc-header .nc-toggle {
+    background: rgba(255,255,255,0.3);
+}
+
+.nc-header .nc-toggle.on {
+    background: #fff;
+}
+
+.nc-toggle-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.nc-toggle.on .nc-toggle-dot {
+    transform: translateX(20px);
+}
+
+.nc-header .nc-toggle .nc-toggle-dot {
+    background: #fff;
+}
+
+.nc-header .nc-toggle.on .nc-toggle-dot {
+    background: var(--primary);
+}
+
+[dir="rtl"] .nc-toggle-dot {
+    left: auto;
+    right: 3px;
+}
+
+[dir="rtl"] .nc-toggle.on .nc-toggle-dot {
+    transform: translateX(-20px);
+}
+
+/* Cards container */
+.nc-cards {
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.nc-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: opacity 0.2s;
+}
+
+.nc-card.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.nc-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+.nc-card-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nc-card-icon .material-symbols-rounded {
+    font-size: 22px;
+    color: #fff;
+}
+
+.nc-icon-blue    { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
+.nc-icon-red     { background: linear-gradient(135deg, #EF4444, #F87171); }
+.nc-icon-purple  { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
+.nc-icon-orange  { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+.nc-icon-green   { background: linear-gradient(135deg, #10B981, #34D399); }
+.nc-icon-gold    { background: linear-gradient(135deg, #D97706, #F59E0B); }
+
+.nc-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.nc-card-title {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.nc-card-desc {
+    font-size: 0.78em;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+/* Status indicator */
+.nc-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72em;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.nc-status.active {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.1);
+}
+
+.nc-status.inactive {
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.04);
+}
+
+.nc-status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.nc-status.active .nc-status-dot { background: var(--primary); }
+.nc-status.inactive .nc-status-dot { background: var(--text-muted); }
+
+/* Sub-settings */
+.nc-sub {
+    padding: 0 16px 14px;
+    border-top: 1px solid rgba(0,0,0,0.04);
+}
+
+.nc-sub.hidden {
+    display: none;
+}
+
+.nc-sub-label {
+    font-size: 0.78em;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 10px 0 8px;
+}
+
+/* Chips */
+.nc-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.nc-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.nc-chip.selected {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* Checkboxes */
+.nc-check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+}
+
+.nc-check-row + .nc-check-row {
+    border-top: 1px solid rgba(0,0,0,0.04);
+}
+
+.nc-checkbox {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.nc-checkbox .material-symbols-rounded {
+    font-size: 16px;
+    color: transparent;
+    transition: color 0.2s;
+}
+
+.nc-checkbox.checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.nc-checkbox.checked .material-symbols-rounded {
+    color: #fff;
+}
+
+.nc-check-label {
+    font-size: 0.82em;
+    color: var(--text-primary);
+}
+
 /* ==================== REDUCED MOTION — CATCH-ALL ==================== */
 @media (prefers-reduced-motion: reduce) {
     /* Today pulse */

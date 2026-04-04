@@ -452,6 +452,11 @@ window.App.Config = {
         'insight_label': { ar: 'ملخص يومي ذكي', en: 'Smart Daily Insight' },
         'insight_subtitle': { ar: 'إشعار بعد العشاء بملخص يومك', en: 'Post-Isha notification with your day summary' },
 
+        // Notification Center
+        'nc_title': { ar: 'مركز الإشعارات', en: 'Notification Center' },
+        'nc_subtitle': { ar: 'تحكم في جميع إشعارات التطبيق', en: 'Manage all app notifications' },
+        'nc_enable_all': { ar: 'تفعيل جميع الإشعارات', en: 'Enable all notifications' },
+
         // Onboarding
         'usage_guide': { ar: 'دليل الاستخدام', en: 'Usage Guide' },
         'usage_guide_subtitle': { ar: 'جولة تعريفية بالتطبيق', en: 'Guided app walkthrough' },

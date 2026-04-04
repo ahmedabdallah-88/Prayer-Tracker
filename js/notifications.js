@@ -1154,7 +1154,20 @@ window.App.Notifications = (function() {
         checkAfterAthan: checkAfterAthan,
         checkAthanTime: checkAthanTime,
         checkFastingNotifications: checkFastingNotifications,
-        checkDailyInsight: checkDailyInsight
+        checkDailyInsight: checkDailyInsight,
+
+        // Bridge: Notification Center settings changed
+        onSettingsChanged: function(newSettings) {
+            if (!newSettings) return;
+            // Sync legacy module state from NC settings
+            beforeEnabled = newSettings.prePrayer ? newSettings.prePrayer.enabled : beforeEnabled;
+            beforeMinutes = newSettings.prePrayer ? newSettings.prePrayer.minutes : beforeMinutes;
+            afterEnabled = newSettings.missedPrayer ? newSettings.missedPrayer.enabled : afterEnabled;
+            afterMinutes = newSettings.missedPrayer ? newSettings.missedPrayer.delayMinutes : afterMinutes;
+            athanSoundEnabled = newSettings.athan ? newSettings.athan.enabled : athanSoundEnabled;
+            fastingNotifEnabled = newSettings.fasting ? newSettings.fasting.enabled : fastingNotifEnabled;
+            dailyInsightEnabled = newSettings.dailyInsight ? newSettings.dailyInsight.enabled : dailyInsightEnabled;
+        }
     };
 
 })();

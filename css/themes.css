@@ -806,3 +806,50 @@
 [data-theme="dark"] .day-box.today-box.week-complete {
     box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.3), 0 0 0 6px rgba(218, 165, 32, 0.4) !important;
 }
+
+/* ==================== NOTIFICATION CENTER — DARK ==================== */
+[data-theme="dark"] .nc-screen {
+    background: var(--bg-main);
+}
+
+[data-theme="dark"] .nc-card {
+    background: var(--card-bg);
+    border-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .nc-card-title { color: var(--text-primary); }
+[data-theme="dark"] .nc-card-desc { color: var(--text-secondary); }
+[data-theme="dark"] .nc-check-label { color: var(--text-primary); }
+
+[data-theme="dark"] .nc-chip {
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .nc-chip.selected {
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .nc-checkbox {
+    border-color: rgba(255,255,255,0.15);
+}
+
+[data-theme="dark"] .nc-toggle {
+    background: rgba(255,255,255,0.15);
+}
+
+[data-theme="dark"] .nc-toggle.on {
+    background: var(--primary);
+}
+
+[data-theme="dark"] .nc-sub {
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .nc-check-row + .nc-check-row {
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .nc-status.inactive {
+    background: rgba(255,255,255,0.06);
+}

@@ -45,6 +45,7 @@ js/qada-dashboard.js — qada analytics
 js/info-tooltips.js — (i) info tooltip system
 js/data-io.js       — export/import JSON
 js/onboarding.js    — first-time user tour
+js/notification-center.js — notification center UI + settings
 js/notifications.js — browser notifications
 ```
 
