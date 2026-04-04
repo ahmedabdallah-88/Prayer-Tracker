@@ -484,23 +484,13 @@ body {
 .section { display: none; }
 .section.active { display: block; }
 
-/* ===== SEQUENTIAL FADE PAGE TRANSITIONS ===== */
-.section.section-fading-out {
-    display: block !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease;
-    z-index: 2;
+/* ===== SIMPLE FADE-IN FOR SECTION SWITCHING ===== */
+@keyframes sectionFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .section.section-fading-out {
-        transition: none !important;
-    }
+.section-fade-in {
+    animation: sectionFadeIn 0.2s ease;
 }
 
 /* ==================== VIEW TOGGLE (hidden - using sub-tabs) ==================== */
@@ -4734,10 +4724,6 @@ body::before {
     /* Tooltip/info animations */
     .info-tooltip { animation: none !important; }
     .toast { animation: none !important; }
-
-    /* Section cross-fade */
-    .section.section-fading-in,
-    .section.section-fading-out { transition: none !important; }
 
     /* Catch-all: kill ALL animations and shorten transitions globally */
     *, *::before, *::after {

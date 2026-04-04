@@ -20,7 +20,7 @@ window.App.Tracker = (function() {
     // Track whether today-pulse animation has been shown (once per session)
     var _todayPulseShown = {};
     // Section transition tracking
-    var _prevSection = null; // null = first load (no animation)
+    // (crossfade state removed — using simple fade-in now)
 
     // ==================== PRIVATE HELPERS ====================
 
@@ -130,52 +130,14 @@ window.App.Tracker = (function() {
             }, 400);
         }
 
-        // ── Sequential fade section transition (no overlap) ──
+        // ── Simple fade-in on section switch ──
         var sectionIds = ['fardSection', 'sunnahSection', 'fastingSection', 'azkarSection'];
-        var targetId = section + 'Section';
-
-        var oldEl = _prevSection ? document.getElementById(_prevSection) : null;
-        var newEl = document.getElementById(targetId);
-        _prevSection = targetId;
-
-        // Skip animation on first load, same section, or reduced motion
-        if (!oldEl || oldEl === newEl) return;
-        var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reducedMotion) return;
-
-        // Hide new section while old fades out (prevent double-vision)
-        if (newEl) {
-            newEl.style.animation = 'none';
-            newEl.style.opacity = '0';
+        var targetEl = document.getElementById(section + 'Section');
+        for (var si = 0; si < sectionIds.length; si++) {
+            var s = document.getElementById(sectionIds[si]);
+            if (s) s.classList.remove('section-fade-in');
         }
-
-        // Step 1: Fade OUT old section
-        oldEl.classList.add('active');
-        oldEl.classList.add('section-fading-out');
-
-        // Step 2: After fade-out, hide old and fade IN new
-        setTimeout(function() {
-            oldEl.classList.remove('active', 'section-fading-out');
-            for (var i = 0; i < sectionIds.length; i++) {
-                var s = document.getElementById(sectionIds[i]);
-                if (s && s !== newEl) {
-                    s.classList.remove('active', 'section-fading-out');
-                }
-            }
-
-            if (newEl) {
-                requestAnimationFrame(function() {
-                    newEl.style.transition = 'opacity 0.15s ease';
-                    newEl.style.opacity = '1';
-                    // Clean up after fade-in
-                    setTimeout(function() {
-                        newEl.style.animation = '';
-                        newEl.style.transition = '';
-                        newEl.style.opacity = '';
-                    }, 180);
-                });
-            }
-        }, 150);
+        if (targetEl) targetEl.classList.add('section-fade-in');
     }
 
     // ==================== switchView (merged: base + Fiori sub-tabs) ====================
