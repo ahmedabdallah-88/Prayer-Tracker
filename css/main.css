@@ -484,14 +484,7 @@ body {
 .section { display: none; }
 .section.active { display: block; }
 
-/* ===== SIMPLE FADE-IN FOR SECTION SWITCHING ===== */
-@keyframes sectionFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.section-fade-in {
-    animation: sectionFadeIn 0.2s ease;
-}
+/* Section switching is instant — no animation */
 
 /* ==================== VIEW TOGGLE (hidden - using sub-tabs) ==================== */
 .view-toggle { display: none; }
@@ -2361,12 +2354,12 @@ body {
 .confirm-btn.no { background: rgba(0,0,0,0.04); color: var(--text-secondary); }
 .confirm-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* ==================== SECTION/VIEW TRANSITIONS ==================== */
-.section, .view {
+/* ==================== VIEW TRANSITIONS ==================== */
+.view {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.section.active, .view.active {
+.view.active {
     animation: fadeSlideIn 0.3s ease forwards;
 }
 

@@ -20,7 +20,7 @@ window.App.Tracker = (function() {
     // Track whether today-pulse animation has been shown (once per session)
     var _todayPulseShown = {};
     // Section transition tracking
-    // (crossfade state removed — using simple fade-in now)
+    // Section switching state
 
     // ==================== PRIVATE HELPERS ====================
 
@@ -130,14 +130,7 @@ window.App.Tracker = (function() {
             }, 400);
         }
 
-        // ── Simple fade-in on section switch ──
-        var sectionIds = ['fardSection', 'sunnahSection', 'fastingSection', 'azkarSection'];
-        var targetEl = document.getElementById(section + 'Section');
-        for (var si = 0; si < sectionIds.length; si++) {
-            var s = document.getElementById(sectionIds[si]);
-            if (s) s.classList.remove('section-fade-in');
-        }
-        if (targetEl) targetEl.classList.add('section-fade-in');
+        // Section switching is instant — display toggled by .active class above
     }
 
     // ==================== switchView (merged: base + Fiori sub-tabs) ====================
