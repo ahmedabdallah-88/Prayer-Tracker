@@ -28,6 +28,7 @@ js/ui-utils.js      — toasts, confirms, haptics, reminders
 js/themes.js        — theme management
 js/profiles.js      — multi-profile system
 js/female-features.js — hayd/nifas exempt days
+js/tracker-utils.js — shared tracker utilities (month nav, stagger, tap-bounce)
 js/fard-tracker.js  — fard prayer tracking, tabs, calendar grid, handleDayClick()
 js/sunnah-tracker.js — sunnah prayer tracking
 js/jamaah-tracker.js — congregation streaks (lanterns)
