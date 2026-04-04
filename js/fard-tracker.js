@@ -130,10 +130,9 @@ window.App.Tracker = (function() {
             }, 400);
         }
 
-        // ── Crossfade section transition ──
+        // ── Sequential fade section transition (no overlap) ──
         var sectionIds = ['fardSection', 'sunnahSection', 'fastingSection', 'azkarSection'];
         var targetId = section + 'Section';
-        if (section === 'azkar') targetId = 'azkarSection';
 
         var oldEl = _prevSection ? document.getElementById(_prevSection) : null;
         var newEl = document.getElementById(targetId);
@@ -144,21 +143,17 @@ window.App.Tracker = (function() {
         var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reducedMotion) return;
 
-        // Old section: position absolute so it overlaps (not stacks) during fade
-        oldEl.classList.add('active');
-        oldEl.classList.add('section-fading-out');
-
-        // New section: override CSS fadeSlideIn animation so crossfade controls opacity
+        // Hide new section while old fades out (prevent double-vision)
         if (newEl) {
             newEl.style.animation = 'none';
             newEl.style.opacity = '0';
-            requestAnimationFrame(function() {
-                newEl.style.transition = 'opacity 0.3s ease';
-                newEl.style.opacity = '1';
-            });
         }
 
-        // After transition: clean up
+        // Step 1: Fade OUT old section
+        oldEl.classList.add('active');
+        oldEl.classList.add('section-fading-out');
+
+        // Step 2: After fade-out, hide old and fade IN new
         setTimeout(function() {
             oldEl.classList.remove('active', 'section-fading-out');
             for (var i = 0; i < sectionIds.length; i++) {
@@ -167,12 +162,20 @@ window.App.Tracker = (function() {
                     s.classList.remove('active', 'section-fading-out');
                 }
             }
+
             if (newEl) {
-                newEl.style.animation = '';
-                newEl.style.transition = '';
-                newEl.style.opacity = '';
+                requestAnimationFrame(function() {
+                    newEl.style.transition = 'opacity 0.15s ease';
+                    newEl.style.opacity = '1';
+                    // Clean up after fade-in
+                    setTimeout(function() {
+                        newEl.style.animation = '';
+                        newEl.style.transition = '';
+                        newEl.style.opacity = '';
+                    }, 180);
+                });
             }
-        }, 340);
+        }, 150);
     }
 
     // ==================== switchView (merged: base + Fiori sub-tabs) ====================

@@ -484,7 +484,7 @@ body {
 .section { display: none; }
 .section.active { display: block; }
 
-/* ===== CROSSFADE PAGE TRANSITIONS ===== */
+/* ===== SEQUENTIAL FADE PAGE TRANSITIONS ===== */
 .section.section-fading-out {
     display: block !important;
     position: absolute;
@@ -493,7 +493,7 @@ body {
     right: 0;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.15s ease;
     z-index: 2;
 }
 
