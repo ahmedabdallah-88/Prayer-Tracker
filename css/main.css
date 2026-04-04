@@ -3473,6 +3473,83 @@ body {
     text-align: center;
 }
 
+/* ==================== GPS LOCATION BAR ==================== */
+.location-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    margin-bottom: 10px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.location-bar-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.location-bar-icon {
+    font-size: 18px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.location-bar-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.location-bar-flag {
+    font-size: 16px;
+    margin: 0 2px;
+}
+
+.location-bar-refresh {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.location-bar-refresh:active {
+    background: rgba(0,0,0,0.06);
+}
+
+.location-bar-refresh .material-symbols-rounded {
+    font-size: 20px;
+}
+
+.location-bar-refresh.refreshing .material-symbols-rounded {
+    animation: loc-spin 0.8s linear infinite;
+}
+
+@keyframes loc-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .location-bar-refresh.refreshing .material-symbols-rounded {
+        animation: none;
+    }
+}
+
 /* ==================== PRAYER TIMES COMPACT ==================== */
 .prayer-times-compact {
     margin-bottom: 14px;

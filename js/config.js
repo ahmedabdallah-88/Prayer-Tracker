@@ -452,6 +452,9 @@ window.App.Config = {
         'insight_label': { ar: 'ملخص يومي ذكي', en: 'Smart Daily Insight' },
         'insight_subtitle': { ar: 'إشعار بعد العشاء بملخص يومك', en: 'Post-Isha notification with your day summary' },
 
+        // Location Bar
+        'loc_detecting': { ar: '\u062c\u0627\u0631\u064a \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u0648\u0642\u0639...', en: 'Detecting location...' },
+
         // Notification Center
         'nc_title': { ar: 'مركز الإشعارات', en: 'Notification Center' },
         'nc_subtitle': { ar: 'تحكم في جميع إشعارات التطبيق', en: 'Manage all app notifications' },

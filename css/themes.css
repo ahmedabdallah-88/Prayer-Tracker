@@ -694,6 +694,18 @@
     background: rgba(212,160,60,0.08);
 }
 
+/* GPS Location Bar dark mode */
+[data-theme="dark"] .location-bar {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .location-bar-refresh {
+    color: rgba(255,255,255,0.5);
+}
+[data-theme="dark"] .location-bar-refresh:active {
+    background: rgba(255,255,255,0.1);
+}
+
 /* Prayer times: unselected boxes dark mode */
 [data-theme="dark"] .pt-item {
     background: rgba(255,255,255,0.08);

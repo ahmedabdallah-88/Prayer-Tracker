@@ -1,5 +1,5 @@
-// Prayer Tracker PWA — Service Worker v328
-const CACHE_NAME = 'salah-tracker-v328';
+// Prayer Tracker PWA — Service Worker v329
+const CACHE_NAME = 'salah-tracker-v329';
 const ASSETS = [
     './',
     './index.html',
@@ -57,7 +57,7 @@ const ASSETS = [
     './audio/athan-makkah.mp3',
     // CDN fonts (cached on first fetch)
     'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&family=Rubik:wght@400;500;700&display=swap',
-    'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add,add_circle,alarm,analytics,assignment_late,auto_awesome,badge,bedtime,bolt,brightness_2,cake,calculate,calendar_month,calendar_today,calendar_view_month,check,check_circle,chevron_left,chevron_right,circle,close,compare_arrows,dark_mode,date_range,delete,delete_outline,do_not_disturb,done_all,download,edit,edit_calendar,emoji_events,event,event_repeat,face,female,grid_view,history,info,insights,light_mode,local_fire_department,location_on,male,menu_book,mosque,nights_stay,notification_important,notifications,notifications_active,partly_cloudy_day,person,person_add,play_arrow,print,refresh,restaurant,routine,schedule,school,settings,show_chart,speed,star,stop,swap_horiz,system_update,target,translate,trending_down,trending_up,upload_file,verified,volume_up,warning,water_drop,wb_sunny,wb_twilight,wifi_off&display=swap',
+    'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add,add_circle,alarm,analytics,assignment_late,auto_awesome,badge,bedtime,bolt,brightness_2,cake,calculate,calendar_month,calendar_today,calendar_view_month,check,check_circle,chevron_left,chevron_right,circle,close,compare_arrows,dark_mode,date_range,delete,delete_outline,do_not_disturb,done_all,download,edit,edit_calendar,emoji_events,event,event_repeat,face,female,grid_view,history,info,insights,light_mode,local_fire_department,location_on,male,menu_book,mosque,my_location,nights_stay,notification_important,notifications,notifications_active,partly_cloudy_day,person,person_add,play_arrow,print,refresh,restaurant,routine,schedule,school,settings,show_chart,speed,star,stop,swap_horiz,system_update,target,translate,trending_down,trending_up,upload_file,verified,volume_up,warning,water_drop,wb_sunny,wb_twilight,wifi_off&display=swap',
     'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap'
 ];
 

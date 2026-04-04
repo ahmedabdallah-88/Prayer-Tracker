@@ -86,20 +86,26 @@ window.App.PrayerTimes = (function() {
         ).then(function(response) {
             return response.json();
         }).then(function(json) {
-            var city = '';
+            var cityName = '';
+            var countryName = '';
             var countryCode = '';
             if (json && json.address) {
-                city = json.address.city || json.address.town || json.address.village || json.address.state || '';
+                cityName = json.address.city || json.address.town || json.address.village || json.address.state || '';
+                countryName = json.address.country || '';
                 countryCode = (json.address.country_code || '').toUpperCase();
-                if (json.address.country) {
-                    city = city ? (city + '\u060C ' + json.address.country) : json.address.country;
-                }
+            }
+            // Combined display string (backward compat)
+            var city = cityName;
+            if (cityName && countryName) {
+                city = cityName + '\u060C ' + countryName;
+            } else if (!cityName && countryName) {
+                city = countryName;
             }
 
             if (city) {
-                localStorage.setItem('salah_city_name', JSON.stringify({ lat: lat, lng: lng, city: city, countryCode: countryCode }));
+                localStorage.setItem('salah_city_name', JSON.stringify({ lat: lat, lng: lng, city: city, cityName: cityName, countryName: countryName, countryCode: countryCode }));
             }
-            return { city: city, countryCode: countryCode };
+            return { city: city, cityName: cityName, countryName: countryName, countryCode: countryCode };
         }).catch(function(e) {
             console.error('Reverse geocode error:', e);
 
@@ -109,12 +115,12 @@ window.App.PrayerTimes = (function() {
                 if (cached) {
                     var data = JSON.parse(cached);
                     if (Math.abs(data.lat - lat) < 0.05 && Math.abs(data.lng - lng) < 0.05) {
-                        return { city: data.city, countryCode: data.countryCode || '' };
+                        return { city: data.city, cityName: data.cityName || '', countryName: data.countryName || '', countryCode: data.countryCode || '' };
                     }
                 }
             } catch(e2) {}
 
-            return { city: '', countryCode: '' };
+            return { city: '', cityName: '', countryName: '', countryCode: '' };
         });
     }
 
@@ -252,6 +258,8 @@ window.App.PrayerTimes = (function() {
                                 isha: timings.Isha
                             },
                             location: cityName || (json.data.meta ? json.data.meta.timezone : ''),
+                            cityName: geoResult.cityName || '',
+                            countryName: geoResult.countryName || '',
                             method: method,
                             methodName: methodName,
                             countryCode: countryCode,
@@ -348,6 +356,70 @@ window.App.PrayerTimes = (function() {
         return { active: active, next: next, prayers: prayers, nowMin: nowMin };
     }
 
+    // ==================== LOCATION BAR ====================
+
+    function countryCodeToFlag(cc) {
+        if (!cc || cc.length !== 2) return '';
+        var first = 0x1F1E6 + cc.charCodeAt(0) - 65;
+        var second = 0x1F1E6 + cc.charCodeAt(1) - 65;
+        // Use surrogate pairs for code points above 0xFFFF
+        function toSurrogate(cp) {
+            if (cp <= 0xFFFF) return String.fromCharCode(cp);
+            cp -= 0x10000;
+            return String.fromCharCode(0xD800 + (cp >> 10), 0xDC00 + (cp & 0x3FF));
+        }
+        return toSurrogate(first) + toSurrogate(second);
+    }
+
+    function updateLocationBar() {
+        var bar = document.getElementById('locationBar');
+        var text = document.getElementById('locationBarText');
+        if (!bar || !text) return;
+
+        if (!prayerTimesData) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        var city = prayerTimesData.cityName || '';
+        var country = prayerTimesData.countryName || '';
+        var cc = prayerTimesData.countryCode || '';
+        var flag = countryCodeToFlag(cc);
+
+        // Build display: "City, Country 🇪🇬" or just "Country 🇪🇬"
+        var display = '';
+        if (city && country) {
+            display = city + '\u060C ' + country;
+        } else if (city) {
+            display = city;
+        } else if (country) {
+            display = country;
+        } else if (prayerTimesData.location) {
+            display = prayerTimesData.location;
+        }
+
+        if (!display) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        if (flag) {
+            display = '<span class="location-bar-flag">' + flag + '</span> ' + display;
+        }
+        text.innerHTML = display;
+        bar.style.display = '';
+    }
+
+    function refreshLocation() {
+        var btn = document.getElementById('locationBarRefresh');
+        if (btn) btn.classList.add('refreshing');
+        refreshPrayerTimes();
+        // Remove spin after 2s
+        setTimeout(function() {
+            if (btn) btn.classList.remove('refreshing');
+        }, 2000);
+    }
+
     // ==================== RENDER ====================
 
     function getPrayerName(id) {
@@ -430,6 +502,9 @@ window.App.PrayerTimes = (function() {
         if (locEl && prayerTimesData.location) {
             locEl.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">location_on</span> ' + prayerTimesData.location;
         }
+
+        // Update location bar
+        updateLocationBar();
 
         // Update next prayer countdown card
         renderNextPrayerCountdown();
@@ -605,7 +680,10 @@ window.App.PrayerTimes = (function() {
         renderPrayerTimes: renderPrayerTimes,
         renderNextPrayerCountdown: renderNextPrayerCountdown,
         refreshPrayerTimes: refreshPrayerTimes,
-        startPrayerTimesMonitor: startPrayerTimesMonitor
+        startPrayerTimesMonitor: startPrayerTimesMonitor,
+        updateLocationBar: updateLocationBar,
+        refreshLocation: refreshLocation,
+        countryCodeToFlag: countryCodeToFlag
     };
 })();
 
@@ -621,3 +699,4 @@ window.getPrayerName = window.App.PrayerTimes.getPrayerName;
 window.getUserLocation = window.App.PrayerTimes.getUserLocation;
 window.reverseGeocode = window.App.PrayerTimes.reverseGeocode;
 window.getPrayerMethod = window.App.PrayerTimes.getPrayerMethod;
+window.refreshLocation = window.App.PrayerTimes.refreshLocation;
