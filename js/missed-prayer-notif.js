@@ -89,6 +89,15 @@ window.App.MissedPrayerNotif = (function() {
             prayerMinutes[pid] = PrayerTimes.parseTimeToMinutes(timings[pid]);
         }
 
+        // Between midnight and Fajr, ALL of today's prayers are still in the future.
+        // The Hijri date has already rolled over, so today's data is empty — but no
+        // prayer can be "missed" yet because none have started.
+        if (nowMin < prayerMinutes['fajr']) {
+            container.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+
         var missedPrayers = [];
 
         for (var i = 0; i < PRAYER_ORDER.length; i++) {
@@ -97,20 +106,7 @@ window.App.MissedPrayerNotif = (function() {
 
             // Determine if this prayer's time has "passed"
             // A prayer is passed 30 minutes after its start time
-            var hasPassed = false;
-            var BUFFER = 30; // minutes after prayer start
-
-            if (prayerId === 'isha') {
-                var fajrTime = prayerMinutes['fajr'];
-                if (nowMin < fajrTime) {
-                    // After midnight, before fajr — isha from "yesterday" is passed
-                    hasPassed = true;
-                } else {
-                    hasPassed = (nowMin >= prayerTime + BUFFER);
-                }
-            } else {
-                hasPassed = (nowMin >= prayerTime + BUFFER);
-            }
+            var hasPassed = (nowMin >= prayerTime + 30);
 
             if (!hasPassed) continue;
 
