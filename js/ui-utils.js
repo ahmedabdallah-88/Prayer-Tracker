@@ -198,8 +198,7 @@ window.App.UI = (function() {
         }
     }
 
-    // Check reminders every 5 minutes
-    setInterval(checkPrayerReminders, 5 * 60 * 1000);
+    // Reminder interval removed — replaced by missed-prayer-notif.js
 
     // ==================== OFFLINE DETECTION ====================
 
@@ -275,6 +274,22 @@ window.App.UI = (function() {
 
     // ==================== HAPTIC FEEDBACK ====================
 
+    var _audioCtx = null;
+
+    function _getAudioContext() {
+        if (!_audioCtx || _audioCtx.state === 'closed') {
+            try {
+                _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch(e) {
+                return null;
+            }
+        }
+        if (_audioCtx.state === 'suspended') {
+            _audioCtx.resume();
+        }
+        return _audioCtx;
+    }
+
     function hapticFeedback(type) {
         try {
             if (navigator.vibrate) {
@@ -289,7 +304,8 @@ window.App.UI = (function() {
 
         try {
             if (type === 'success' || type === 'medium') {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var ctx = _getAudioContext();
+                if (!ctx) return;
                 var osc = ctx.createOscillator();
                 var gain = ctx.createGain();
                 osc.connect(gain);
@@ -299,7 +315,6 @@ window.App.UI = (function() {
                 osc.start();
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
                 osc.stop(ctx.currentTime + 0.1);
-                setTimeout(function() { ctx.close(); }, 200);
             }
         } catch(e) {}
     }
