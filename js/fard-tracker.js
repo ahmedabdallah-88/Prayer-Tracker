@@ -476,12 +476,8 @@ window.App.Tracker = (function() {
         var isCurrentMonth = (todayH.year === hYear && todayH.month === hMonth);
 
         // Update compact month nav label
-        var monthLabel = document.getElementById(type + 'TrackerMonthLabel');
-        if (monthLabel) {
-            monthLabel.textContent = Hijri.getHijriMonthName(hMonth - 1) + ' ' + hYear;
-        }
-        var daysPill = document.getElementById(type === 'fard' ? 'monthDaysToggleBtn' : type + 'MonthDaysPill');
-        if (daysPill) daysPill.textContent = daysInMonth;
+        var pillId = type === 'fard' ? 'monthDaysToggleBtn' : type + 'MonthDaysPill';
+        window.App.TrackerUtils.updateMonthLabel(type + 'TrackerMonthLabel', pillId, hMonth, hYear, daysInMonth);
 
         var activePrayerId = _getActiveTab(type);
         // Validate tab exists in prayers array
@@ -757,25 +753,9 @@ window.App.Tracker = (function() {
 
         // ── Feature #10: Stagger fade-in on month change (when scrollToTab is truthy) ──
         if (scrollToTab) {
-            var allDayBoxes = grid.querySelectorAll('.day-box');
-            var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (!reducedMotion) {
-                for (var si = 0; si < allDayBoxes.length; si++) {
-                    allDayBoxes[si].classList.add('day-entering');
-                    allDayBoxes[si].style.animationDelay = (si * 15) + 'ms';
-                }
-                // After stagger completes: remove day-entering, then apply week glow
-                var staggerMs = allDayBoxes.length * 15 + 300;
-                setTimeout(function() {
-                    for (var ri = 0; ri < allDayBoxes.length; ri++) {
-                        allDayBoxes[ri].classList.remove('day-entering');
-                        allDayBoxes[ri].style.animationDelay = '';
-                    }
-                    _applyWeekGlow(grid);
-                }, staggerMs);
-            } else {
+            window.App.TrackerUtils.staggerFadeIn(grid, '.day-box', function() {
                 _applyWeekGlow(grid);
-            }
+            });
         } else {
             _applyWeekGlow(grid);
         }
@@ -1011,16 +991,7 @@ window.App.Tracker = (function() {
             }
         }
 
-        // Animate month label slide
-        var monthLabel = document.getElementById(type + 'TrackerMonthLabel');
-        if (monthLabel) {
-            monthLabel.classList.remove('slide-from-left', 'slide-from-right');
-            void monthLabel.offsetWidth;
-            var isRTL = document.documentElement.dir === 'rtl';
-            var slideDir = (delta > 0) === isRTL ? 'slide-from-left' : 'slide-from-right';
-            monthLabel.classList.add(slideDir);
-            setTimeout(function() { monthLabel.classList.remove('slide-from-left', 'slide-from-right'); }, 250);
-        }
+        window.App.TrackerUtils.animateMonthLabel(type + 'TrackerMonthLabel', delta);
 
         var elMonth = document.getElementById(type + 'TrackerMonthSelect');
         var elYear = document.getElementById(type + 'TrackerYearInput');
@@ -1219,10 +1190,7 @@ window.App.Tracker = (function() {
                 var box = gridWrap.children[day - 1];
                 if (box) {
                     // Feature #6: tap-bounce
-                    box.classList.remove('tap-bounce');
-                    void box.offsetWidth;
-                    box.classList.add('tap-bounce');
-                    setTimeout(function() { box.classList.remove('tap-bounce'); }, 350);
+                    window.App.TrackerUtils.tapBounce(box);
                     // Glow
                     if (glowClass) {
                         box.classList.add(glowClass);

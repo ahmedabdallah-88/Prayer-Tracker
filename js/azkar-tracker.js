@@ -55,12 +55,7 @@ window.App.Azkar = (function() {
         var currentLang = I18n.getCurrentLang();
 
         // Update compact month nav label
-        var monthLabel = document.getElementById('azkarTrackerMonthLabel');
-        if (monthLabel) {
-            monthLabel.textContent = Hijri.getHijriMonthName(month - 1) + ' ' + year;
-        }
-        var daysPill = document.getElementById('azkarMonthDaysPill');
-        if (daysPill) daysPill.textContent = daysInMonth;
+        window.App.TrackerUtils.updateMonthLabel('azkarTrackerMonthLabel', 'azkarMonthDaysPill', month, year, daysInMonth);
 
         var container = document.getElementById('azkarPrayersContainer');
         if (!container) return;
@@ -164,10 +159,7 @@ window.App.Azkar = (function() {
                 }
                 (function(d, catId, box) {
                     box.onclick = function() {
-                        box.classList.remove('tap-bounce');
-                        void box.offsetWidth;
-                        box.classList.add('tap-bounce');
-                        setTimeout(function() { box.classList.remove('tap-bounce'); }, 350);
+                        window.App.TrackerUtils.tapBounce(box);
                         var azData = getAzkarData(year, month);
                         if (!azData[catId]) azData[catId] = {};
                         azData[catId][d] = !azData[catId][d];
@@ -183,14 +175,7 @@ window.App.Azkar = (function() {
         if (isCurrentMonth) _azkarPulseShown = true;
 
         // Feature #10: stagger fade-in
-        var reducedMA = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!reducedMA) {
-            var allAzBoxes = grid.querySelectorAll('.day-box');
-            for (var ai = 0; ai < allAzBoxes.length; ai++) {
-                allAzBoxes[ai].classList.add('day-entering');
-                allAzBoxes[ai].style.animationDelay = (ai * 15) + 'ms';
-            }
-        }
+        window.App.TrackerUtils.staggerFadeIn(grid, '.day-box');
 
         gridWrap.appendChild(grid);
         trackerCard.appendChild(gridWrap);
@@ -217,27 +202,17 @@ window.App.Azkar = (function() {
 
     function changeAzkarMonth(delta) {
         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+        var TU = window.App.TrackerUtils;
         var mEl = document.getElementById('azkarTrackerMonth');
         var yEl = document.getElementById('azkarTrackerYear');
         var month = mEl ? parseInt(mEl.value) : Hijri.getCurrentHijriMonth();
         var year = yEl ? parseInt(yEl.value) : Hijri.getCurrentHijriYear();
-        month += delta;
-        if (month > 12) { month = 1; year++; }
-        else if (month < 1) { month = 12; year--; }
+        var stepped = TU.stepMonth(month, year, delta);
+        month = stepped.month; year = stepped.year;
         if (mEl) mEl.value = month;
         if (yEl) yEl.value = year;
 
-        // Animate month label slide
-        var monthLabel = document.getElementById('azkarTrackerMonthLabel');
-        if (monthLabel) {
-            monthLabel.classList.remove('slide-from-left', 'slide-from-right');
-            void monthLabel.offsetWidth;
-            var isRTL = document.documentElement.dir === 'rtl';
-            var slideDir = (delta > 0) === isRTL ? 'slide-from-left' : 'slide-from-right';
-            monthLabel.classList.add(slideDir);
-            setTimeout(function() { monthLabel.classList.remove('slide-from-left', 'slide-from-right'); }, 250);
-        }
-
+        TU.animateMonthLabel('azkarTrackerMonthLabel', delta);
         updateAzkarTracker();
     }
 

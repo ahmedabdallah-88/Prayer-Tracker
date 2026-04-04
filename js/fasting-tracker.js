@@ -173,12 +173,7 @@ window.App.Fasting = (function() {
         var exemptData = isFemale ? window.App.Female.getExemptDays(fastingYear, fastingMonth) : {};
 
         // Update compact month nav label
-        var monthLabel = document.getElementById('fastingMonthLabel');
-        if (monthLabel && window.App.Hijri) {
-            monthLabel.textContent = window.App.Hijri.getHijriMonthName(fastingMonth - 1) + ' ' + fastingYear;
-        }
-        var daysPill = document.getElementById('fastingMonthDaysPill');
-        if (daysPill) daysPill.textContent = daysInMonth;
+        window.App.TrackerUtils.updateMonthLabel('fastingMonthLabel', 'fastingMonthDaysPill', fastingMonth, fastingYear, daysInMonth);
 
         var grid = document.getElementById('voluntaryFastingGrid');
         if (!grid) return;
@@ -221,10 +216,7 @@ window.App.Fasting = (function() {
                 if (!dayExempt2) {
                     (function(d, box) {
                         box.onclick = function() {
-                            box.classList.remove('tap-bounce');
-                            void box.offsetWidth;
-                            box.classList.add('tap-bounce');
-                            setTimeout(function() { box.classList.remove('tap-bounce'); }, 350);
+                            window.App.TrackerUtils.tapBounce(box);
                             var volData = getVolFastingData(fastingYear, fastingMonth);
                             volData[d] = !volData[d];
                             window.App.UI.hapticFeedback(volData[d] ? 'success' : 'light');
@@ -247,14 +239,7 @@ window.App.Fasting = (function() {
         }
 
         // Feature #10: stagger fade-in
-        var reducedM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!reducedM) {
-            var allVolBoxes = grid.querySelectorAll('.fasting-day-box');
-            for (var vi = 0; vi < allVolBoxes.length; vi++) {
-                allVolBoxes[vi].classList.add('day-entering');
-                allVolBoxes[vi].style.animationDelay = (vi * 15) + 'ms';
-            }
-        }
+        window.App.TrackerUtils.staggerFadeIn(grid, '.fasting-day-box');
 
         // Shawwal 6-day banner
         renderShawwalBanner(fastingMonth, fastingYear);
@@ -267,27 +252,17 @@ window.App.Fasting = (function() {
 
     function changeFastingMonth(delta) {
         if (window.App.UI && window.App.UI.haptic) window.App.UI.haptic('soft');
+        var TU = window.App.TrackerUtils;
         var mEl = document.getElementById('fastingMonthSelect');
         var yEl = document.getElementById('fastingYearVoluntary');
         if (mEl) fastingMonth = parseInt(mEl.value);
         if (yEl) fastingYear = parseInt(yEl.value);
-        fastingMonth += delta;
-        if (fastingMonth > 12) { fastingMonth = 1; fastingYear++; }
-        else if (fastingMonth < 1) { fastingMonth = 12; fastingYear--; }
+        var stepped = TU.stepMonth(fastingMonth, fastingYear, delta);
+        fastingMonth = stepped.month; fastingYear = stepped.year;
         if (mEl) mEl.value = fastingMonth;
         if (yEl) yEl.value = fastingYear;
 
-        // Animate month label slide
-        var monthLabel = document.getElementById('fastingMonthLabel');
-        if (monthLabel) {
-            monthLabel.classList.remove('slide-from-left', 'slide-from-right');
-            void monthLabel.offsetWidth;
-            var isRTL = document.documentElement.dir === 'rtl';
-            var slideDir = (delta > 0) === isRTL ? 'slide-from-left' : 'slide-from-right';
-            monthLabel.classList.add(slideDir);
-            setTimeout(function() { monthLabel.classList.remove('slide-from-left', 'slide-from-right'); }, 250);
-        }
-
+        TU.animateMonthLabel('fastingMonthLabel', delta);
         updateVoluntaryFasting();
     }
 
@@ -388,10 +363,7 @@ window.App.Fasting = (function() {
 
             (function(d, b) {
                 b.onclick = function() {
-                    b.classList.remove('tap-bounce');
-                    void b.offsetWidth;
-                    b.classList.add('tap-bounce');
-                    setTimeout(function() { b.classList.remove('tap-bounce'); }, 350);
+                    window.App.TrackerUtils.tapBounce(b);
                     cycleFastingDay(year, d);
                 };
             })(day, box);
