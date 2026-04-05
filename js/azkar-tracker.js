@@ -136,8 +136,12 @@ window.App.Azkar = (function() {
         // ── SINGLE CALENDAR GRID ──
         var gridWrap = document.createElement('div');
         gridWrap.className = 'prayer-tab-grid';
+        gridWrap.innerHTML = window.App.TrackerUtils.buildDayNamesRow();
         var grid = document.createElement('div');
         grid.className = 'days-grid flow-grid';
+
+        // Align day 1 under its real day-of-week column
+        window.App.TrackerUtils.appendEmptyCells(grid, window.App.TrackerUtils.getFirstDayOffset(year, month));
 
         for (var day = 1; day <= daysInMonth; day++) {
             var dayBox = document.createElement('div');

@@ -397,24 +397,35 @@ window.App.Tracker = (function() {
     // ==================== Complete Week Glow ====================
     function _applyWeekGlow(grid) {
         if (!grid) return;
-        var boxes = grid.querySelectorAll('.day-box');
-        if (!boxes.length) return;
-
-        // Remove old glow classes
-        for (var i = 0; i < boxes.length; i++) {
-            boxes[i].classList.remove('week-complete', 'week-complete-jamaah');
+        // Clear old glow on all day boxes
+        var dayBoxes = grid.querySelectorAll('.day-box');
+        for (var i = 0; i < dayBoxes.length; i++) {
+            dayBoxes[i].classList.remove('week-complete', 'week-complete-jamaah');
         }
 
-        // Process visual rows of 7
-        for (var rowStart = 0; rowStart < boxes.length; rowStart += 7) {
-            var rowEnd = Math.min(rowStart + 7, boxes.length);
+        // Walk grid children (includes .day-empty offset cells) in groups of 7 = visual rows
+        var cells = grid.children;
+        if (!cells.length) return;
+
+        for (var rowStart = 0; rowStart < cells.length; rowStart += 7) {
+            var rowEnd = Math.min(rowStart + 7, cells.length);
             if (rowEnd - rowStart < 7) break; // skip partial last row
+
+            // Collect only real day boxes from this visual row
+            var rowBoxes = [];
+            for (var k = rowStart; k < rowEnd; k++) {
+                if (cells[k].classList && cells[k].classList.contains('day-box')) {
+                    rowBoxes.push(cells[k]);
+                }
+            }
+            // Only full Sat→Fri weeks qualify for week glow
+            if (rowBoxes.length < 7) continue;
 
             var allPrayed = true;
             var allJamaah = true;
 
-            for (var k = rowStart; k < rowEnd; k++) {
-                var box = boxes[k];
+            for (var m = 0; m < rowBoxes.length; m++) {
+                var box = rowBoxes[m];
                 var isExempt = box.classList.contains('exempt');
                 if (isExempt) {
                     allJamaah = false;
@@ -433,9 +444,9 @@ window.App.Tracker = (function() {
 
             if (allPrayed) {
                 var cls = allJamaah ? 'week-complete-jamaah' : 'week-complete';
-                for (var m = rowStart; m < rowEnd; m++) {
-                    if (!boxes[m].classList.contains('exempt')) {
-                        boxes[m].classList.add(cls);
+                for (var n = 0; n < rowBoxes.length; n++) {
+                    if (!rowBoxes[n].classList.contains('exempt')) {
+                        rowBoxes[n].classList.add(cls);
                     }
                 }
             }
@@ -658,9 +669,13 @@ window.App.Tracker = (function() {
         // ── SINGLE CALENDAR GRID ──
         var gridWrap = document.createElement('div');
         gridWrap.className = 'prayer-tab-grid';
+        gridWrap.innerHTML = window.App.TrackerUtils.buildDayNamesRow();
         var grid = document.createElement('div');
         grid.className = 'days-grid flow-grid';
         var lang = I18n.getCurrentLang();
+
+        // Align day 1 under its real day-of-week column
+        window.App.TrackerUtils.appendEmptyCells(grid, window.App.TrackerUtils.getFirstDayOffset(hYear, hMonth));
 
         for (var day = 1; day <= daysInMonth; day++) {
             var dayBox = document.createElement('div');
@@ -823,6 +838,9 @@ window.App.Tracker = (function() {
             grid.className = 'days-grid flow-grid';
             var lang = I18n.getCurrentLang();
 
+            // Align day 1 under its real day-of-week column
+            window.App.TrackerUtils.appendEmptyCells(grid, window.App.TrackerUtils.getFirstDayOffset(hYear, hMonth));
+
             for (var day = 1; day <= daysInMonth; day++) {
                 var dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
@@ -880,7 +898,7 @@ window.App.Tracker = (function() {
 
             _applyWeekGlow(grid);
 
-            oldGridWrap.innerHTML = '';
+            oldGridWrap.innerHTML = window.App.TrackerUtils.buildDayNamesRow();
             oldGridWrap.appendChild(grid);
         }
     }
@@ -1187,7 +1205,9 @@ window.App.Tracker = (function() {
         requestAnimationFrame(function() {
             var gridWrap = document.querySelector('#' + type + 'TrackerPrayersContainer .prayer-tab-grid .flow-grid');
             if (gridWrap) {
-                var box = gridWrap.children[day - 1];
+                // Skip .day-empty offset cells — day boxes are in Hijri-day order
+                var dayBoxes = gridWrap.querySelectorAll('.day-box');
+                var box = dayBoxes[day - 1];
                 if (box) {
                     // Feature #6: tap-bounce
                     window.App.TrackerUtils.tapBounce(box);

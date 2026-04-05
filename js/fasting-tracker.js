@@ -80,7 +80,13 @@ window.App.Fasting = (function() {
 
         var grid = document.getElementById('voluntaryFastingGrid');
         if (grid && grid.parentNode) {
-            grid.parentNode.insertBefore(banner, grid);
+            // Insert before day-names-row if present, so names stay directly above grid
+            var anchor = grid;
+            var prev = grid.previousElementSibling;
+            if (prev && prev.classList && prev.classList.contains('day-names-row')) {
+                anchor = prev;
+            }
+            grid.parentNode.insertBefore(banner, anchor);
         }
     }
 
@@ -178,6 +184,10 @@ window.App.Fasting = (function() {
         var grid = document.getElementById('voluntaryFastingGrid');
         if (!grid) return;
         grid.innerHTML = '';
+        window.App.TrackerUtils.ensureDayNamesRow(grid);
+
+        // Align day 1 under its real day-of-week column
+        window.App.TrackerUtils.appendEmptyCells(grid, window.App.TrackerUtils.getFirstDayOffset(fastingYear, fastingMonth));
 
         var fasted = 0, exemptCount = 0;
 
@@ -337,9 +347,13 @@ window.App.Fasting = (function() {
         var grid = document.getElementById('fastingGrid');
         if (!grid) return;
         grid.innerHTML = '';
+        window.App.TrackerUtils.ensureDayNamesRow(grid);
 
         // Ramadan is always Hijri month 9 - get its days
         var ramadanDays = window.App.Hijri.getHijriDaysInMonth(year, 9);
+
+        // Align day 1 (Ramadan 1) under its real day-of-week column
+        window.App.TrackerUtils.appendEmptyCells(grid, window.App.TrackerUtils.getFirstDayOffset(year, 9));
 
         // Show Gregorian reference
         var refEl = document.getElementById('ramadanHijriRef');

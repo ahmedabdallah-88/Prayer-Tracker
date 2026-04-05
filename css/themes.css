@@ -163,6 +163,14 @@
     color: #E8E6E1;
 }
 
+[data-theme="dark"] .day-name-pill {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .day-name-pill.friday {
+    background: rgba(var(--accent-rgb, 212, 160, 60), 0.15);
+}
+
 [data-theme="dark"] .shell-bar {
     background: rgba(26,26,30,0.9);
     border-bottom-color: rgba(255,255,255,0.06);

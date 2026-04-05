@@ -3363,6 +3363,50 @@ body {
     }
 }
 
+/* Invisible placeholder cell — used to offset day 1 to its real weekday column */
+.day-empty {
+    width: 44px;
+    height: 44px;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+@media (max-width: 480px) {
+    .day-empty { width: 40px; height: 40px; }
+}
+
+/* ==================== DAY NAMES HEADER (pill row above calendar grid) ==================== */
+.day-names-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 0 10px 6px;
+}
+
+.day-name-pill {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary, #6B7280);
+    padding: 4px 0;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.03);
+    font-family: 'Rubik', sans-serif;
+}
+
+.day-name-pill.friday {
+    background: rgba(var(--accent-rgb, 212, 160, 60), 0.12);
+    color: var(--accent, #D4A03C);
+    font-weight: 700;
+}
+
+/* Hide on very small screens where the grid collapses to 6 columns */
+@media (max-width: 360px) {
+    .day-names-row {
+        display: none;
+    }
+}
+
 /* ==================== SUNNAH FASTING BADGES ==================== */
 .sunnah-fast-badge {
     pointer-events: none;

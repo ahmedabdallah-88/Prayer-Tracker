@@ -91,11 +91,78 @@ window.App.TrackerUtils = (function() {
         setTimeout(function() { el.classList.remove('tap-bounce'); }, 350);
     }
 
+    /**
+     * Build the day-names header row HTML (7 pills: Sat, Sun, Mon, Tue, Wed, Thu, Fri).
+     * Friday (last column) gets the .friday class for golden highlight.
+     * Returns an HTML string.
+     */
+    function buildDayNamesRow() {
+        var I18n = window.App && window.App.I18n;
+        var lang = (I18n && I18n.getCurrentLang) ? I18n.getCurrentLang() : 'ar';
+        var names = (lang === 'ar')
+            ? ['سبت', 'أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع']
+            : ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        var html = '<div class="day-names-row">';
+        for (var i = 0; i < names.length; i++) {
+            var cls = 'day-name-pill' + (i === 6 ? ' friday' : '');
+            html += '<div class="' + cls + '">' + names[i] + '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    /**
+     * Return the number of empty leading cells needed so that day 1 of the
+     * given Hijri month lines up under its real day-of-week column.
+     * Grid column order: 0=Sat, 1=Sun, 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri.
+     */
+    function getFirstDayOffset(hYear, hMonth) {
+        var Hijri = window.App && window.App.Hijri;
+        if (!Hijri || !Hijri.hijriToGregorian) return 0;
+        var gDate = Hijri.hijriToGregorian(hYear, hMonth, 1);
+        if (!gDate || typeof gDate.getDay !== 'function') return 0;
+        // JS getDay: 0=Sun..6=Sat. Our grid: 0=Sat..6=Fri.
+        return (gDate.getDay() + 1) % 7;
+    }
+
+    /**
+     * Append `count` invisible .day-empty placeholder cells to a grid.
+     * Used to offset day 1 to its real day-of-week column.
+     */
+    function appendEmptyCells(gridEl, count) {
+        if (!gridEl || count <= 0) return;
+        for (var i = 0; i < count; i++) {
+            var cell = document.createElement('div');
+            cell.className = 'day-empty';
+            cell.setAttribute('aria-hidden', 'true');
+            gridEl.appendChild(cell);
+        }
+    }
+
+    /**
+     * Ensure a .day-names-row sits directly before the given grid element.
+     * Rebuilds on each call so language switches are reflected immediately.
+     */
+    function ensureDayNamesRow(gridEl) {
+        if (!gridEl || !gridEl.parentNode) return;
+        var existing = gridEl.previousElementSibling;
+        if (existing && existing.classList && existing.classList.contains('day-names-row')) {
+            gridEl.parentNode.removeChild(existing);
+        }
+        var tmp = document.createElement('div');
+        tmp.innerHTML = buildDayNamesRow();
+        gridEl.parentNode.insertBefore(tmp.firstChild, gridEl);
+    }
+
     return {
         stepMonth: stepMonth,
         updateMonthLabel: updateMonthLabel,
         animateMonthLabel: animateMonthLabel,
         staggerFadeIn: staggerFadeIn,
-        tapBounce: tapBounce
+        tapBounce: tapBounce,
+        buildDayNamesRow: buildDayNamesRow,
+        ensureDayNamesRow: ensureDayNamesRow,
+        getFirstDayOffset: getFirstDayOffset,
+        appendEmptyCells: appendEmptyCells
     };
 })();
