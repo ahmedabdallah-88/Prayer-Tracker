@@ -143,6 +143,13 @@ window.App.I18n = (function() {
         }, 50);
 
         if (typeof window.updateShellBar === 'function') window.updateShellBar();
+
+        // Re-render GPS location bar with new language (no network call)
+        try {
+            if (window.App.PrayerTimes && window.App.PrayerTimes.updateLocationBar) {
+                window.App.PrayerTimes.updateLocationBar();
+            }
+        } catch(e) {}
     }
 
     return {

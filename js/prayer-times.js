@@ -78,23 +78,87 @@ window.App.PrayerTimes = (function() {
         });
     }
 
-    // Reverse geocode coordinates to city name + country code
+    // Reverse geocode coordinates to city name + country code — bilingual (ar + en)
+    // Makes two Nominatim calls (~1s apart to respect 1 req/sec limit) and stores both
     function reverseGeocode(lat, lng) {
-        return fetch(
-            'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&accept-language=' + getCurrentLang(),
-            { headers: { 'User-Agent': 'PrayerTrackerPWA/1.0' } }
-        ).then(function(response) {
-            return response.json();
-        }).then(function(json) {
-            var cityName = '';
-            var countryName = '';
-            var countryCode = '';
-            if (json && json.address) {
-                cityName = json.address.city || json.address.town || json.address.village || json.address.state || '';
-                countryName = json.address.country || '';
-                countryCode = (json.address.country_code || '').toUpperCase();
+        function fetchOne(langCode) {
+            return fetch(
+                'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&accept-language=' + langCode,
+                { headers: { 'User-Agent': 'PrayerTrackerPWA/1.0' } }
+            ).then(function(response) {
+                return response.json();
+            }).then(function(json) {
+                var cityName = '';
+                var countryName = '';
+                var countryCode = '';
+                if (json && json.address) {
+                    cityName = json.address.city || json.address.town || json.address.village || json.address.state || '';
+                    countryName = json.address.country || '';
+                    countryCode = (json.address.country_code || '').toUpperCase();
+                }
+                return { cityName: cityName, countryName: countryName, countryCode: countryCode };
+            });
+        }
+
+        function delay(ms) {
+            return new Promise(function(resolve) { setTimeout(resolve, ms); });
+        }
+
+        var arResult = null;
+        var enResult = null;
+
+        return fetchOne('ar').then(function(r) {
+            arResult = r;
+        }).catch(function(e) {
+            console.error('Reverse geocode (ar) error:', e);
+        }).then(function() {
+            // Respect Nominatim 1 req/sec rate limit
+            return delay(1100);
+        }).then(function() {
+            return fetchOne('en');
+        }).then(function(r) {
+            enResult = r;
+        }).catch(function(e) {
+            console.error('Reverse geocode (en) error:', e);
+        }).then(function() {
+            // Both failed — fall back to cache
+            if (!arResult && !enResult) {
+                try {
+                    var cached = localStorage.getItem('salah_city_name');
+                    if (cached) {
+                        var data = JSON.parse(cached);
+                        if (Math.abs(data.lat - lat) < 0.05 && Math.abs(data.lng - lng) < 0.05) {
+                            return {
+                                city: data.city || '',
+                                cityName: data.cityName || '',
+                                countryName: data.countryName || '',
+                                countryCode: data.countryCode || '',
+                                cityName_ar: data.cityName_ar || data.cityName || '',
+                                countryName_ar: data.countryName_ar || data.countryName || '',
+                                cityName_en: data.cityName_en || data.cityName || '',
+                                countryName_en: data.countryName_en || data.countryName || ''
+                            };
+                        }
+                    }
+                } catch(e2) {}
+                return { city: '', cityName: '', countryName: '', countryCode: '', cityName_ar: '', countryName_ar: '', cityName_en: '', countryName_en: '' };
             }
-            // Combined display string (backward compat)
+
+            // Partial failure: use the one that succeeded for both
+            if (!arResult) arResult = enResult;
+            if (!enResult) enResult = arResult;
+
+            var cityName_ar = arResult.cityName;
+            var countryName_ar = arResult.countryName;
+            var cityName_en = enResult.cityName;
+            var countryName_en = enResult.countryName;
+            var countryCode = arResult.countryCode || enResult.countryCode || '';
+
+            // Backward-compat default fields hold Arabic values
+            var cityName = cityName_ar;
+            var countryName = countryName_ar;
+
+            // Combined display string (backward compat — Arabic)
             var city = cityName;
             if (cityName && countryName) {
                 city = cityName + '\u060C ' + countryName;
@@ -103,24 +167,18 @@ window.App.PrayerTimes = (function() {
             }
 
             if (city) {
-                localStorage.setItem('salah_city_name', JSON.stringify({ lat: lat, lng: lng, city: city, cityName: cityName, countryName: countryName, countryCode: countryCode }));
+                localStorage.setItem('salah_city_name', JSON.stringify({
+                    lat: lat, lng: lng, city: city,
+                    cityName: cityName, countryName: countryName, countryCode: countryCode,
+                    cityName_ar: cityName_ar, countryName_ar: countryName_ar,
+                    cityName_en: cityName_en, countryName_en: countryName_en
+                }));
             }
-            return { city: city, cityName: cityName, countryName: countryName, countryCode: countryCode };
-        }).catch(function(e) {
-            console.error('Reverse geocode error:', e);
-
-            // Check cache as fallback
-            try {
-                var cached = localStorage.getItem('salah_city_name');
-                if (cached) {
-                    var data = JSON.parse(cached);
-                    if (Math.abs(data.lat - lat) < 0.05 && Math.abs(data.lng - lng) < 0.05) {
-                        return { city: data.city, cityName: data.cityName || '', countryName: data.countryName || '', countryCode: data.countryCode || '' };
-                    }
-                }
-            } catch(e2) {}
-
-            return { city: '', cityName: '', countryName: '', countryCode: '' };
+            return {
+                city: city, cityName: cityName, countryName: countryName, countryCode: countryCode,
+                cityName_ar: cityName_ar, countryName_ar: countryName_ar,
+                cityName_en: cityName_en, countryName_en: countryName_en
+            };
         });
     }
 
@@ -260,6 +318,10 @@ window.App.PrayerTimes = (function() {
                             location: cityName || (json.data.meta ? json.data.meta.timezone : ''),
                             cityName: geoResult.cityName || '',
                             countryName: geoResult.countryName || '',
+                            cityName_ar: geoResult.cityName_ar || geoResult.cityName || '',
+                            countryName_ar: geoResult.countryName_ar || geoResult.countryName || '',
+                            cityName_en: geoResult.cityName_en || geoResult.cityName || '',
+                            countryName_en: geoResult.countryName_en || geoResult.countryName || '',
                             method: method,
                             methodName: methodName,
                             countryCode: countryCode,
@@ -381,15 +443,20 @@ window.App.PrayerTimes = (function() {
             return;
         }
 
-        var city = prayerTimesData.cityName || '';
-        var country = prayerTimesData.countryName || '';
+        // Pick fields by current language, fall back to backward-compat fields
+        var lang = (window.App.I18n && window.App.I18n.getCurrentLang)
+            ? window.App.I18n.getCurrentLang()
+            : (localStorage.getItem('salah_lang') || 'ar');
+        var city = prayerTimesData['cityName_' + lang] || prayerTimesData.cityName || '';
+        var country = prayerTimesData['countryName_' + lang] || prayerTimesData.countryName || '';
         var cc = prayerTimesData.countryCode || '';
         var flag = countryCodeToFlag(cc);
 
-        // Build display: "City, Country 🇪🇬" or just "Country 🇪🇬"
+        // Build display: "City, Country" — Arabic comma for ar, Latin comma for en
+        var sep = lang === 'ar' ? '\u060C ' : ', ';
         var display = '';
         if (city && country) {
-            display = city + '\u060C ' + country;
+            display = city + sep + country;
         } else if (city) {
             display = city;
         } else if (country) {
@@ -403,10 +470,13 @@ window.App.PrayerTimes = (function() {
             return;
         }
 
+        var esc = (window.App.UI && window.App.UI.escapeHTML) ? window.App.UI.escapeHTML : function(s) { return s; };
+        var safeDisplay = esc(display);
         if (flag) {
-            display = '<span class="location-bar-flag">' + flag + '</span> ' + display;
+            text.innerHTML = '<span class="location-bar-flag">' + flag + '</span> ' + safeDisplay;
+        } else {
+            text.innerHTML = safeDisplay;
         }
-        text.innerHTML = display;
         bar.style.display = '';
     }
 
